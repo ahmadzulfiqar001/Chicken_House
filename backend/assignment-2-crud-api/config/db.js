@@ -8,6 +8,8 @@ const loadEnv = () => {
     path.join(__dirname, "..", ".env"),
     path.join(__dirname, "..", "..", ".env"),
     path.join(__dirname, "..", "..", ".env.local"),
+    path.join(__dirname, "..", "..", "..", ".env"),
+    path.join(__dirname, "..", "..", "..", ".env.local"),
   ];
 
   candidates.forEach((filePath) => {

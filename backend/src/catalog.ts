@@ -27,7 +27,7 @@ const normalizeLocalImageKey = (value: string) =>
 
 const normalizeCategoryKey = (value: string) => slugify(value);
 
-const LOCAL_MENU_IMAGE_ROOT = path.resolve(__dirname, "..", "public", "menu-library");
+const LOCAL_MENU_IMAGE_ROOT = path.resolve(__dirname, "..", "..", "frontend", "public", "menu-library");
 
 const LOCAL_CATEGORY_FOLDERS: Record<string, string[]> = {
   pizza: ["pizza"],

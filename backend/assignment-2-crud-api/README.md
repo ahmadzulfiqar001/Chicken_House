@@ -20,9 +20,9 @@ The chosen resource is `ingredients`, which belongs directly to the Chicken Hous
 
 ## Run Instructions
 
-1. Open terminal in `assignment-2-crud-api`
+1. Open terminal in `backend/assignment-2-crud-api`
 2. Ensure `MONGODB_URI` is available in:
-   - `assignment-2-crud-api/.env`, or
+   - `backend/assignment-2-crud-api/.env`, or
    - parent project `.env`
 3. Start the server:
 
@@ -79,7 +79,7 @@ Take screenshots for:
 
 ## File Structure
 
-- `assignment-2-crud-api/server.js` -> main Express server
-- `assignment-2-crud-api/config/db.js` -> MongoDB connection
-- `assignment-2-crud-api/models/Item.js` -> Mongoose model
-- `assignment-2-crud-api/routes/items.js` -> all 5 CRUD routes
+- `backend/assignment-2-crud-api/server.js` -> main Express server
+- `backend/assignment-2-crud-api/config/db.js` -> MongoDB connection
+- `backend/assignment-2-crud-api/models/Item.js` -> Mongoose model
+- `backend/assignment-2-crud-api/routes/items.js` -> all 5 CRUD routes

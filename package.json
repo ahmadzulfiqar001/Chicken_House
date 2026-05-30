@@ -4,10 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx server.ts",
-    "build": "vite build",
-    "preview": "vite preview",
-    "clean": "rm -rf dist",
+    "dev": "tsx backend/server.ts",
+    "build": "vite build --config frontend/vite.config.ts",
+    "preview": "vite preview --config frontend/vite.config.ts",
+    "clean": "node -e \"const fs=require('fs'); for (const p of ['frontend/dist','dist']) fs.rmSync(p,{recursive:true,force:true});\"",
     "lint": "tsc --noEmit"
   },
   "dependencies": {

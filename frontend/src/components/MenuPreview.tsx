@@ -14,7 +14,7 @@ type PreviewDish = {
   startingPrice: number;
 };
 
-const fallbackPreview = [
+const fallbackPreview: PreviewDish[] = [
   {
     id: "preview-1",
     name: "Chicken Karahi",
@@ -58,7 +58,7 @@ const fallbackPreview = [
 ];
 
 const MenuPreview = () => {
-  const [dishes, setDishes] = useState(fallbackPreview);
+  const [dishes, setDishes] = useState<PreviewDish[]>(fallbackPreview);
 
   useEffect(() => {
     const fetchPreview = async () => {

@@ -1,7 +1,9 @@
 node_modules/
 build/
 dist/
+frontend/dist/
 coverage/
+.vite/
 .DS_Store
 *.log
 .env*

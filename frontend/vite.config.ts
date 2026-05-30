@@ -4,15 +4,25 @@ import path from 'path';
 import {defineConfig, loadEnv} from 'vite';
 
 export default defineConfig(({mode}) => {
-  const env = loadEnv(mode, '.', '');
+  const frontendRoot = __dirname;
+  const projectRoot = path.resolve(frontendRoot, '..');
+  const env = loadEnv(mode, projectRoot, '');
+
   return {
+    root: frontendRoot,
+    publicDir: path.join(frontendRoot, 'public'),
+    envDir: projectRoot,
     plugins: [react(), tailwindcss()],
+    build: {
+      outDir: 'dist',
+      emptyOutDir: true,
+    },
     define: {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
     },
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, '.'),
+        '@': path.join(frontendRoot, 'src'),
       },
     },
     server: {

@@ -32,12 +32,26 @@ type UserAccount = {
   } | null;
 };
 
-const emptyForm = {
+type UserForm = {
+  name: string;
+  email: string;
+  password: string;
+  role: UserAccount["role"];
+  status: UserAccount["status"];
+  phone: string;
+  shift: string;
+  department: string;
+  salary: string;
+  address: string;
+  emergencyContact: string;
+};
+
+const emptyForm: UserForm = {
   name: "",
   email: "",
   password: "",
-  role: "user" as const,
-  status: "Active" as const,
+  role: "user",
+  status: "Active",
   phone: "",
   shift: "Morning",
   department: "",

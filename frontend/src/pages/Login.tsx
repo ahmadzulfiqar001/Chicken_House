@@ -41,7 +41,7 @@ const LoginPage = () => {
     const result = await login({ email, password });
     setIsSubmitting(false);
 
-    if (!result.ok) {
+    if (result.ok === false) {
       console.error("Login failed:", result.message);
       setError(result.message);
       return;

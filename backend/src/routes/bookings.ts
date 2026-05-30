@@ -39,8 +39,8 @@ router.get("/", requirePermission("bookings:view"), async (req, res) => {
   return res.json(bookings);
 });
 
-// Create booking - requires bookings:create permission
-router.post("/", requirePermission("bookings:create"), async (req, res) => {
+// Create booking - public website flow
+router.post("/", async (req, res) => {
   const payload = {
     customerName: String(req.body?.customerName ?? "").trim(),
     customerEmail: String(req.body?.customerEmail ?? "").trim().toLowerCase(),

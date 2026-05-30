@@ -14,8 +14,14 @@ type BookingRecord = {
   package: string;
   date: string;
   time: string;
+  source: string;
   status: BookingStatus;
+  specialRequests: string;
+  branchId: string;
   quotedPrice: number;
+  internalNotes?: string;
+  assignedTo?: string;
+  createdAt?: string;
 };
 
 type BookingCalendarProps = {

@@ -1,22 +1,45 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Chicken House
 
-# Run and deploy your AI Studio app
+Chicken House is a restaurant ERP and digital ordering platform with a React/Vite customer frontend and an Express API backend.
 
-This contains everything you need to run your app locally.
+## Project Structure
 
-View your app in AI Studio: https://ai.studio/apps/5815f4c9-92b9-4162-8391-5bf35ee55c8a
+```text
+.
+├── backend/
+│   ├── server.ts                  # Express API + Vite middleware entrypoint
+│   ├── src/                       # API routes, auth, data services, models, seed data
+│   ├── docs/                      # Backend schema and assignment documentation
+│   └── assignment-2-crud-api/     # Standalone Assignment 2 CRUD API
+├── frontend/
+│   ├── index.html
+│   ├── vite.config.ts
+│   ├── public/                    # Served static assets and menu library
+│   ├── assets/source-images/      # Original menu/source images
+│   └── src/                       # React pages, components, contexts, and shared libs
+├── docs/                          # Project implementation and testing notes
+├── package.json
+└── tsconfig.json
+```
 
 ## Run Locally
 
-**Prerequisites:**  Node.js
+```bash
+npm install
+npm run dev
+```
 
+The app runs at `http://localhost:3000`. API routes are served from `/api/*`; the frontend is served through Vite middleware in development.
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Useful Scripts
 
-# Chicken_House
+```bash
+npm run lint
+npm run build
+npm run preview
+npm run clean
+```
+
+## Environment
+
+Copy `.env.example` to `.env` and set the values needed for your setup. `MONGODB_URI` is optional during local development because the backend can fall back to in-memory seed data.

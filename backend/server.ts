@@ -2,29 +2,31 @@ import express from "express";
 import { createServer as createViteServer } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
-import orderRoutes from "./server/routes/orders";
-import inventoryRoutes from "./server/routes/inventory";
-import hrRoutes from "./server/routes/hr";
-import attendanceRoutes from "./server/routes/attendance";
-import leaveRoutes from "./server/routes/leaves";
-import payrollRoutes from "./server/routes/payroll";
-import shiftRoutes from "./server/routes/shifts";
-import performanceRoutes from "./server/routes/performance";
-import financeRoutes from "./server/routes/finance";
-import menuRoutes from "./server/routes/menu";
-import authRoutes from "./server/routes/auth";
-import assistantRoutes from "./server/routes/assistant";
-import whatsappRoutes from "./server/routes/whatsapp";
-import customerRoutes from "./server/routes/customer";
-import bookingRoutes from "./server/routes/bookings";
-import contactRoutes from "./server/routes/contact";
-import usersRoutes from "./server/routes/users";
-import staffPanelRoutes from "./server/routes/staff-panel";
-import operationsRoutes from "./server/routes/operations";
-import { connectToMongo, getMongoHealth, isMongoConnected } from "./server/mongo";
+import orderRoutes from "./src/routes/orders";
+import inventoryRoutes from "./src/routes/inventory";
+import hrRoutes from "./src/routes/hr";
+import attendanceRoutes from "./src/routes/attendance";
+import leaveRoutes from "./src/routes/leaves";
+import payrollRoutes from "./src/routes/payroll";
+import shiftRoutes from "./src/routes/shifts";
+import performanceRoutes from "./src/routes/performance";
+import financeRoutes from "./src/routes/finance";
+import menuRoutes from "./src/routes/menu";
+import authRoutes from "./src/routes/auth";
+import assistantRoutes from "./src/routes/assistant";
+import whatsappRoutes from "./src/routes/whatsapp";
+import customerRoutes from "./src/routes/customer";
+import bookingRoutes from "./src/routes/bookings";
+import contactRoutes from "./src/routes/contact";
+import usersRoutes from "./src/routes/users";
+import staffPanelRoutes from "./src/routes/staff-panel";
+import operationsRoutes from "./src/routes/operations";
+import { connectToMongo, getMongoHealth, isMongoConnected } from "./src/mongo";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const projectRoot = path.resolve(__dirname, "..");
+const frontendRoot = path.join(projectRoot, "frontend");
 
 async function startServer() {
   await connectToMongo();
@@ -68,12 +70,14 @@ async function startServer() {
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
+      root: frontendRoot,
+      configFile: path.join(frontendRoot, "vite.config.ts"),
       server: { middlewareMode: true },
       appType: "spa",
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.join(process.cwd(), "dist");
+    const distPath = path.join(frontendRoot, "dist");
     app.use(express.static(distPath));
     app.get("*", (req, res) => {
       res.sendFile(path.join(distPath, "index.html"));

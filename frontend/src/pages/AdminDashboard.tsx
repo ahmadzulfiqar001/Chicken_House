@@ -18,7 +18,8 @@ import {
   BarChart3,
   Layers,
   MapPin,
-  Bot
+  Bot,
+  Shield
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -57,6 +58,12 @@ type DashboardTabId =
   | "branches"
   | "chatbot"
   | "analytics"
+  | "promotions"
+  | "ai"
+  | "riders"
+  | "support"
+  | "security"
+  | "notifications"
   | "settings";
 
 type SidebarLink = {
@@ -79,6 +86,12 @@ const DASHBOARD_LINKS: SidebarLink[] = [
   { id: "branches", name: "Branches", icon: <MapPin size={20} />, allow: ["admin"] },
   { id: "chatbot", name: "Chatbot Inbox", icon: <Bot size={20} />, allow: ["admin"] },
   { id: "analytics", name: "Analytics", icon: <BarChart3 size={20} />, allow: ["admin", "manager"] },
+  { id: "promotions", name: "Promotions", icon: <TrendingUp size={20} />, allow: ["admin"] },
+  { id: "ai", name: "Forecasting", icon: <BarChart3 size={20} />, allow: ["admin"] },
+  { id: "riders", name: "Riders", icon: <Users size={20} />, allow: ["admin"] },
+  { id: "support", name: "Support", icon: <Bell size={20} />, allow: ["admin"] },
+  { id: "security", name: "Security", icon: <Shield size={20} />, allow: ["admin"] },
+  { id: "notifications", name: "Notifications", icon: <Bell size={20} />, allow: ["admin"] },
   { id: "settings", name: "Settings", icon: <Settings size={20} />, allow: ["admin"] },
 ];
 
@@ -119,24 +132,6 @@ const AdminDashboard = () => {
   }, [activeTab, sidebarLinks]);
 
   const stats = useMemo(() => {
-    if (currentRole === "staff") {
-      return [
-        { name: "Active Orders", value: "48", change: "+5.2%", icon: <ShoppingCart size={24} />, color: "bg-blue-500/10 text-blue-500" },
-        { name: "Ready For Handoff", value: "14", change: "+2.1%", icon: <Layers size={24} />, color: "bg-green-500/10 text-green-500" },
-        { name: "Booking Queue", value: "9", change: "+1.4%", icon: <Calendar size={24} />, color: "bg-amber-500/10 text-amber-600" },
-        { name: "Live Tasks", value: "6", change: "Now", icon: <Bell size={24} />, color: "bg-primary/10 text-primary" },
-      ];
-    }
-
-    if (currentRole === "manager") {
-      return [
-        { name: "Active Orders", value: "48", change: "+5.2%", icon: <ShoppingCart size={24} />, color: "bg-blue-500/10 text-blue-500" },
-        { name: "Booking Queue", value: "16", change: "+4.3%", icon: <Calendar size={24} />, color: "bg-amber-500/10 text-amber-600" },
-        { name: "Inventory Alerts", value: "12", change: "-2.4%", icon: <Package size={24} />, color: "bg-red-500/10 text-red-500" },
-        { name: "Team On Duty", value: "27", change: "Stable", icon: <Users size={24} />, color: "bg-purple-500/10 text-purple-500" },
-      ];
-    }
-
     return [
       { name: "Total Sales", value: "Rs. 1,245,000", change: "+12.5%", icon: <DollarSign size={24} />, color: "bg-green-500/10 text-green-500" },
       { name: "Active Orders", value: "48", change: "+5.2%", icon: <ShoppingCart size={24} />, color: "bg-blue-500/10 text-blue-500" },
@@ -153,24 +148,6 @@ const AdminDashboard = () => {
   ];
 
   const quickActions = useMemo(() => {
-    if (currentRole === "staff") {
-      return [
-        { label: "Update Orders", icon: <Layers size={24} />, className: "bg-primary/5 text-primary hover:bg-primary hover:text-white" },
-        { label: "Bookings", icon: <Calendar size={24} />, className: "bg-accent/5 text-accent hover:bg-accent hover:text-dark" },
-        { label: "Menu View", icon: <Utensils size={24} />, className: "bg-green-500/5 text-green-500 hover:bg-green-500 hover:text-white" },
-        { label: "Alerts", icon: <Bell size={24} />, className: "bg-purple-500/5 text-purple-500 hover:bg-purple-500 hover:text-white" },
-      ];
-    }
-
-    if (currentRole === "manager") {
-      return [
-        { label: "Orders", icon: <Layers size={24} />, className: "bg-primary/5 text-primary hover:bg-primary hover:text-white" },
-        { label: "Staff", icon: <Users size={24} />, className: "bg-accent/5 text-accent hover:bg-accent hover:text-dark" },
-        { label: "Reports", icon: <TrendingUp size={24} />, className: "bg-green-500/5 text-green-500 hover:bg-green-500 hover:text-white" },
-        { label: "Inventory", icon: <Package size={24} />, className: "bg-purple-500/5 text-purple-500 hover:bg-purple-500 hover:text-white" },
-      ];
-    }
-
     return [
       { label: "Add Item", icon: <Utensils size={24} />, className: "bg-primary/5 text-primary hover:bg-primary hover:text-white" },
       { label: "Add Staff", icon: <Users size={24} />, className: "bg-accent/5 text-accent hover:bg-accent hover:text-dark" },
@@ -180,24 +157,6 @@ const AdminDashboard = () => {
   }, [currentRole]);
 
   const spotlightCard = useMemo(() => {
-    if (currentRole === "staff") {
-      return {
-        title: "Shift Focus",
-        text: "Keep orders moving, watch the booking queue, and stay aligned with today's floor tasks.",
-        button: "Open Orders",
-        icon: <Bell size={32} className="mb-4" />,
-      };
-    }
-
-    if (currentRole === "manager") {
-      return {
-        title: "Operations Watch",
-        text: "Review inventory pressure, track team readiness, and keep bookings and orders synchronized.",
-        button: "Review Operations",
-        icon: <TrendingUp size={32} className="mb-4" />,
-      };
-    }
-
     return {
       title: "Inventory Alert",
       text: "12 items are below the safety threshold of 15%.",
