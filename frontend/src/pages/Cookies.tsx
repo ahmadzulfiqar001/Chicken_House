@@ -1,4 +1,4 @@
-import PageMeta from "../components/PageMeta";
+import PageMeta from "../components/layout/PageMeta";
 
 const CookiesPage = () => {
   return (

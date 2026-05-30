@@ -23,26 +23,26 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-import AccountsModule from "../components/AccountsModule";
-import BranchesModule from "../components/BranchesModule";
-import EcommerceModule from "../components/EcommerceModule";
-import SettingsModule from "../components/SettingsModule";
-import DemandForecasting from "../components/DemandForecasting";
-import RiderModule from "../components/RiderModule";
-import SupportModule from "../components/SupportModule";
-import SecurityModule from "../components/SecurityModule";
-import NotificationModule from "../components/NotificationModule";
-import MenuManagement from "../components/MenuManagement";
-import HRManagement from "../components/HRManagement";
-import UserManagement from "../components/UserManagement";
-import InventoryManagement from "../components/InventoryManagement";
-import PromotionManagement from "../components/PromotionManagement";
-import AnalyticsOverview from "../components/AnalyticsOverview";
-import OrderManagement from "../components/OrderManagement";
-import BookingManagement from "../components/BookingManagement";
-import ChatbotInboxModule from "../components/ChatbotInboxModule";
-import StaffWorkspace from "../components/StaffWorkspace";
-import ManagerWorkspace from "../components/ManagerWorkspace";
+import AccountsModule from "../components/admin/AccountsModule";
+import BranchesModule from "../components/admin/BranchesModule";
+import EcommerceModule from "../components/admin/EcommerceModule";
+import SettingsModule from "../components/admin/SettingsModule";
+import DemandForecasting from "../components/admin/DemandForecasting";
+import RiderModule from "../components/admin/RiderModule";
+import SupportModule from "../components/admin/SupportModule";
+import SecurityModule from "../components/admin/SecurityModule";
+import NotificationModule from "../components/admin/NotificationModule";
+import MenuManagement from "../components/admin/MenuManagement";
+import HRManagement from "../components/admin/HRManagement";
+import UserManagement from "../components/admin/UserManagement";
+import InventoryManagement from "../components/admin/InventoryManagement";
+import PromotionManagement from "../components/admin/PromotionManagement";
+import AnalyticsOverview from "../components/admin/AnalyticsOverview";
+import OrderManagement from "../components/admin/OrderManagement";
+import BookingManagement from "../components/admin/BookingManagement";
+import ChatbotInboxModule from "../components/admin/ChatbotInboxModule";
+import StaffWorkspace from "../components/admin/StaffWorkspace";
+import ManagerWorkspace from "../components/admin/ManagerWorkspace";
 import { useAuth, UserRole } from "../context/AuthContext";
 
 type DashboardTabId =

@@ -2,8 +2,8 @@ import React, { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowUpRight, Calendar, Clock3, MapPin, MessageCircle, Send, ShieldCheck, Store } from "lucide-react";
 import { Link } from "react-router-dom";
-import PageMeta from "../components/PageMeta";
-import { useToast } from "../components/ToastProvider";
+import PageMeta from "../components/layout/PageMeta";
+import { useToast } from "../components/layout/ToastProvider";
 import { buildWhatsAppUrl, connectChannels, siteConfig, socialMediaLinks } from "../lib/site";
 
 const normalizePhone = (value: string) => value.replace(/[^\d+]/g, "");

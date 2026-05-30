@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { ArrowUpRight, Clock3, MapPin, ShieldCheck, Sparkles, UtensilsCrossed } from "lucide-react";
 import { Link } from "react-router-dom";
-import PageMeta from "../components/PageMeta";
+import PageMeta from "../components/layout/PageMeta";
 import { siteConfig } from "../lib/site";
 
 const serviceHighlights = [

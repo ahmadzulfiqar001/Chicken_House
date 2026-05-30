@@ -1,27 +1,29 @@
 import express from "express";
+import http from "http";
 import { createServer as createViteServer } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
-import orderRoutes from "./src/routes/orders";
-import inventoryRoutes from "./src/routes/inventory";
-import hrRoutes from "./src/routes/hr";
-import attendanceRoutes from "./src/routes/attendance";
-import leaveRoutes from "./src/routes/leaves";
-import payrollRoutes from "./src/routes/payroll";
-import shiftRoutes from "./src/routes/shifts";
-import performanceRoutes from "./src/routes/performance";
-import financeRoutes from "./src/routes/finance";
-import menuRoutes from "./src/routes/menu";
-import authRoutes from "./src/routes/auth";
-import assistantRoutes from "./src/routes/assistant";
-import whatsappRoutes from "./src/routes/whatsapp";
-import customerRoutes from "./src/routes/customer";
-import bookingRoutes from "./src/routes/bookings";
-import contactRoutes from "./src/routes/contact";
-import usersRoutes from "./src/routes/users";
-import staffPanelRoutes from "./src/routes/staff-panel";
-import operationsRoutes from "./src/routes/operations";
-import { connectToMongo, getMongoHealth, isMongoConnected } from "./src/mongo";
+import orderRoutes from "./src/modules/orders/orders.routes";
+import inventoryRoutes from "./src/modules/inventory/inventory.routes";
+import hrRoutes from "./src/modules/hr/hr.routes";
+import attendanceRoutes from "./src/modules/hr/attendance.routes";
+import leaveRoutes from "./src/modules/hr/leaves.routes";
+import payrollRoutes from "./src/modules/hr/payroll.routes";
+import shiftRoutes from "./src/modules/hr/shifts.routes";
+import performanceRoutes from "./src/modules/hr/performance.routes";
+import financeRoutes from "./src/modules/finance/finance.routes";
+import menuRoutes from "./src/modules/menu/menu.routes";
+import authRoutes from "./src/modules/auth/auth.routes";
+import assistantRoutes from "./src/modules/assistant/assistant.routes";
+import whatsappRoutes from "./src/modules/whatsapp/whatsapp.routes";
+import customerRoutes from "./src/modules/customer/customer.routes";
+import bookingRoutes from "./src/modules/bookings/bookings.routes";
+import contactRoutes from "./src/modules/contact/contact.routes";
+import usersRoutes from "./src/modules/users/users.routes";
+import staffPanelRoutes from "./src/modules/hr/staff-panel.routes";
+import operationsRoutes from "./src/modules/operations/operations.routes";
+import { connectToMongo, getMongoHealth, isMongoConnected } from "./src/core/mongo";
+import { initRealtime, startChangeStreams } from "./src/core/realtime";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -84,7 +86,12 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
+  // Realtime: attach Socket.IO to the HTTP server, then open Mongo change streams.
+  const server = http.createServer(app);
+  initRealtime(server);
+  startChangeStreams();
+
+  server.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
 }

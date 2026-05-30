@@ -1,9 +1,0 @@
-{
-  "name": "Chicken House ERP & Digital Ecosystem",
-  "description": "A comprehensive MERN-stack enterprise solution for restaurant management, including dynamic menu, floor mapping, event booking, finance ledger, HR, and inventory tracking.",
-  "requestFramePermissions": [
-    "camera",
-    "microphone",
-    "geolocation"
-  ]
-}

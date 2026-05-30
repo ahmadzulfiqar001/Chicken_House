@@ -18,7 +18,7 @@ import {
   Zap,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import PageMeta from "../components/PageMeta";
+import PageMeta from "../components/layout/PageMeta";
 import { useAuth } from "../context/AuthContext";
 import { siteConfig } from "../lib/site";
 
