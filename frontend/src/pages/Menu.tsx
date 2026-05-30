@@ -19,8 +19,8 @@ import {
   Star,
   XCircle,
 } from "lucide-react";
-import PageMeta from "../components/PageMeta";
-import { useToast } from "../components/ToastProvider";
+import PageMeta from "../components/layout/PageMeta";
+import { useToast } from "../components/layout/ToastProvider";
 import { useCart } from "../context/CartContext";
 import { siteConfig } from "../lib/site";
 

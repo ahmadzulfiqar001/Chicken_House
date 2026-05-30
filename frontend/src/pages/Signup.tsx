@@ -2,7 +2,7 @@ import { FormEvent, useState } from "react";
 import { motion } from "motion/react";
 import { AlertCircle, ArrowRight, Lock, Mail, Phone, ShieldCheck, User } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import PageMeta from "../components/PageMeta";
+import PageMeta from "../components/layout/PageMeta";
 import { useAuth } from "../context/AuthContext";
 import { siteConfig } from "../lib/site";
 

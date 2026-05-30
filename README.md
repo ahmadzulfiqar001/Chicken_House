@@ -8,16 +8,13 @@ Chicken House is a restaurant ERP and digital ordering platform with a React/Vit
 .
 ├── backend/
 │   ├── server.ts                  # Express API + Vite middleware entrypoint
-│   ├── src/                       # API routes, auth, data services, models, seed data
-│   ├── docs/                      # Backend schema and assignment documentation
-│   └── assignment-2-crud-api/     # Standalone Assignment 2 CRUD API
+│   └── src/                       # API routes, auth, data services, models, seed data
 ├── frontend/
 │   ├── index.html
 │   ├── vite.config.ts
 │   ├── public/                    # Served static assets and menu library
 │   ├── assets/source-images/      # Original menu/source images
 │   └── src/                       # React pages, components, contexts, and shared libs
-├── docs/                          # Project implementation and testing notes
 ├── package.json
 └── tsconfig.json
 ```
@@ -42,4 +39,4 @@ npm run clean
 
 ## Environment
 
-Copy `.env.example` to `.env` and set the values needed for your setup. `MONGODB_URI` is optional during local development because the backend can fall back to in-memory seed data.
+Create a `.env` file in the project root and set the values needed for your setup. `MONGODB_URI` is optional during local development because the backend can fall back to in-memory seed data.

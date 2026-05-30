@@ -1,8 +1,9 @@
 import { useEffect, useState, FormEvent } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { useRealtime } from "../lib/realtime";
 import { Search, Clock, CheckCircle2, Truck, Utensils, AlertCircle, ChevronRight, MapPin } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
-import PageMeta from "../components/PageMeta";
+import PageMeta from "../components/layout/PageMeta";
 import { siteConfig } from "../lib/site";
 
 type TrackingOrder = {
@@ -58,6 +59,13 @@ const OrderTrackingPage = () => {
       void fetchOrder(searchParams.get("orderId") as string);
     }
   }, [searchParams]);
+
+  // Live updates: refresh the tracked order in realtime as its status changes.
+  useRealtime("orders", () => {
+    if (orderData?.id) {
+      void fetchOrder(orderData.id);
+    }
+  });
 
   const handleSearch = async (e: FormEvent) => {
     e.preventDefault();

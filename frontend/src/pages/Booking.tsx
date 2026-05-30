@@ -11,9 +11,9 @@ import {
   Star,
   Users,
 } from "lucide-react";
-import PageMeta from "../components/PageMeta";
-import SeatingMap from "../components/SeatingMap";
-import { useToast } from "../components/ToastProvider";
+import PageMeta from "../components/layout/PageMeta";
+import SeatingMap from "../components/marketing/SeatingMap";
+import { useToast } from "../components/layout/ToastProvider";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 import {

@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { ArrowLeft, Compass, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
-import PageMeta from "../components/PageMeta";
+import PageMeta from "../components/layout/PageMeta";
 
 const NotFoundPage = () => {
   return (

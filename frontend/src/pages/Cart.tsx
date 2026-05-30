@@ -12,8 +12,8 @@ import {
   Truck,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import PageMeta from "../components/PageMeta";
-import { useToast } from "../components/ToastProvider";
+import PageMeta from "../components/layout/PageMeta";
+import { useToast } from "../components/layout/ToastProvider";
 import { useCart } from "../context/CartContext";
 import {
   calculateDeliveryFee,
