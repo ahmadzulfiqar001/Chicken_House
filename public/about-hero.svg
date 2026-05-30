@@ -1,0 +1,31 @@
+<svg width="1600" height="1000" viewBox="0 0 1600 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="1000" fill="#120A07"/>
+  <rect width="1600" height="1000" fill="url(#bg)"/>
+  <circle cx="1290" cy="180" r="220" fill="#FFAA49" fill-opacity="0.24"/>
+  <circle cx="250" cy="820" r="250" fill="#D24A15" fill-opacity="0.16"/>
+  <path d="M0 710C193 640 331 612 526 634C748 660 908 764 1128 778C1273 788 1436 756 1600 670V1000H0V710Z" fill="#1B120E"/>
+  <rect x="335" y="288" width="930" height="432" rx="40" fill="#251814" stroke="#3A251D" stroke-width="3"/>
+  <rect x="408" y="354" width="784" height="170" rx="28" fill="#F8E8C8"/>
+  <rect x="475" y="393" width="650" height="92" rx="24" fill="#311C14"/>
+  <text x="800" y="453" text-anchor="middle" fill="#FFAA49" font-size="72" font-family="Georgia, serif" font-weight="700">CHICKEN HOUSE</text>
+  <rect x="520" y="560" width="560" height="26" rx="13" fill="#3D261D"/>
+  <rect x="470" y="650" width="84" height="190" rx="40" fill="#231714"/>
+  <rect x="1046" y="650" width="84" height="190" rx="40" fill="#231714"/>
+  <rect x="700" y="650" width="200" height="150" rx="28" fill="#2B1B15"/>
+  <rect x="730" y="618" width="140" height="44" rx="20" fill="#FFAA49"/>
+  <circle cx="800" cy="610" r="52" fill="#FFD087"/>
+  <path d="M764 603C780 574 823 574 838 603C846 618 844 640 833 659H770C759 640 756 618 764 603Z" fill="#D24A15"/>
+  <path d="M570 372C602 344 668 331 729 338C807 347 862 390 944 387C1008 384 1061 356 1110 320V548H570V372Z" fill="#FFF7E6" fill-opacity="0.42"/>
+  <path d="M0 188C168 104 376 88 598 138C802 184 967 296 1174 312C1349 325 1462 280 1600 196V0H0V188Z" fill="url(#topGlow)"/>
+  <defs>
+    <linearGradient id="bg" x1="178" y1="54" x2="1458" y2="949" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1C120D"/>
+      <stop offset="0.52" stop-color="#4D1E10"/>
+      <stop offset="1" stop-color="#1A110D"/>
+    </linearGradient>
+    <linearGradient id="topGlow" x1="800" y1="0" x2="800" y2="312" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFAA49" stop-opacity="0.24"/>
+      <stop offset="1" stop-color="#FFAA49" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+</svg>

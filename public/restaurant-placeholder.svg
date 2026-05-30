@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">Chicken House placeholder</title>
+  <desc id="desc">Warm restaurant placeholder with Chicken House branding.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a0d08" />
+      <stop offset="55%" stop-color="#7f1215" />
+      <stop offset="100%" stop-color="#d8a82f" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg)" />
+  <circle cx="980" cy="150" r="180" fill="rgba(255,255,255,0.08)" />
+  <circle cx="220" cy="660" r="220" fill="rgba(255,255,255,0.06)" />
+  <g fill="none" stroke="rgba(255,255,255,0.16)" stroke-width="3">
+    <path d="M200 560c90-180 260-320 480-320s360 110 440 280" />
+    <path d="M260 600c130-120 260-180 390-180s250 40 370 140" />
+  </g>
+  <g transform="translate(600 400)">
+    <circle r="110" fill="rgba(255,255,255,0.12)" />
+    <circle r="78" fill="rgba(255,255,255,0.18)" />
+    <path d="M-34-6c0-36 28-64 62-64 30 0 54 24 54 54 0 42-46 70-70 94C-12 52-34 28-34-6Z" fill="#fff3d2" />
+  </g>
+  <text x="600" y="150" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="34" letter-spacing="9">
+    CHICKEN HOUSE
+  </text>
+  <text x="600" y="700" text-anchor="middle" fill="rgba(255,255,255,0.82)" font-family="Arial, sans-serif" font-size="22" letter-spacing="5">
+    FRESHLY PREPARED FOOD • RENALA KHURD
+  </text>
+</svg>
