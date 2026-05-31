@@ -6,6 +6,7 @@ import { isMongoConfigured } from "../../core/mongo";
 
 const AUTH_COOKIE_NAME = "chicken_house_session";
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7;
+const PASSWORD_RESET_TTL_MS = 1000 * 60 * 60;
 
 import type { Permission, UserRole } from "../../core/permissions";
 import { hasPermission } from "../../core/permissions";
@@ -25,6 +26,8 @@ const normalizeEmail = (value: string) => value.trim().toLowerCase();
 
 const hashSessionToken = (token: string) =>
   crypto.createHash("sha256").update(token).digest("hex");
+
+const hashPasswordResetToken = hashSessionToken;
 
 export const hashPassword = (password: string) => {
   const salt = crypto.randomBytes(16).toString("hex");
@@ -272,6 +275,84 @@ export const findAccountByEmail = async (email: string) => {
   }
 
   return db.userAccounts.find((item) => item.email.toLowerCase() === normalizedEmail) ?? null;
+};
+
+export const createPasswordResetToken = async (account: Record<string, unknown>) => {
+  const token = crypto.randomBytes(32).toString("hex");
+  const expiresAt = new Date(Date.now() + PASSWORD_RESET_TTL_MS).toISOString();
+  const patch = {
+    passwordResetTokenHash: hashPasswordResetToken(token),
+    passwordResetExpiresAt: expiresAt,
+  };
+
+  if (isMongoConfigured()) {
+    await UserAccountModel.updateOne({ id: account.id }, patch);
+  } else {
+    Object.assign(account, patch);
+  }
+
+  return { token, expiresAt };
+};
+
+export const completePasswordReset = async (token: string, nextPassword: string) => {
+  const tokenHash = hashPasswordResetToken(token);
+  const now = Date.now();
+
+  if (isMongoConfigured()) {
+    const account = await UserAccountModel.findOne({ passwordResetTokenHash: tokenHash });
+
+    if (!account) {
+      return { ok: false as const, message: "This reset link is invalid or has already been used." };
+    }
+
+    const expiresAt = Date.parse(String(account.passwordResetExpiresAt ?? ""));
+    if (!Number.isFinite(expiresAt) || expiresAt <= now) {
+      account.passwordResetTokenHash = "";
+      account.passwordResetExpiresAt = "";
+      await account.save();
+      return { ok: false as const, message: "This reset link has expired. Please request a new one." };
+    }
+
+    account.passwordHash = hashPassword(nextPassword);
+    account.passwordResetTokenHash = "";
+    account.passwordResetExpiresAt = "";
+    account.passwordChangedAt = new Date().toISOString();
+    await account.save();
+
+    await AuthSessionModel.updateMany({ userId: account.id, isActive: true }, { isActive: false });
+    return { ok: true as const, email: String(account.email ?? "") };
+  }
+
+  const account = db.userAccounts.find(
+    (item) => String((item as Record<string, unknown>).passwordResetTokenHash ?? "") === tokenHash,
+  ) as (typeof db.userAccounts[number] & {
+    passwordResetTokenHash?: string;
+    passwordResetExpiresAt?: string;
+    passwordChangedAt?: string;
+  }) | undefined;
+
+  if (!account) {
+    return { ok: false as const, message: "This reset link is invalid or has already been used." };
+  }
+
+  const expiresAt = Date.parse(String(account.passwordResetExpiresAt ?? ""));
+  if (!Number.isFinite(expiresAt) || expiresAt <= now) {
+    account.passwordResetTokenHash = "";
+    account.passwordResetExpiresAt = "";
+    return { ok: false as const, message: "This reset link has expired. Please request a new one." };
+  }
+
+  account.passwordHash = hashPassword(nextPassword);
+  account.passwordResetTokenHash = "";
+  account.passwordResetExpiresAt = "";
+  account.passwordChangedAt = new Date().toISOString();
+  db.authSessions.forEach((session) => {
+    if (session.userId === account.id) {
+      session.isActive = false;
+    }
+  });
+
+  return { ok: true as const, email: account.email };
 };
 
 export const createCustomerProfile = async ({

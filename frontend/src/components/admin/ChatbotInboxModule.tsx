@@ -128,7 +128,7 @@ const ChatbotInboxModule = () => {
             <Phone size={22} />
           </div>
           <p className="text-muted text-xs font-bold uppercase tracking-widest mb-1">Admin Number</p>
-          <p className="text-lg font-bold text-dark">+92 333 4880840</p>
+          <p className="text-lg font-bold text-dark">+92 345 7493339</p>
         </motion.div>
       </div>
 

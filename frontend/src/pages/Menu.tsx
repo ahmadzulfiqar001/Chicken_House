@@ -296,6 +296,7 @@ const MenuPage = () => {
     extras: [],
   });
   const categoryRefs = useRef<Record<string, HTMLElement | null>>({});
+  const categoryRailRef = useRef<HTMLDivElement | null>(null);
   const deferredSearchQuery = useDeferredValue(searchQuery);
 
   useEffect(() => {
@@ -574,6 +575,29 @@ const MenuPage = () => {
       ? activeCategoryIndex * (SIDEBAR_CATEGORY_BUTTON_HEIGHT + SIDEBAR_CATEGORY_BUTTON_GAP)
       : 0;
 
+  useEffect(() => {
+    const rail = categoryRailRef.current;
+    if (!rail || activeCategoryIndex < 0) return;
+
+    const itemTop = activeIndicatorOffset;
+    const itemBottom = itemTop + SIDEBAR_CATEGORY_BUTTON_HEIGHT;
+    const viewTop = rail.scrollTop;
+    const viewBottom = viewTop + rail.clientHeight;
+    const breathingRoom = 12;
+
+    if (itemTop < viewTop + breathingRoom) {
+      rail.scrollTo({ top: Math.max(itemTop - breathingRoom, 0), behavior: "smooth" });
+      return;
+    }
+
+    if (itemBottom > viewBottom - breathingRoom) {
+      rail.scrollTo({
+        top: itemBottom - rail.clientHeight + breathingRoom,
+        behavior: "smooth",
+      });
+    }
+  }, [activeCategoryIndex, activeIndicatorOffset]);
+
   return (
     <div className="min-h-screen bg-paper">
       <PageMeta
@@ -588,7 +612,7 @@ const MenuPage = () => {
         <div className="grid gap-8 xl:grid-cols-[28rem_minmax(0,1fr)]">
           <aside className="hidden xl:block xl:min-w-0 xl:h-full">
             <div className="space-y-4 xl:sticky xl:top-28">
-              <div className="flex h-full min-h-[calc(100vh-8.5rem)] flex-col overflow-hidden rounded-[3rem] border border-[#eadcc8] bg-gradient-to-b from-[#fff9ef] via-white to-[#f8ecdb] shadow-[0_28px_80px_rgba(17,8,5,0.12)]">
+              <div className="flex h-[calc(100vh-8.5rem)] min-h-[34rem] flex-col overflow-hidden rounded-[3rem] border border-[#eadcc8] bg-gradient-to-b from-[#fff9ef] via-white to-[#f8ecdb] shadow-[0_28px_80px_rgba(17,8,5,0.12)]">
                 <div className="px-6 py-6">
                   <div className="rounded-[2rem] bg-white/85 p-5 shadow-inner shadow-white/70">
                     <div className="flex items-center justify-between gap-3">
@@ -620,14 +644,14 @@ const MenuPage = () => {
                   </div>
                 </div>
 
-                <div className="flex-1 px-5 pb-6 pt-0">
-                  <div className="relative min-h-full space-y-2 rounded-[2.2rem] bg-white/45 px-3 pb-4 pt-3 shadow-inner shadow-[#f4e8d6]">
+                <div className="min-h-0 flex-1 px-5 pb-6 pt-0">
+                  <div ref={categoryRailRef} className="menu-category-rail relative h-full space-y-2 overflow-y-auto rounded-[2.2rem] bg-white/45 px-3 pb-4 pt-3 shadow-inner shadow-[#f4e8d6]">
                     {categories.length ? (
                       <motion.div
                         aria-hidden="true"
                         animate={{ y: activeIndicatorOffset }}
                         transition={{ type: "spring", stiffness: 280, damping: 26 }}
-                        className="pointer-events-none absolute inset-x-0 top-0 h-[44px] rounded-[1.1rem] bg-[linear-gradient(135deg,rgba(127,18,21,0.96),rgba(151,36,24,0.95),rgba(216,168,47,0.92))] shadow-[0_18px_28px_rgba(127,18,21,0.18)]"
+                        className="pointer-events-none absolute inset-x-3 top-3 h-[44px] rounded-[1.1rem] bg-[linear-gradient(135deg,rgba(127,18,21,0.96),rgba(151,36,24,0.95),rgba(216,168,47,0.92))] shadow-[0_18px_28px_rgba(127,18,21,0.18)]"
                       />
                     ) : null}
                     {categories.map((category, index) => {

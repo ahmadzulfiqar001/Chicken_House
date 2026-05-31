@@ -34,7 +34,7 @@ const heroVideoUrl =
 const kitchenVideoUrl =
   "https://cdn.coverr.co/videos/coverr-chef-cooking-pasta-1561297351540?download=1080p";
 const whatsappUrl =
-  "https://wa.me/923334880840?text=Assalam%20o%20Alaikum%20Chicken%20House!%20Please%20share%20menu%2C%20booking%2C%20delivery%2C%20combos%2C%20and%20service%20details.";
+  "https://wa.me/923457493339?text=Assalam%20o%20Alaikum%20Chicken%20House!%20Please%20share%20menu%2C%20booking%2C%20delivery%2C%20combos%2C%20and%20service%20details.";
 
 const stats = [
   { label: "Service Modules", value: "20+", icon: Sparkles },

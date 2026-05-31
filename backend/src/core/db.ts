@@ -343,7 +343,7 @@ export const createDb = () => ({
       role: "admin",
       provider: "email",
       status: "Active",
-      phone: "+92 333 4880840",
+      phone: "+92 345 7493339",
       memberSince: "2024",
       emailVerified: true,
       lastLoginAt: "",
@@ -534,7 +534,7 @@ export const createDb = () => ({
       id: "CHAT-1001",
       customerName: "Farhan Ali",
       customerNumber: "+92 300 1112233",
-      adminNumber: "+92 333 4880840",
+      adminNumber: "+92 345 7493339",
       channel: "WhatsApp",
       status: "Bot Active",
       startedAt: "2026-03-18T08:20:00Z",
@@ -583,10 +583,10 @@ export const createDb = () => ({
     { id: "JOB-server", title: "Waiter / Server", department: "Front of House", type: "Part-time", location: "Renala Khurd", description: "Serve dine-in guests and keep the seating area clean and welcoming.", requirements: ["Friendly attitude", "Team player", "Flexible hours"], salaryRange: "Rs. 25,000 - 35,000", status: "Open", createdAt: "2026-01-01T00:00:00.000Z" },
   ],
   branches: [
-    { id: "renala-khurd-main", name: "Chicken House Main Branch", slug: "renala-khurd-main", status: "Active", manager: "", email: "info@chickenhouse.pk", phone: "+92 333 4880840", addressLine1: "Near Mitchell's, GT Road", addressLine2: "Close to Mitchell's Fruit Farm", city: "Renala Khurd, Okara", landmark: "Mitchell's Fruit Farm", coordinates: { lat: 0, lng: 0 }, timings: [], amenities: ["Family Seating", "Takeaway", "Delivery"], parkingAvailable: true, staffCount: 0, rating: 4.7, averageDailyOrders: 0, averageDailyRevenue: 0, gallery: [] },
+    { id: "renala-khurd-main", name: "Chicken House Main Branch", slug: "renala-khurd-main", status: "Active", manager: "", email: "info@chickenhouse.pk", phone: "+92 345 7493339", addressLine1: "Near Mitchell's, GT Road", addressLine2: "Close to Mitchell's Fruit Farm", city: "Renala Khurd, Okara", landmark: "Mitchell's Fruit Farm", coordinates: { lat: 0, lng: 0 }, timings: [], amenities: ["Family Seating", "Takeaway", "Delivery"], parkingAvailable: true, staffCount: 0, rating: 4.7, averageDailyOrders: 0, averageDailyRevenue: 0, gallery: [] },
   ],
   siteSettings: [
-    { key: "default", brandName: "Chicken House", tagline: "A Symbol of Quality & Freshness", logoUrl: "", faviconUrl: "", primaryColor: "#7f1215", accentColor: "#d8a82f", contactEmail: "info@chickenhouse.pk", contactPhone: "+92 333 4880840", whatsappNumber: "923334880840", addressLine1: "Near Mitchell's, GT Road", city: "Renala Khurd, Okara", mapEmbedUrl: "", businessHours: [], socialLinks: [], seoTitle: "", seoDescription: "", maintenanceMode: false, settings: { currency: "PKR", timezone: "Asia/Karachi", twoFactorAuth: false, autoBackup: true, orderNotifications: true } },
+    { key: "default", brandName: "Chicken House", tagline: "A Symbol of Quality & Freshness", logoUrl: "", faviconUrl: "", primaryColor: "#7f1215", accentColor: "#d8a82f", contactEmail: "info@chickenhouse.pk", contactPhone: "+92 345 7493339", whatsappNumber: "923457493339", addressLine1: "Near Mitchell's, GT Road", city: "Renala Khurd, Okara", mapEmbedUrl: "", businessHours: [], socialLinks: [], seoTitle: "", seoDescription: "", maintenanceMode: false, settings: { currency: "PKR", timezone: "Asia/Karachi", twoFactorAuth: false, autoBackup: true, orderNotifications: true } },
   ],
   menu: clone(menuSeed),
 });

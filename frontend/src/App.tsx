@@ -15,6 +15,8 @@ import OrderTrackingPage from "./pages/OrderTracking";
 import AdminDashboard from "./pages/AdminDashboard";
 import LoginPage from "./pages/Login";
 import SignupPage from "./pages/Signup";
+import ForgotPasswordPage from "./pages/ForgotPassword";
+import ResetPasswordPage from "./pages/ResetPassword";
 import CartPage from "./pages/Cart";
 import CheckoutPage from "./pages/Checkout";
 import ProfilePage from "./pages/Profile";
@@ -122,6 +124,8 @@ function App() {
                   <Route path="/careers" element={<CareerPage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/signup" element={<SignupPage />} />
+                  <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                  <Route path="/reset-password" element={<ResetPasswordPage />} />
                   <Route path="/cart" element={<CartPage />} />
                   <Route path="/checkout" element={<CheckoutPage />} />
                   <Route path="/privacy" element={<PrivacyPolicyPage />} />

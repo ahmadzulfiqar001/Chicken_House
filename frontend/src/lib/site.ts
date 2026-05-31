@@ -3,9 +3,9 @@ import { Mail, MapPinned, MessageCircle, Phone } from "lucide-react";
 export const siteConfig = {
   brandName: "Chicken House",
   tagline: "A Symbol of Quality & Freshness",
-  phone: "+92 333 4880840",
+  phone: "+92 345 7493339",
   email: "info@chickenhouse.pk",
-  whatsappNumber: "923334880840",
+  whatsappNumber: "923457493339",
   addressLine1: "Near Mitchell's Fair Price Shop, GT Road",
   addressLine2: "Close to Mitchell's Fruit Farm",
   city: "Renala Khurd, Okara",

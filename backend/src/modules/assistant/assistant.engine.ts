@@ -18,7 +18,7 @@ const LOCATION_TEXT =
   "Chicken House is located near Mitchell's Fair Price Shop, GT Road, Renala Khurd, Okara, Punjab, Pakistan.";
 const HOURS_TEXT =
   "We are open 7 days a week from 11:00 AM to 12:00 AM.";
-const WHATSAPP_TEXT = "For WhatsApp, call or chat at +92 333 4880840.";
+const WHATSAPP_TEXT = "For WhatsApp, call or chat at +92 345 7493339.";
 
 const normalize = (value: string) => value.toLowerCase().trim();
 
@@ -503,7 +503,7 @@ export const logAssistantConversation = async ({
   assistantReply: AssistantResponse;
 }) => {
   const normalizedCustomerNumber = customerNumber?.trim() || "unknown-customer";
-  const normalizedAdminNumber = adminNumber?.trim() || "+92 333 4880840";
+  const normalizedAdminNumber = adminNumber?.trim() || "+92 345 7493339";
 
   if (isMongoConfigured()) {
     let session = await AssistantConversationModel.findOne({

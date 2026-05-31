@@ -60,7 +60,7 @@ router.post("/webhook", async (req, res) => {
 
   try {
     const entries = req.body?.entry ?? [];
-    const adminNumber = process.env.META_WA_ADMIN_NUMBER || "+92 333 4880840";
+    const adminNumber = process.env.META_WA_ADMIN_NUMBER || "+92 345 7493339";
 
     for (const entry of entries) {
       for (const change of entry.changes ?? []) {
@@ -105,7 +105,7 @@ router.post("/webhook", async (req, res) => {
 router.get("/status", (req, res) => {
   res.json({
     configured: isWhatsAppCloudConfigured(),
-    adminNumber: process.env.META_WA_ADMIN_NUMBER || "+92 333 4880840",
+    adminNumber: process.env.META_WA_ADMIN_NUMBER || "+92 345 7493339",
     verifyTokenConfigured: Boolean(process.env.META_WA_VERIFY_TOKEN),
   });
 });

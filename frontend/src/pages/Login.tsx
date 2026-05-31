@@ -137,7 +137,12 @@ const LoginPage = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-[0.24em] text-dark">Password</label>
+                <div className="flex items-center justify-between gap-3">
+                  <label className="text-xs font-bold uppercase tracking-[0.24em] text-dark">Password</label>
+                  <Link to="/forgot-password" className="text-xs font-bold uppercase tracking-[0.16em] text-primary hover:underline">
+                    Forgot?
+                  </Link>
+                </div>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={18} />
                   <input type="password" placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full rounded-2xl bg-surface px-12 py-4 outline-none" />

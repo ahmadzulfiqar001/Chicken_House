@@ -2,7 +2,9 @@ import express from "express";
 import { db } from "../../core/db";
 import {
   clearAuthCookie,
+  completePasswordReset,
   createCustomerProfile,
+  createPasswordResetToken,
   createSessionForUser,
   deactivateSession,
   findAccountByEmail,
@@ -15,8 +17,15 @@ import {
 } from "./auth.service";
 import { UserAccountModel } from "../../core/models";
 import { isMongoConfigured } from "../../core/mongo";
+import { deliverNotification } from "../notifications/notify.service";
 
 const router = express.Router();
+
+const getRequestOrigin = (req: express.Request) => {
+  const configuredOrigin = process.env.APP_ORIGIN?.split(",")[0]?.trim();
+  if (configuredOrigin) return configuredOrigin.replace(/\/$/, "");
+  return `${req.protocol}://${req.get("host")}`;
+};
 
 router.get("/me", async (req, res) => {
   const user = await getAuthenticatedUser(req);
@@ -47,6 +56,71 @@ router.post("/login", async (req, res) => {
   setAuthCookie(res, token);
 
   return res.json({ user });
+});
+
+router.post("/forgot-password", async (req, res) => {
+  const email = normalizeEmailInput(String(req.body?.email ?? ""));
+
+  if (!email.includes("@")) {
+    return res.status(400).json({ message: "Please enter a valid email address." });
+  }
+
+  const account = await findAccountByEmail(email);
+
+  if (account && String(account.status ?? "Active") === "Active") {
+    const { token, expiresAt } = await createPasswordResetToken(account as Record<string, unknown>);
+    const resetUrl = `${getRequestOrigin(req)}/reset-password?token=${encodeURIComponent(token)}`;
+    const name = String(account.name ?? "Chicken House customer");
+
+    try {
+      const delivery = await deliverNotification({
+        channel: "email",
+        title: "Reset your Chicken House password",
+        message:
+          `Hi ${name},\n\nWe received a request to reset your Chicken House account password. ` +
+          `Use this secure link within 60 minutes:\n\n${resetUrl}\n\n` +
+          `This link expires at ${new Date(expiresAt).toLocaleString("en-PK", {
+            dateStyle: "medium",
+            timeStyle: "short",
+          })}. If you did not request this, you can safely ignore this email.`,
+        recipients: [{ email, name }],
+      });
+
+      if (delivery.skipped) {
+        console.warn("Password reset email was not sent because Resend is not configured.");
+      }
+      if (delivery.errors.length) {
+        console.error("Password reset email delivery failed:", delivery.errors.join("; "));
+      }
+    } catch (error) {
+      console.error("Password reset email delivery failed:", (error as Error).message);
+    }
+  }
+
+  return res.json({
+    message: "If an account exists for that email, a password reset link has been sent.",
+  });
+});
+
+router.post("/reset-password", async (req, res) => {
+  const token = String(req.body?.token ?? "").trim();
+  const password = String(req.body?.password ?? "");
+
+  if (token.length < 20) {
+    return res.status(400).json({ message: "Reset link is invalid." });
+  }
+
+  if (password.length < 6) {
+    return res.status(400).json({ message: "Password must be at least 6 characters." });
+  }
+
+  const result = await completePasswordReset(token, password);
+
+  if (!result.ok) {
+    return res.status(400).json({ message: result.message });
+  }
+
+  return res.json({ message: "Password reset successfully. Please sign in with your new password." });
 });
 
 router.post("/signup", async (req, res) => {
