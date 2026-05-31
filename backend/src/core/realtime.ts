@@ -42,7 +42,13 @@ export const initRealtime = (server: HttpServer): IOServer => {
   io = new IOServer(server, {
     path: "/socket.io",
     cors: {
-      origin: process.env.APP_ORIGIN ? process.env.APP_ORIGIN.split(",").map((o) => o.trim()) : true,
+      // Fail closed in production: if APP_ORIGIN is not configured, allow only
+      // same-origin (false) rather than reflecting any origin with credentials.
+      origin: process.env.APP_ORIGIN
+        ? process.env.APP_ORIGIN.split(",").map((o) => o.trim())
+        : process.env.NODE_ENV === "production"
+          ? false
+          : true,
       credentials: true,
     },
   });

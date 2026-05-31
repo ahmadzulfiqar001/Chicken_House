@@ -23,6 +23,7 @@ import {
   CartesianGrid,
   Cell,
   ResponsiveContainer,
+  Legend,
   Tooltip,
   XAxis,
   YAxis,
@@ -547,28 +548,20 @@ const AccountsModule = () => {
 
           <div className="h-[320px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient id="financeSales" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#d24a15" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#d24a15" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="financeProfit" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#0f8b6d" stopOpacity={0.15} />
-                    <stop offset="95%" stopColor="#0f8b6d" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
+              <BarChart data={chartData} barGap={4} barCategoryGap="20%">
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1ece7" />
                 <XAxis dataKey="label" axisLine={false} tickLine={false} />
                 <YAxis axisLine={false} tickLine={false} />
                 <Tooltip
+                  cursor={{ fill: "rgba(0,0,0,0.04)" }}
                   formatter={(value: number) => formatCurrency(value)}
                   contentStyle={{ borderRadius: 18, border: "none", boxShadow: "0 10px 25px rgba(0,0,0,0.08)" }}
                 />
-                <Area type="monotone" dataKey="sales" stroke="#d24a15" strokeWidth={3} fill="url(#financeSales)" />
-                <Area type="monotone" dataKey="expenses" stroke="#141414" strokeWidth={2} fillOpacity={0} strokeDasharray="6 6" />
-                <Area type="monotone" dataKey="profit" stroke="#0f8b6d" strokeWidth={2} fill="url(#financeProfit)" />
-              </AreaChart>
+                <Legend iconType="circle" />
+                <Bar name="Sales" dataKey="sales" fill="#d24a15" radius={[6, 6, 0, 0]} maxBarSize={26} />
+                <Bar name="Expenses" dataKey="expenses" fill="#141414" radius={[6, 6, 0, 0]} maxBarSize={26} />
+                <Bar name="Profit" dataKey="profit" fill="#0f8b6d" radius={[6, 6, 0, 0]} maxBarSize={26} />
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </div>

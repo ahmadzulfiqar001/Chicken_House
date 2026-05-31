@@ -1,7 +1,46 @@
+import React, { useState } from "react";
 import { motion } from "motion/react";
 import { Send, Mail } from "lucide-react";
 
 const NewsletterSection = () => {
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSuccess("");
+    setError("");
+
+    if (!email.trim()) {
+      setError("Please enter your email address.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message ?? "Subscription failed. Please try again.");
+      }
+
+      setSuccess("You're subscribed!");
+      setEmail("");
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : "Subscription failed. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <section className="py-24 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -30,25 +69,36 @@ const NewsletterSection = () => {
               Be the first to know about our new dishes, special events, and exclusive offers in Renala Khurd.
             </p>
 
-            <form className="flex flex-col md:flex-row gap-4 max-w-2xl mx-auto">
+            <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-4 max-w-2xl mx-auto">
               <div className="flex-1 relative">
-                <input 
-                  type="email" 
+                <input
+                  type="email"
                   placeholder="Your email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-8 py-6 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:border-primary transition-all outline-none text-lg"
                   required
                 />
               </div>
               <motion.button
+                type="submit"
+                disabled={isSubmitting}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="px-12 py-6 rounded-2xl bg-primary text-white font-bold text-lg flex items-center justify-center gap-3 shadow-xl shadow-primary/20 hover:bg-primary-dark transition-all"
+                className="px-12 py-6 rounded-2xl bg-primary text-white font-bold text-lg flex items-center justify-center gap-3 shadow-xl shadow-primary/20 hover:bg-primary-dark transition-all disabled:opacity-60"
               >
-                Subscribe
+                {isSubmitting ? "Subscribing..." : "Subscribe"}
                 <Send size={20} />
               </motion.button>
             </form>
-            
+
+            {success && (
+              <p className="mt-6 text-accent text-base font-medium">{success}</p>
+            )}
+            {error && (
+              <p className="mt-6 text-primary text-base font-medium">{error}</p>
+            )}
+
             <p className="mt-8 text-white/30 text-sm font-light">
               We respect your privacy. Unsubscribe at any time.
             </p>

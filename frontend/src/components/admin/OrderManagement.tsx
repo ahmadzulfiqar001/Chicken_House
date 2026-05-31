@@ -298,14 +298,28 @@ const OrderManagement = () => {
     }
 
     try {
-      const details = [
-        {
-          name: form.items.trim(),
-          quantity: 1,
-          price: subtotal,
-          variantLabel: "Admin Entry",
-        },
-      ];
+      // Parse the free-text summary ("2x Chicken Karahi, 1x Naan") into real line
+      // items so the Order Summary shows a proper breakdown. The subtotal is
+      // distributed evenly per unit so price x quantity sums back to the subtotal.
+      const lineItems = form.items
+        .split(/[\n,]+/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => {
+          const match = line.match(/^(\d+)\s*[xX]\s*(.+)$/);
+          return match
+            ? { quantity: Math.max(1, Number(match[1])), name: match[2].trim() }
+            : { quantity: 1, name: line };
+        });
+      const safeLineItems = lineItems.length ? lineItems : [{ quantity: 1, name: form.items.trim() }];
+      const totalQty = safeLineItems.reduce((sum, li) => sum + li.quantity, 0) || 1;
+      const unitPrice = Math.round(subtotal / totalQty);
+      const details = safeLineItems.map((li) => ({
+        name: li.name,
+        quantity: li.quantity,
+        price: unitPrice,
+        variantLabel: "",
+      }));
 
       const payload = {
         customer: form.customer.trim(),

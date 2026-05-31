@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import { Users, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const tables = [
   { id: 1, zone: "Indoor", capacity: 4, status: "available", x: 20, y: 20 },
@@ -13,6 +14,7 @@ const tables = [
 ];
 
 const SeatingMap = () => {
+  const navigate = useNavigate();
   const [selectedTable, setSelectedTable] = useState<any>(null);
 
   return (
@@ -73,6 +75,14 @@ const SeatingMap = () => {
               <p className={`text-xs font-bold uppercase ${selectedTable.status === "available" ? "text-green-500" : "text-red-500"}`}>
                 Status: {selectedTable.status}
               </p>
+              {selectedTable.status === "available" && (
+                <button
+                  onClick={() => navigate("/booking")}
+                  className="mt-3 w-full rounded-lg bg-primary px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-white transition-colors hover:bg-primary-strong"
+                >
+                  Reserve This Table
+                </button>
+              )}
             </div>
           ) : (
             <p className="text-muted text-xs italic">Select a table to see details</p>

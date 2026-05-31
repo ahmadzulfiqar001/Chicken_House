@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
 import { Instagram, Facebook, Twitter, Star } from "lucide-react";
+import { siteConfig, hasConfiguredUrl } from "../../lib/site";
 
 const chefs = [
   {
@@ -24,6 +25,12 @@ const chefs = [
     experience: "8 Years"
   }
 ];
+
+const chefSocials = [
+  { Icon: Instagram, href: siteConfig.socialLinks.instagram },
+  { Icon: Facebook, href: siteConfig.socialLinks.facebook },
+  { Icon: Twitter, href: siteConfig.socialLinks.twitter },
+].filter((social) => hasConfiguredUrl(social.href));
 
 const ChefsSection = () => {
   return (
@@ -59,18 +66,24 @@ const ChefsSection = () => {
                 />
                 
                 {/* Social Overlay */}
-                <div className="absolute inset-0 bg-dark/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center gap-4">
-                  {[Instagram, Facebook, Twitter].map((Icon, i) => (
-                    <motion.button
-                      key={i}
-                      whileHover={{ scale: 1.2, backgroundColor: "#FF6B6B" }}
-                      whileTap={{ scale: 0.9 }}
-                      className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white transition-colors"
-                    >
-                      <Icon size={20} />
-                    </motion.button>
-                  ))}
-                </div>
+                {chefSocials.length > 0 && (
+                  <div className="absolute inset-0 bg-dark/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center gap-4">
+                    {chefSocials.map(({ Icon, href }, i) => (
+                      <motion.a
+                        key={i}
+                        href={href}
+                        target="_blank"
+                        rel="noreferrer"
+                        whileHover={{ scale: 1.2, backgroundColor: "#FF6B6B" }}
+                        whileTap={{ scale: 0.9 }}
+                        aria-label={`${chef.name} social profile`}
+                        className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white transition-colors"
+                      >
+                        <Icon size={20} />
+                      </motion.a>
+                    ))}
+                  </div>
+                )}
 
                 {/* Experience Badge */}
                 <div className="absolute top-6 left-6 px-4 py-2 bg-accent text-dark font-bold text-[10px] uppercase tracking-widest rounded-full shadow-lg">

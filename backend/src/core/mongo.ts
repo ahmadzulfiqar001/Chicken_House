@@ -20,7 +20,22 @@ import {
   StaffNoticeModel,
   StaffRequestModel,
   ActivityLogModel,
+  RiderModel,
+  JobOpeningModel,
 } from "./models";
+
+const jobOpeningSeed = [
+  { id: "JOB-chef", title: "Chef / Cook", department: "Kitchen", type: "Full-time", location: "Renala Khurd", description: "Prepare BBQ, karahi, and fast-food items to Chicken House standards.", requirements: ["2+ years kitchen experience", "Knowledge of desi & fast food", "Hygiene & food safety"], salaryRange: "Rs. 40,000 - 70,000", status: "Open", createdAt: new Date().toISOString() },
+  { id: "JOB-rider", title: "Delivery Rider", department: "Delivery", type: "Full-time", location: "Renala Khurd / Okara", description: "Deliver orders quickly and safely across the service area.", requirements: ["Own bike + valid license", "Knows local routes", "Smartphone"], salaryRange: "Rs. 30,000 + fuel", status: "Open", createdAt: new Date().toISOString() },
+  { id: "JOB-cashier", title: "Cashier / Counter Staff", department: "Front of House", type: "Full-time", location: "Renala Khurd", description: "Handle billing, takeaway orders, and customer service at the counter.", requirements: ["Basic POS skills", "Good communication", "Honest & punctual"], salaryRange: "Rs. 28,000 - 40,000", status: "Open", createdAt: new Date().toISOString() },
+  { id: "JOB-server", title: "Waiter / Server", department: "Front of House", type: "Part-time", location: "Renala Khurd", description: "Serve dine-in guests and keep the seating area clean and welcoming.", requirements: ["Friendly attitude", "Team player", "Flexible hours"], salaryRange: "Rs. 25,000 - 35,000", status: "Open", createdAt: new Date().toISOString() },
+];
+
+const riderSeed = [
+  { id: "RD-001", name: "Bilal Ahmed", phone: "+92 333 4880841", status: "Available", shift: "Evening", vehicleType: "Bike", plateNumber: "OKR-1234", zone: "Renala Khurd", rating: 4.8, activeOrders: 0 },
+  { id: "RD-002", name: "Usman Ghani", phone: "+92 333 4880842", status: "On Delivery", shift: "Day", vehicleType: "Bike", plateNumber: "OKR-5678", zone: "Okara City", rating: 4.6, activeOrders: 1 },
+  { id: "RD-003", name: "Ali Raza", phone: "+92 333 4880843", status: "Offline", shift: "Night", vehicleType: "Bike", plateNumber: "OKR-9012", zone: "GT Road", rating: 4.9, activeOrders: 0 },
+];
 
 dotenv.config();
 
@@ -61,6 +76,8 @@ const seedDatabase = async () => {
   await seedMany("staffNotices", StaffNoticeModel as never, seed.staffNotices);
   await seedMany("staffRequests", StaffRequestModel as never, seed.staffRequests);
   await seedMany("activityLogs", ActivityLogModel as never, seed.activityLogs);
+  await seedMany("riders", RiderModel as never, riderSeed);
+  await seedMany("jobOpenings", JobOpeningModel as never, jobOpeningSeed);
 
   try {
   if ((await SiteSettingModel.estimatedDocumentCount()) === 0) {

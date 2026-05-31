@@ -1,5 +1,5 @@
 import express from "express";
-import { requirePermission } from "../auth/auth.service";
+import { requirePermission, requireRole } from "../auth/auth.service";
 import { db } from "../../core/db";
 import { ContactMessageModel } from "../../core/models";
 import { isMongoConfigured } from "../../core/mongo";
@@ -64,6 +64,34 @@ router.post("/", async (req, res) => {
 
   db.contactMessages.push(messageRecord);
   return res.status(201).json(messageRecord);
+});
+
+// Staff: update a message (status, priority, reply). Powers the Support module.
+router.patch("/:id", requireRole(["admin", "manager"]), async (req, res) => {
+  const patch: Record<string, unknown> = {};
+  if (req.body?.status !== undefined) patch.status = String(req.body.status);
+  if (req.body?.priority !== undefined) patch.priority = String(req.body.priority);
+  if (req.body?.assignedTo !== undefined) patch.assignedTo = String(req.body.assignedTo);
+  if (req.body?.responseMessage !== undefined) {
+    patch.responseMessage = String(req.body.responseMessage);
+    patch.respondedAt = new Date().toISOString();
+    if (req.body?.status === undefined) patch.status = "Replied";
+  }
+
+  if (isMongoConfigured()) {
+    const updated = await ContactMessageModel.findOneAndUpdate(
+      { id: req.params.id },
+      patch,
+      { new: true },
+    ).lean();
+    if (!updated) return res.status(404).json({ message: "Message not found." });
+    return res.json(updated);
+  }
+
+  const index = db.contactMessages.findIndex((item) => item.id === req.params.id);
+  if (index === -1) return res.status(404).json({ message: "Message not found." });
+  db.contactMessages[index] = { ...db.contactMessages[index], ...patch };
+  return res.json(db.contactMessages[index]);
 });
 
 export default router;

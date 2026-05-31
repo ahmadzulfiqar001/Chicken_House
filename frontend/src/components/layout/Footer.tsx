@@ -24,6 +24,7 @@ const Footer = () => {
     { name: "Our Menu", href: "/menu" },
     { name: "Book a Table", href: "/booking" },
     { name: "Track Order", href: "/track" },
+    { name: "Careers", href: "/careers" },
     { name: "Contact", href: "/contact" },
   ];
 

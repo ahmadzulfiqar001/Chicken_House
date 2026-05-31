@@ -1,13 +1,229 @@
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
-import { Bell, BellOff, MessageSquare, Mail, Smartphone, Settings, CheckCircle, AlertCircle, ChevronRight } from "lucide-react";
+import {
+  Bell,
+  MessageSquare,
+  Mail,
+  Smartphone,
+  Settings,
+  AlertCircle,
+  CheckCircle,
+  Send,
+  Trash2,
+  Search,
+  FileText,
+} from "lucide-react";
+import { useRealtime } from "../../lib/realtime";
+import { useToast } from "../layout/ToastProvider";
+
+const emptyForm = {
+  title: "",
+  message: "",
+  audience: "all",
+  channel: "in-app",
+};
+
+const statusStyles = {
+  Sent: "bg-green-500/10 text-green-600",
+  Queued: "bg-blue-500/10 text-blue-500",
+  Draft: "bg-surface-strong text-muted",
+  Failed: "bg-red-500/10 text-red-500",
+};
+
+const channelLabels = {
+  "in-app": "In-App",
+  email: "Email",
+  sms: "SMS",
+  whatsapp: "WhatsApp",
+};
+
+const formatTime = (value) => {
+  if (!value) {
+    return "Not sent yet";
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "Not sent yet";
+  }
+  return date.toLocaleString("en-PK");
+};
 
 const NotificationModule = () => {
-  const notifications = [
-    { id: "NT-001", type: "Order", message: "New order received from Table 5", time: "2 mins ago", status: "Unread" },
-    { id: "NT-002", type: "Inventory", message: "Low stock alert: Chicken Breast (5kg left)", time: "15 mins ago", status: "Unread" },
-    { id: "NT-003", type: "System", message: "Daily backup completed successfully", time: "1 hour ago", status: "Read" },
-    { id: "NT-004", type: "Support", message: "New support ticket from Ali Raza", time: "3 hours ago", status: "Read" },
-  ];
+  const { showToast } = useToast();
+  const [notifications, setNotifications] = useState([]);
+  const [metrics, setMetrics] = useState(null);
+  const [channels, setChannels] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
+  const [form, setForm] = useState(emptyForm);
+  const [sending, setSending] = useState(false);
+
+  const loadNotifications = async () => {
+    try {
+      const res = await fetch("/api/notifications");
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message ?? "Failed to load notifications.");
+      }
+
+      setNotifications(data.notifications ?? []);
+      setMetrics(data.metrics ?? null);
+      setChannels(data.channels ?? null);
+      setError("");
+    } catch (fetchError) {
+      console.error(fetchError);
+      setError("Notifications could not be loaded right now.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadNotifications();
+  }, []);
+
+  // Live updates: refetch whenever a notification is created / sent / deleted.
+  useRealtime("notifications", () => {
+    void loadNotifications();
+  });
+
+  const filteredNotifications = useMemo(() => {
+    const lowered = search.toLowerCase();
+    return notifications.filter((notif) =>
+      [notif.title, notif.message, notif.audience, notif.channel, notif.status]
+        .join(" ")
+        .toLowerCase()
+        .includes(lowered),
+    );
+  }, [notifications, search]);
+
+  const composeNotification = async (event: FormEvent) => {
+    event.preventDefault();
+
+    if (form.title.trim().length < 2 || form.message.trim().length < 2) {
+      showToast({
+        tone: "error",
+        title: "Notification not sent",
+        description: "A title and message are both required.",
+      });
+      return;
+    }
+
+    setSending(true);
+
+    try {
+      const res = await fetch("/api/notifications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: form.title.trim(),
+          message: form.message.trim(),
+          audience: form.audience,
+          channel: form.channel,
+          send: true,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message ?? "Failed to send notification.");
+      }
+
+      await loadNotifications();
+      setForm(emptyForm);
+      showToast({
+        tone: "success",
+        title: "Notification sent",
+        description: `"${form.title.trim()}" was dispatched to ${form.audience}.`,
+      });
+    } catch (composeError) {
+      console.error(composeError);
+      showToast({
+        tone: "error",
+        title: "Send failed",
+        description: composeError instanceof Error ? composeError.message : "The notification could not be sent.",
+      });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const sendNotification = async (notif) => {
+    try {
+      const res = await fetch(`/api/notifications/${notif.id}/send`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message ?? "Failed to send notification.");
+      }
+
+      await loadNotifications();
+      showToast({
+        tone: "success",
+        title: notif.status === "Sent" ? "Notification resent" : "Notification sent",
+        description: `"${notif.title}" was dispatched.`,
+      });
+    } catch (sendError) {
+      console.error(sendError);
+      showToast({
+        tone: "error",
+        title: "Send failed",
+        description: sendError instanceof Error ? sendError.message : "The notification could not be sent.",
+      });
+    }
+  };
+
+  const deleteNotification = async (notif) => {
+    if (!window.confirm(`Delete notification "${notif.title}"?`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/notifications/${notif.id}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(data.message ?? "Failed to delete notification.");
+      }
+
+      await loadNotifications();
+      showToast({
+        tone: "success",
+        title: "Notification deleted",
+        description: `"${notif.title}" was removed.`,
+      });
+    } catch (deleteError) {
+      console.error(deleteError);
+      showToast({
+        tone: "error",
+        title: "Delete failed",
+        description: deleteError instanceof Error ? deleteError.message : "The notification could not be deleted.",
+      });
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-8 animate-pulse">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div key={index} className="bg-white p-6 rounded-3xl shadow-xl shadow-dark/5 border border-gray-50">
+              <div className="mb-4 h-12 w-12 rounded-2xl bg-surface" />
+              <div className="mb-2 h-3 w-28 rounded-full bg-surface" />
+              <div className="h-8 w-20 rounded-full bg-surface" />
+            </div>
+          ))}
+        </div>
+        <div className="h-96 rounded-[3rem] bg-white shadow-xl shadow-dark/5 border border-gray-50" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -22,7 +238,7 @@ const NotificationModule = () => {
             <Bell size={24} />
           </div>
           <p className="text-muted text-xs font-bold uppercase tracking-widest mb-1">Total Notifications</p>
-          <p className="text-2xl font-display font-bold text-dark">124</p>
+          <p className="text-2xl font-display font-bold text-dark">{metrics?.total ?? 0}</p>
         </motion.div>
 
         <motion.div
@@ -31,11 +247,11 @@ const NotificationModule = () => {
           transition={{ delay: 0.1 }}
           className="bg-white p-6 rounded-3xl shadow-xl shadow-dark/5 border border-gray-50"
         >
-          <div className="w-12 h-12 rounded-2xl bg-red-500/10 text-red-500 flex items-center justify-center mb-4">
-            <AlertCircle size={24} />
+          <div className="w-12 h-12 rounded-2xl bg-green-500/10 text-green-500 flex items-center justify-center mb-4">
+            <CheckCircle size={24} />
           </div>
-          <p className="text-muted text-xs font-bold uppercase tracking-widest mb-1">Unread</p>
-          <p className="text-2xl font-display font-bold text-dark">12 Unread</p>
+          <p className="text-muted text-xs font-bold uppercase tracking-widest mb-1">Sent</p>
+          <p className="text-2xl font-display font-bold text-dark">{metrics?.sent ?? 0}</p>
         </motion.div>
 
         <motion.div
@@ -45,10 +261,10 @@ const NotificationModule = () => {
           className="bg-white p-6 rounded-3xl shadow-xl shadow-dark/5 border border-gray-50"
         >
           <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center mb-4">
-            <MessageSquare size={24} />
+            <FileText size={24} />
           </div>
-          <p className="text-muted text-xs font-bold uppercase tracking-widest mb-1">SMS Sent</p>
-          <p className="text-2xl font-display font-bold text-dark">1,240</p>
+          <p className="text-muted text-xs font-bold uppercase tracking-widest mb-1">Drafts</p>
+          <p className="text-2xl font-display font-bold text-dark">{metrics?.drafts ?? 0}</p>
         </motion.div>
 
         <motion.div
@@ -57,93 +273,201 @@ const NotificationModule = () => {
           transition={{ delay: 0.3 }}
           className="bg-white p-6 rounded-3xl shadow-xl shadow-dark/5 border border-gray-50"
         >
-          <div className="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-500 flex items-center justify-center mb-4">
-            <Mail size={24} />
+          <div className="w-12 h-12 rounded-2xl bg-red-500/10 text-red-500 flex items-center justify-center mb-4">
+            <AlertCircle size={24} />
           </div>
-          <p className="text-muted text-xs font-bold uppercase tracking-widest mb-1">Emails Sent</p>
-          <p className="text-2xl font-display font-bold text-dark">450</p>
+          <p className="text-muted text-xs font-bold uppercase tracking-widest mb-1">Failed</p>
+          <p className="text-2xl font-display font-bold text-dark">{metrics?.failed ?? 0}</p>
+          <p className="mt-2 text-xs font-bold uppercase tracking-widest text-muted">
+            {metrics?.sentToday ?? 0} sent today
+          </p>
         </motion.div>
       </div>
 
-      {/* Notification Settings & List */}
+      {/* Notification List + Compose / Channels */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Notification List */}
         <div className="lg:col-span-2 bg-white rounded-[3rem] p-10 shadow-xl shadow-dark/5 border border-gray-50">
-          <h2 className="text-2xl font-bold text-dark mb-10">Recent Notifications</h2>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
+            <h2 className="text-2xl font-bold text-dark">Recent Notifications</h2>
+            <div className="relative flex-1 md:w-64 md:flex-none">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={18} />
+              <input
+                type="text"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search notifications..."
+                className="w-full pl-12 pr-4 py-3 rounded-xl bg-surface border-none focus:ring-2 focus:ring-primary/20 transition-all text-sm"
+              />
+            </div>
+          </div>
+
+          {error ? <p className="mb-6 text-sm font-medium text-red-500">{error}</p> : null}
+
           <div className="space-y-6">
-            {notifications.map((notif, index) => (
-              <div key={index} className="flex items-start gap-6 p-6 rounded-3xl bg-surface hover:bg-surface-strong transition-all group cursor-pointer">
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
-                  notif.type === "Order" ? "bg-primary/10 text-primary" :
-                  notif.type === "Inventory" ? "bg-red-500/10 text-red-500" :
-                  "bg-blue-500/10 text-blue-500"
-                }`}>
-                  {notif.type === "Order" ? <Smartphone size={24} /> :
-                   notif.type === "Inventory" ? <AlertCircle size={24} /> :
-                   <Bell size={24} />}
+            {filteredNotifications.map((notif) => (
+              <div
+                key={notif.id}
+                className="flex items-start gap-6 p-6 rounded-3xl bg-surface hover:bg-surface-strong transition-all group"
+              >
+                <div
+                  className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
+                    notif.channel === "email"
+                      ? "bg-purple-500/10 text-purple-500"
+                      : notif.channel === "sms"
+                        ? "bg-blue-500/10 text-blue-500"
+                        : notif.channel === "whatsapp"
+                          ? "bg-green-500/10 text-green-500"
+                          : "bg-primary/10 text-primary"
+                  }`}
+                >
+                  {notif.channel === "email" ? (
+                    <Mail size={24} />
+                  ) : notif.channel === "sms" ? (
+                    <Smartphone size={24} />
+                  ) : notif.channel === "whatsapp" ? (
+                    <MessageSquare size={24} />
+                  ) : (
+                    <Bell size={24} />
+                  )}
                 </div>
-                <div className="flex-1">
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="text-dark font-bold">{notif.type} Notification</span>
-                    <span className="text-muted text-xs font-bold uppercase tracking-widest">{notif.time}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap justify-between items-start gap-2 mb-2">
+                    <span className="text-dark font-bold">{notif.title}</span>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        statusStyles[notif.status] ?? "bg-surface-strong text-muted"
+                      }`}
+                    >
+                      {notif.status}
+                    </span>
                   </div>
                   <p className="text-muted text-sm leading-relaxed">{notif.message}</p>
+                  <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted">
+                    <span className="px-2 py-1 rounded-full bg-white">
+                      {channelLabels[notif.channel] ?? notif.channel}
+                    </span>
+                    <span className="px-2 py-1 rounded-full bg-white">{notif.audience}</span>
+                    <span>{formatTime(notif.sentAt)}</span>
+                    {notif.metadata ? (
+                      <span className="text-primary">{notif.metadata.delivered ?? 0} delivered</span>
+                    ) : null}
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <button
+                      onClick={() => sendNotification(notif)}
+                      className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-bold text-dark transition hover:bg-primary hover:text-white"
+                    >
+                      <Send size={14} />
+                      {notif.status === "Sent" ? "Resend" : "Send"}
+                    </button>
+                    <button
+                      onClick={() => deleteNotification(notif)}
+                      className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-bold text-dark transition hover:bg-red-500 hover:text-white"
+                    >
+                      <Trash2 size={14} />
+                      Delete
+                    </button>
+                  </div>
                 </div>
-                {notif.status === "Unread" && (
-                  <div className="w-3 h-3 rounded-full bg-primary mt-2" />
-                )}
               </div>
             ))}
+
+            {!filteredNotifications.length ? (
+              <div className="rounded-3xl bg-surface px-6 py-12 text-center text-muted">
+                {search ? "No notifications matched your search." : "No notifications yet."}
+              </div>
+            ) : null}
           </div>
         </div>
 
-        {/* Channels */}
+        {/* Compose + Channels */}
         <div className="bg-dark rounded-[3rem] p-10 text-white">
-          <h3 className="text-xl font-bold mb-10 flex items-center gap-3">
+          <h3 className="text-xl font-bold mb-8 flex items-center gap-3">
+            <Send size={24} className="text-primary" />
+            Compose
+          </h3>
+
+          <form onSubmit={composeNotification} className="space-y-4">
+            <input
+              value={form.title}
+              onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
+              placeholder="Notification title"
+              className="w-full rounded-xl bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/40 outline-none focus:ring-2 focus:ring-primary/40"
+            />
+            <textarea
+              value={form.message}
+              onChange={(event) => setForm((current) => ({ ...current, message: event.target.value }))}
+              placeholder="Message body"
+              className="min-h-24 w-full rounded-xl bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/40 outline-none focus:ring-2 focus:ring-primary/40"
+            />
+            <div className="grid grid-cols-2 gap-3">
+              <select
+                value={form.audience}
+                onChange={(event) => setForm((current) => ({ ...current, audience: event.target.value }))}
+                className="rounded-xl bg-white/10 px-3 py-3 text-sm text-white outline-none focus:ring-2 focus:ring-primary/40"
+              >
+                <option className="text-dark" value="all">All</option>
+                <option className="text-dark" value="customers">Customers</option>
+                <option className="text-dark" value="admins">Admins</option>
+                <option className="text-dark" value="staff">Staff</option>
+              </select>
+              <select
+                value={form.channel}
+                onChange={(event) => setForm((current) => ({ ...current, channel: event.target.value }))}
+                className="rounded-xl bg-white/10 px-3 py-3 text-sm text-white outline-none focus:ring-2 focus:ring-primary/40"
+              >
+                <option className="text-dark" value="in-app">In-App</option>
+                <option className="text-dark" value="email">Email</option>
+                <option className="text-dark" value="sms">SMS</option>
+                <option className="text-dark" value="whatsapp">WhatsApp</option>
+              </select>
+            </div>
+            <button
+              type="submit"
+              disabled={sending}
+              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-bold text-white shadow-lg shadow-primary/20 transition hover:bg-primary-strong disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              <Send size={18} />
+              {sending ? "Sending..." : "Send Notification"}
+            </button>
+          </form>
+
+          <h3 className="text-xl font-bold mt-12 mb-6 flex items-center gap-3">
             <Settings size={24} className="text-primary" />
             Channels
           </h3>
-          <div className="space-y-8">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
-                  <Smartphone size={20} className="text-primary" />
+          <div className="space-y-4">
+            {[
+              { key: "in-app", label: "In-App", icon: Bell },
+              { key: "email", label: "Email Alerts", icon: Mail },
+              { key: "whatsapp", label: "WhatsApp", icon: MessageSquare },
+              { key: "sms", label: "SMS Marketing", icon: Smartphone },
+            ].map(({ key, label, icon: Icon }) => {
+              const available = channels ? channels[key] : false;
+              return (
+                <div key={key} className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+                      <Icon size={20} className="text-primary" />
+                    </div>
+                    <span className="font-bold">{label}</span>
+                  </div>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-bold ${
+                      available ? "bg-green-500/10 text-green-400" : "bg-white/10 text-white/40"
+                    }`}
+                  >
+                    {available ? "Available" : "Not configured"}
+                  </span>
                 </div>
-                <span className="font-bold">Push Notifications</span>
-              </div>
-              <div className="w-12 h-6 rounded-full bg-primary relative cursor-pointer">
-                <div className="absolute right-1 top-1 w-4 h-4 rounded-full bg-white shadow-sm" />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
-                  <Mail size={20} className="text-primary" />
-                </div>
-                <span className="font-bold">Email Alerts</span>
-              </div>
-              <div className="w-12 h-6 rounded-full bg-primary relative cursor-pointer">
-                <div className="absolute right-1 top-1 w-4 h-4 rounded-full bg-white shadow-sm" />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
-                  <MessageSquare size={20} className="text-primary" />
-                </div>
-                <span className="font-bold">SMS Marketing</span>
-              </div>
-              <div className="w-12 h-6 rounded-full bg-white/20 relative cursor-pointer">
-                <div className="absolute left-1 top-1 w-4 h-4 rounded-full bg-white shadow-sm" />
-              </div>
-            </div>
+              );
+            })}
           </div>
 
-          <div className="mt-12 p-6 rounded-2xl bg-white/5 border border-white/10">
+          <div className="mt-10 p-6 rounded-2xl bg-white/5 border border-white/10">
             <p className="text-white/60 text-xs leading-relaxed">
-              Automated notifications are sent based on system triggers. You can customize these in the global settings.
+              In-app notifications are always delivered. Email, SMS, and WhatsApp depend on configured providers — channels marked "Not configured" fall back to in-app delivery.
             </p>
           </div>
         </div>

@@ -1,6 +1,10 @@
-import { motion } from "motion/react";
+import { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { X } from "lucide-react";
 
 const WelcomeSection = () => {
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
+
   return (
     <section className="py-32 bg-white overflow-hidden relative">
       <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12">
@@ -65,6 +69,8 @@ const WelcomeSection = () => {
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
+                  onClick={() => setIsVideoOpen(true)}
+                  aria-label="Play Chicken House video"
                   className="w-24 h-24 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center text-primary shadow-2xl"
                 >
                   <div className="w-0 h-0 border-t-[12px] border-t-transparent border-l-[20px] border-l-primary border-b-[12px] border-b-transparent ml-2" />
@@ -109,6 +115,36 @@ const WelcomeSection = () => {
           </motion.div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {isVideoOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsVideoOpen(false)}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.92, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.92, opacity: 0 }}
+              onClick={(event) => event.stopPropagation()}
+              className="relative w-full max-w-4xl overflow-hidden rounded-[2rem] shadow-2xl"
+            >
+              <button
+                type="button"
+                onClick={() => setIsVideoOpen(false)}
+                aria-label="Close video"
+                className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-md transition hover:bg-black/70"
+              >
+                <X size={20} />
+              </button>
+              <video src="/bg-video.mp4" controls autoPlay playsInline className="h-full w-full bg-black" />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 };

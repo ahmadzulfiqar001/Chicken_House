@@ -20,7 +20,8 @@ import {
   Layers,
   MapPin,
   Bot,
-  Shield
+  Shield,
+  Briefcase
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -33,6 +34,7 @@ import RiderModule from "../components/admin/RiderModule";
 import SupportModule from "../components/admin/SupportModule";
 import SecurityModule from "../components/admin/SecurityModule";
 import NotificationModule from "../components/admin/NotificationModule";
+import CareersModule from "../components/admin/CareersModule";
 import MenuManagement from "../components/admin/MenuManagement";
 import HRManagement from "../components/admin/HRManagement";
 import UserManagement from "../components/admin/UserManagement";
@@ -45,6 +47,7 @@ import ChatbotInboxModule from "../components/admin/ChatbotInboxModule";
 import StaffWorkspace from "../components/admin/StaffWorkspace";
 import ManagerWorkspace from "../components/admin/ManagerWorkspace";
 import { useAuth, UserRole } from "../context/AuthContext";
+import { useRealtime } from "../lib/realtime";
 
 type DashboardTabId =
   | "dashboard"
@@ -65,6 +68,7 @@ type DashboardTabId =
   | "support"
   | "security"
   | "notifications"
+  | "careers"
   | "settings";
 
 type SidebarLink = {
@@ -93,6 +97,7 @@ const DASHBOARD_LINKS: SidebarLink[] = [
   { id: "support", name: "Support", icon: <Bell size={20} />, allow: ["admin"] },
   { id: "security", name: "Security", icon: <Shield size={20} />, allow: ["admin"] },
   { id: "notifications", name: "Notifications", icon: <Bell size={20} />, allow: ["admin"] },
+  { id: "careers", name: "Careers", icon: <Briefcase size={20} />, allow: ["admin", "manager"] },
   { id: "settings", name: "Settings", icon: <Settings size={20} />, allow: ["admin"] },
 ];
 
@@ -118,45 +123,125 @@ const AdminDashboard = () => {
     [currentRole],
   );
 
+  // Live dashboard data (admin / manager only).
+  const [overview, setOverview] = useState(null);
+  const [orders, setOrders] = useState([]);
+  const [loadingDashboard, setLoadingDashboard] = useState(true);
+  const [dashboardSearch, setDashboardSearch] = useState("");
+
   useEffect(() => {
     if (!sidebarLinks.some((link) => link.id === activeTab)) {
       setActiveTab(sidebarLinks[0]?.id ?? "dashboard");
     }
   }, [activeTab, sidebarLinks]);
 
+  const fetchDashboard = async () => {
+    setLoadingDashboard(true);
+    try {
+      const [overviewRes, ordersRes] = await Promise.all([
+        fetch("/api/operations/overview"),
+        fetch("/api/orders"),
+      ]);
+      if (overviewRes.ok) {
+        setOverview(await overviewRes.json());
+      }
+      if (ordersRes.ok) {
+        setOrders(await ordersRes.json());
+      }
+    } catch (fetchError) {
+      console.error("Dashboard data could not be loaded.", fetchError);
+    } finally {
+      setLoadingDashboard(false);
+    }
+  };
+
+  useEffect(() => {
+    if (currentRole === "admin" || currentRole === "manager") {
+      void fetchDashboard();
+    } else {
+      setLoadingDashboard(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentRole]);
+
+  // Live updates: refresh KPIs and the recent-orders list whenever orders change.
+  useRealtime("orders", () => {
+    if (currentRole === "admin" || currentRole === "manager") {
+      void fetchDashboard();
+    }
+  });
+
+  const formatRs = (amount) =>
+    `Rs. ${Number(amount ?? 0).toLocaleString("en-PK")}`;
+
+  const relativeTime = (iso) => {
+    if (!iso) return "";
+    const then = new Date(iso).getTime();
+    if (Number.isNaN(then)) return iso;
+    const diffMs = Date.now() - then;
+    const mins = Math.round(diffMs / 60000);
+    if (mins < 1) return "just now";
+    if (mins < 60) return `${mins} min${mins === 1 ? "" : "s"} ago`;
+    const hours = Math.round(mins / 60);
+    if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+    const days = Math.round(hours / 24);
+    return `${days} day${days === 1 ? "" : "s"} ago`;
+  };
+
+  const overviewStats = overview?.stats ?? {};
+  const lowStockCount = overviewStats.lowStockCount ?? 0;
+
   const stats = useMemo(() => {
     return [
-      { name: "Total Sales", value: "Rs. 1,245,000", change: "+12.5%", icon: <DollarSign size={24} />, color: "bg-green-500/10 text-green-500" },
-      { name: "Active Orders", value: "48", change: "+5.2%", icon: <ShoppingCart size={24} />, color: "bg-blue-500/10 text-blue-500" },
-      { name: "New Customers", value: "124", change: "+8.1%", icon: <UserPlus size={24} />, color: "bg-purple-500/10 text-purple-500" },
-      { name: "Inventory Alerts", value: "12", change: "-2.4%", icon: <Package size={24} />, color: "bg-red-500/10 text-red-500" },
+      { name: "Total Sales", value: formatRs(overviewStats.todayRevenue), change: "Today", icon: <DollarSign size={24} />, color: "bg-green-500/10 text-green-500" },
+      { name: "Active Orders", value: String(overviewStats.activeOrders ?? 0), change: "Live", icon: <ShoppingCart size={24} />, color: "bg-blue-500/10 text-blue-500" },
+      { name: "New Customers", value: String(overviewStats.customerAccounts ?? 0), change: "Total", icon: <UserPlus size={24} />, color: "bg-purple-500/10 text-purple-500" },
+      { name: "Inventory Alerts", value: String(lowStockCount), change: lowStockCount > 0 ? "Action" : "Stable", icon: <Package size={24} />, color: "bg-red-500/10 text-red-500" },
     ];
-  }, [currentRole]);
+  }, [overview]);
 
-  const recentOrders = [
-    { id: "CH-12345", customer: "John Doe", items: "Chicken Karahi, Naan", total: "2,560", status: "Cooking", time: "5 mins ago" },
-    { id: "CH-12346", customer: "Jane Smith", items: "Special BBQ Platter", total: "5,200", status: "Pending", time: "12 mins ago" },
-    { id: "CH-12347", customer: "Ali Khan", items: "Premium Pizza", total: "1,800", status: "Delivered", time: "25 mins ago" },
-    { id: "CH-12348", customer: "Sara Ahmed", items: "Hot & Sour Soup", total: "900", status: "Out for Delivery", time: "40 mins ago" },
-  ];
+  const recentOrders = useMemo(() => {
+    const mapped = (orders ?? []).slice(0, 5).map((order) => ({
+      id: order.id,
+      customer: order.customer,
+      items: order.items,
+      total: Number(order.total ?? 0).toLocaleString("en-PK"),
+      status: order.status,
+      time: relativeTime(order.time),
+    }));
+    const query = dashboardSearch.trim().toLowerCase();
+    if (!query) return mapped;
+    return mapped.filter((order) =>
+      `${order.id} ${order.customer} ${order.items} ${order.status}`.toLowerCase().includes(query),
+    );
+  }, [orders, dashboardSearch]);
 
-  const quickActions = useMemo(() => {
+  const quickActions = useMemo<
+    Array<{ label: string; icon: ReactNode; tab: DashboardTabId; className: string }>
+  >(() => {
     return [
-      { label: "Add Item", icon: <Utensils size={24} />, className: "bg-primary/5 text-primary hover:bg-primary hover:text-white" },
-      { label: "Add Staff", icon: <Users size={24} />, className: "bg-accent/5 text-accent hover:bg-accent hover:text-dark" },
-      { label: "Reports", icon: <TrendingUp size={24} />, className: "bg-green-500/5 text-green-500 hover:bg-green-500 hover:text-white" },
-      { label: "Notify", icon: <Bell size={24} />, className: "bg-purple-500/5 text-purple-500 hover:bg-purple-500 hover:text-white" },
+      { label: "Add Item", icon: <Utensils size={24} />, tab: "menu", className: "bg-primary/5 text-primary hover:bg-primary hover:text-white" },
+      { label: "Add Staff", icon: <Users size={24} />, tab: "hr", className: "bg-accent/5 text-accent hover:bg-accent hover:text-dark" },
+      { label: "Reports", icon: <TrendingUp size={24} />, tab: "analytics", className: "bg-green-500/5 text-green-500 hover:bg-green-500 hover:text-white" },
+      { label: "Notify", icon: <Bell size={24} />, tab: "notifications", className: "bg-purple-500/5 text-purple-500 hover:bg-purple-500 hover:text-white" },
     ];
   }, [currentRole]);
 
-  const spotlightCard = useMemo(() => {
+  const spotlightCard = useMemo<{
+    title: string;
+    text: string;
+    button: string;
+    tab: DashboardTabId;
+    icon: ReactNode;
+  }>(() => {
     return {
       title: "Inventory Alert",
-      text: "12 items are below the safety threshold of 15%.",
+      text: `${lowStockCount} items are below the safety threshold.`,
       button: "Manage Stock",
+      tab: "inventory",
       icon: <Package size={32} className="mb-4" />,
     };
-  }, [currentRole]);
+  }, [lowStockCount]);
 
   // Role-based shells — after all hooks (Rules of Hooks).
   if (staffWorkspaceRoles.includes(currentRole)) {
@@ -252,10 +337,16 @@ const AdminDashboard = () => {
               <input
                 type="text"
                 placeholder="Search anything..."
+                value={dashboardSearch}
+                onChange={(event) => setDashboardSearch(event.target.value)}
                 className="pl-10 pr-4 py-2 rounded-lg bg-surface border border-transparent focus:border-primary focus:bg-white transition-all outline-none text-sm w-64"
               />
             </div>
-            <button className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors text-muted">
+            <button
+              onClick={() => setActiveTab("notifications")}
+              aria-label="View notifications"
+              className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors text-muted"
+            >
               <Bell size={20} />
               <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full border-2 border-white" />
             </button>
@@ -296,7 +387,13 @@ const AdminDashboard = () => {
                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${stat.color}`}>
                           {stat.icon}
                         </div>
-                        <span className={`text-xs font-bold px-2 py-1 rounded-lg ${stat.change.startsWith("+") ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"}`}>
+                        <span className={`text-xs font-bold px-2 py-1 rounded-lg ${
+                          stat.change.startsWith("+")
+                            ? "bg-green-500/10 text-green-500"
+                            : stat.change.startsWith("-") || stat.change === "Action"
+                              ? "bg-red-500/10 text-red-500"
+                              : "bg-surface text-muted"
+                        }`}>
                           {stat.change}
                         </span>
                       </div>
@@ -311,7 +408,7 @@ const AdminDashboard = () => {
                   <div className="lg:col-span-2 bg-white rounded-[3rem] p-8 shadow-xl shadow-dark/5 border border-gray-50">
                     <div className="flex justify-between items-center mb-8">
                       <h2 className="text-xl font-bold text-dark">Recent Orders</h2>
-                      <button className="text-primary font-bold text-sm hover:underline">View All</button>
+                      <button onClick={() => setActiveTab("orders")} className="text-primary font-bold text-sm hover:underline">View All</button>
                     </div>
                     <div className="overflow-x-auto">
                       <table className="w-full">
@@ -326,7 +423,18 @@ const AdminDashboard = () => {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
-                          {recentOrders.map((order, index) => (
+                          {loadingDashboard ? (
+                            <tr>
+                              <td colSpan={6} className="py-8 text-center text-muted text-sm">Loading orders...</td>
+                            </tr>
+                          ) : recentOrders.length === 0 ? (
+                            <tr>
+                              <td colSpan={6} className="py-8 text-center text-muted text-sm">
+                                {dashboardSearch.trim() ? "No matching orders." : "No orders yet."}
+                              </td>
+                            </tr>
+                          ) : (
+                            recentOrders.map((order, index) => (
                             <tr key={index} className="group hover:bg-surface transition-colors">
                               <td className="py-4 font-bold text-dark">{order.id}</td>
                               <td className="py-4 text-muted">{order.customer}</td>
@@ -335,7 +443,7 @@ const AdminDashboard = () => {
                               <td className="py-4">
                                 <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                                   order.status === "Delivered" ? "bg-green-500/10 text-green-500" :
-                                  order.status === "Cooking" ? "bg-blue-500/10 text-blue-500" :
+                                  order.status === "Cooking" || order.status === "Preparing" ? "bg-blue-500/10 text-blue-500" :
                                   order.status === "Pending" ? "bg-yellow-500/10 text-yellow-500" :
                                   "bg-primary/10 text-primary"
                                 }`}>
@@ -344,7 +452,8 @@ const AdminDashboard = () => {
                               </td>
                               <td className="py-4 text-muted text-xs">{order.time}</td>
                             </tr>
-                          ))}
+                            ))
+                          )}
                         </tbody>
                       </table>
                     </div>
@@ -358,6 +467,7 @@ const AdminDashboard = () => {
                         {quickActions.map((action) => (
                           <button
                             key={action.label}
+                            onClick={() => setActiveTab(action.tab)}
                             className={`p-4 rounded-2xl transition-all duration-300 flex flex-col items-center gap-2 group ${action.className}`}
                           >
                             <span className="group-hover:scale-110 transition-transform">{action.icon}</span>
@@ -373,7 +483,7 @@ const AdminDashboard = () => {
                         {spotlightCard.icon}
                         <h3 className="text-xl font-bold mb-2">{spotlightCard.title}</h3>
                         <p className="text-white/70 text-sm mb-6">{spotlightCard.text}</p>
-                        <button className="w-full py-3 rounded-xl bg-white text-primary font-bold hover:bg-accent hover:text-dark transition-colors">
+                        <button onClick={() => setActiveTab(spotlightCard.tab)} className="w-full py-3 rounded-xl bg-white text-primary font-bold hover:bg-accent hover:text-dark transition-colors">
                           {spotlightCard.button}
                         </button>
                       </div>
@@ -564,7 +674,17 @@ const AdminDashboard = () => {
               </motion.div>
             )}
 
-            {activeTab !== "dashboard" && activeTab !== "accounts" && activeTab !== "inventory" && activeTab !== "hr" && activeTab !== "orders" && activeTab !== "bookings" && activeTab !== "branches" && activeTab !== "promotions" && activeTab !== "analytics" && activeTab !== "chatbot" && activeTab !== "settings" && activeTab !== "menu" && activeTab !== "ai" && activeTab !== "riders" && activeTab !== "support" && activeTab !== "security" && activeTab !== "notifications" && activeTab !== "ecommerce" && (
+            {activeTab === "careers" && (
+              <motion.div
+                key="careers"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+              >
+                <CareersModule />
+              </motion.div>
+            )}
+
+            {activeTab !== "dashboard" && activeTab !== "accounts" && activeTab !== "inventory" && activeTab !== "hr" && activeTab !== "orders" && activeTab !== "bookings" && activeTab !== "branches" && activeTab !== "promotions" && activeTab !== "analytics" && activeTab !== "chatbot" && activeTab !== "settings" && activeTab !== "menu" && activeTab !== "ai" && activeTab !== "riders" && activeTab !== "support" && activeTab !== "security" && activeTab !== "notifications" && activeTab !== "careers" && activeTab !== "ecommerce" && (
               <motion.div
                 key="placeholder"
                 initial={{ opacity: 0 }}
