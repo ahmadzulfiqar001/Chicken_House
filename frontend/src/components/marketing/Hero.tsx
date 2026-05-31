@@ -12,12 +12,21 @@ const Hero = () => {
         transition={{ duration: 1.8 }}
         className="absolute inset-0 z-0"
       >
-        <div
-          className="h-full w-full scale-110 bg-cover bg-center"
-          style={{ backgroundImage: `url(${siteConfig.imageFallback})` }}
-        />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,170,73,0.22),transparent_30%)]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-dark/82 via-dark/62 to-dark/94" />
+        <video
+          className="h-full w-full scale-105 object-cover"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          poster={siteConfig.imageFallback}
+          aria-hidden="true"
+        >
+          <source src="/hero-video.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,170,73,0.14),transparent_34%)]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-dark/42 via-dark/28 to-dark/58" />
+        <div className="absolute inset-0 bg-gradient-to-r from-dark/58 via-dark/20 to-dark/28" />
       </motion.div>
 
       <div className="absolute inset-0 atmosphere pointer-events-none" />
@@ -58,17 +67,6 @@ const Hero = () => {
             </span>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.15 }}
-            className="mb-8 inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/8 px-5 py-3 text-[11px] font-mono uppercase tracking-[0.35em] text-white/80 backdrop-blur-lg"
-          >
-            Fresh Flames
-            <span className="h-2 w-2 rounded-full bg-accent shadow-[0_0_16px_rgba(255,170,73,0.9)]" />
-            Cooking In Action
-          </motion.div>
-
           <div className="mb-8 max-w-[980px]">
             <motion.h1
               initial={{ opacity: 0, y: 100 }}
@@ -83,17 +81,15 @@ const Hero = () => {
             </motion.h1>
           </div>
 
-          <div className="w-full max-w-[760px] rounded-[2rem] border border-white/10 bg-black/18 p-6 md:p-8 backdrop-blur-md shadow-[0_24px_60px_rgba(0,0,0,0.24)]">
-            <motion.p
+          <div className="w-full max-w-[820px]">
+            <motion.h2
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="text-base sm:text-lg md:text-[1.28rem] text-white/82 max-w-2xl font-light leading-relaxed"
+              transition={{ duration: 0.8, delay: 0.35 }}
+              className="max-w-3xl text-2xl font-display font-semibold leading-snug text-white drop-shadow-[0_8px_24px_rgba(0,0,0,0.45)] sm:text-3xl md:text-4xl"
             >
-              Watch the heat, hear the sizzle, and dive into signature BBQ,
-              karahi, biryani, burgers, pasta, and premium platters. Chicken
-              House brings the full kitchen energy right to the first fold.
-            </motion.p>
+              Traditional Taste, Homelike Comfort, and a Warm Atmosphere.
+            </motion.h2>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}

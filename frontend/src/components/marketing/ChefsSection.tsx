@@ -3,24 +3,24 @@ import { Instagram, Facebook, Twitter, Star } from "lucide-react";
 
 const chefs = [
   {
-    name: "Chef Arsalan",
+    name: "Chef Imran Qureshi",
     role: "Executive Chef",
     image: "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&w=600&q=80",
-    specialty: "BBQ Specialist",
+    specialty: "BBQ & Grill Specialist",
     experience: "15 Years"
   },
   {
-    name: "Chef Maria",
-    role: "Head Pastry Chef",
-    image: "https://images.unsplash.com/photo-1583394293214-28dea15ee548?auto=format&fit=crop&w=600&q=80",
-    specialty: "Dessert Artisan",
-    experience: "10 Years"
+    name: "Chef Salman Raza",
+    role: "Head Karahi Chef",
+    image: "https://images.unsplash.com/photo-1581299894007-aaa50297cf16?auto=format&fit=crop&w=600&q=80",
+    specialty: "Karahi Expert",
+    experience: "12 Years"
   },
   {
-    name: "Chef Zaid",
+    name: "Chef Naveed Akram",
     role: "Sous Chef",
-    image: "https://images.unsplash.com/photo-1595273670150-db0d3bf39241?auto=format&fit=crop&w=600&q=80",
-    specialty: "Karahi Expert",
+    image: "https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?auto=format&fit=crop&w=600&q=80",
+    specialty: "Desi Meals & Platters",
     experience: "8 Years"
   }
 ];
