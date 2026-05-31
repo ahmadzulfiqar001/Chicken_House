@@ -103,8 +103,7 @@ const seasonalCards = [
 
 const filters = ["All", "Customer Moments", "Food Aesthetics", "Reels Preview", "Trendy Kitchen"];
 
-const galleryVideo =
-  "https://cdn.coverr.co/videos/coverr-chef-cooking-pasta-1561297351540?download=1080p";
+const galleryVideo = "/bg-video.mp4";
 const eventVideo =
   "https://cdn.coverr.co/videos/coverr-chef-plating-up-a-dish-1563896751574?download=1080p";
 

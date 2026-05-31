@@ -112,8 +112,11 @@ const LOCAL_IMAGE_INDEX: LocalImageEntry[] = (() => {
   return entries;
 })();
 
+const encodeLocalImageSegment = (segment: string) =>
+  encodeURIComponent(segment).replace(/%26/g, "&").replace(/%2B/g, "+");
+
 const toLocalImageUrl = (relativePath: string) =>
-  `/menu-library/${relativePath.split("/").map((segment) => encodeURIComponent(segment)).join("/")}`;
+  `/menu-library/${relativePath.split("/").map(encodeLocalImageSegment).join("/")}`;
 
 const resolveLocalMenuImage = (category: string, name: string) => {
   const normalizedCategory = normalizeCategoryKey(category);
