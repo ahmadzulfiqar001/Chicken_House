@@ -16,10 +16,10 @@ const LoginPage = () => {
   const { login, demoAccounts } = useAuth();
 
   // Backoffice roles — ye log /admin pe jaate hain
-  const BACKOFFICE_ROLES = ["admin", "manager", "rider", "staff"] as const;
+  const BACKOFFICE_ROLES = ["admin", "manager", "hr", "rider", "staff"] as const;
 
   const routeByRole = (
-    role: "admin" | "manager" | "rider" | "staff" | "user",
+    role: "admin" | "manager" | "hr" | "rider" | "staff" | "user",
   ) => {
     const from = (location.state as { from?: string } | null)?.from;
 
@@ -37,17 +37,14 @@ const LoginPage = () => {
     setError("");
     setIsSubmitting(true);
 
-    console.log("Attempting login with:", { email, role: "checking..." });
     const result = await login({ email, password });
     setIsSubmitting(false);
 
     if (result.ok === false) {
-      console.error("Login failed:", result.message);
       setError(result.message);
       return;
     }
 
-    console.log("Login successful! User role:", result.user.role);
     routeByRole(result.user.role);
   };
 

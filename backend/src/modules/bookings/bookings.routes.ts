@@ -3,7 +3,7 @@ import { requirePermission } from "../auth/auth.service";
 import { db } from "../../core/db";
 import { calculateQuotedBookingPrice, validateBookingPayload } from "./bookings.helpers";
 import { BookingRequestModel } from "../../core/models";
-import { isMongoConnected } from "../../core/mongo";
+import { isMongoConfigured } from "../../core/mongo";
 
 const router = express.Router();
 
@@ -14,7 +14,7 @@ router.get("/", requirePermission("bookings:view"), async (req, res) => {
   const limit = Number(req.query.limit ?? 0);
   const status = String(req.query.status ?? "").trim();
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const query = status ? { status } : {};
     let bookingQuery = BookingRequestModel.find(query).sort({ createdAt: -1 });
 
@@ -72,7 +72,7 @@ router.post("/", async (req, res) => {
   }
 
   const bookingRecord = {
-    id: `BOOK-${Date.now()}`,
+    id: `BOOK-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     ...payload,
     status: "Pending",
     branchId: "renala-khurd-main",
@@ -81,7 +81,7 @@ router.post("/", async (req, res) => {
     assignedTo: "",
   };
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const created = await BookingRequestModel.create(bookingRecord);
     return res.status(201).json(created.toObject());
   }
@@ -98,7 +98,7 @@ router.patch("/:id", requirePermission("bookings:update"), async (req, res) => {
     return res.status(400).json({ message: "Invalid booking status." });
   }
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const updated = await BookingRequestModel.findOneAndUpdate(
       { id: req.params.id },
       req.body,

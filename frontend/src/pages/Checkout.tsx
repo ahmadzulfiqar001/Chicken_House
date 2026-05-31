@@ -53,7 +53,8 @@ type CheckoutConfirmation = {
   items: CartItem[];
 };
 
-const paymentMethods = ["Cash on Delivery", "Card on Delivery", "Bank Transfer"];
+const paymentMethods = ["Cash on Delivery", "Easypaisa", "JazzCash", "Bank Transfer (HBL)"];
+const isTransferMethod = (method: string) => !/cash/i.test(method);
 const orderTypes = ["Delivery", "Takeaway"] as const;
 
 const normalizePhone = (value: string) => value.replace(/[^\d+]/g, "");
@@ -70,6 +71,7 @@ const CheckoutPage = () => {
     city: "Renala Khurd",
     notes: "",
     paymentMethod: "Cash on Delivery",
+    paymentReference: "",
     type: "Delivery" as "Delivery" | "Takeaway",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -185,6 +187,7 @@ const CheckoutPage = () => {
           type: formData.type,
           city: formData.city,
           paymentMethod: formData.paymentMethod,
+          paymentReference: formData.paymentReference,
           deliveryAddress:
             formData.type === "Delivery"
               ? `${formData.address}, ${formData.city}`.trim()
@@ -305,6 +308,27 @@ const CheckoutPage = () => {
                 <p className="mt-4 text-lg text-muted">
                   Your order <span className="font-bold text-primary">{confirmation.id}</span> has been placed successfully.
                 </p>
+
+                {isTransferMethod(confirmation.paymentMethod) && (
+                  <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">
+                    <p className="font-bold">Complete your {confirmation.paymentMethod} payment</p>
+                    <p className="mt-1">
+                      Send <span className="font-bold">Rs. {confirmation.total.toLocaleString()}</span> to the account
+                      below and include your Order ID <span className="font-bold">{confirmation.id}</span> in the
+                      transaction. Our team verifies it shortly and the status updates live on your tracking page.
+                    </p>
+                    <div className="mt-3 space-y-1">
+                      {(siteConfig.bankAccounts.some((acct) => acct.method === confirmation.paymentMethod)
+                        ? siteConfig.bankAccounts.filter((acct) => acct.method === confirmation.paymentMethod)
+                        : siteConfig.bankAccounts
+                      ).map((acct) => (
+                        <p key={acct.accountNumber} className="font-bold text-dark">
+                          {acct.bank}: <span className="font-mono">{acct.accountNumber}</span> ({acct.accountTitle})
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <div className="mt-8 grid gap-4 sm:grid-cols-2">
                   <div className="rounded-[2rem] bg-surface p-5 text-sm text-dark">
@@ -568,6 +592,43 @@ const CheckoutPage = () => {
                         ))}
                       </select>
                     </div>
+
+                    {isTransferMethod(formData.paymentMethod) ? (
+                      <div className="space-y-3 rounded-2xl border border-accent/40 bg-accent/5 p-5 md:col-span-2">
+                        <div className="flex items-center gap-2 text-sm font-bold text-dark">
+                          <CreditCard size={18} className="text-accent" />
+                          Send the order total to the account below to complete your {formData.paymentMethod} payment.
+                        </div>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          {(siteConfig.bankAccounts.some((acct) => acct.method === formData.paymentMethod)
+                            ? siteConfig.bankAccounts.filter((acct) => acct.method === formData.paymentMethod)
+                            : siteConfig.bankAccounts
+                          ).map((acct) => (
+                            <div key={`${acct.bank}-${acct.accountNumber}`} className="rounded-xl bg-white p-4 text-sm shadow-sm">
+                              <p className="font-bold text-dark">{acct.bank}</p>
+                              <p className="text-muted">{acct.accountTitle}</p>
+                              <p className="mt-1 font-mono text-lg font-bold text-dark">{acct.accountNumber}</p>
+                              <p className="mt-1 text-xs font-medium text-primary">{acct.note}</p>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="rounded-xl bg-amber-50 px-4 py-3 text-xs font-medium text-amber-800">
+                          After you place the order you&apos;ll get an Order ID — include it in your payment so our team
+                          can verify it. You&apos;ll see the status update live on your tracking page.
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold uppercase tracking-[0.24em] text-muted">
+                            Transaction ID (optional — if you have already paid)
+                          </label>
+                          <input
+                            value={formData.paymentReference}
+                            onChange={(e) => setFormData((prev) => ({ ...prev, paymentReference: e.target.value }))}
+                            placeholder="e.g. your Easypaisa / JazzCash / bank transaction ID"
+                            className="w-full rounded-2xl border border-gray-200 bg-white px-5 py-4 outline-none"
+                          />
+                        </div>
+                      </div>
+                    ) : null}
 
                     <div className="space-y-2">
                       <label className="text-xs font-bold uppercase tracking-[0.24em] text-muted">City</label>

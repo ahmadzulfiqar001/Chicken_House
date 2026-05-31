@@ -586,7 +586,7 @@ const MenuPage = () => {
         <div className="pointer-events-none absolute right-[8%] top-[34rem] h-72 w-72 rounded-full bg-accent/10 blur-3xl" />
       <div className="mx-auto max-w-[106rem] px-4 pb-24 pt-32 sm:px-6 lg:px-8">
         <div className="grid gap-8 xl:grid-cols-[28rem_minmax(0,1fr)]">
-          <aside className="xl:min-w-0 xl:h-full">
+          <aside className="hidden xl:block xl:min-w-0 xl:h-full">
             <div className="space-y-4 xl:sticky xl:top-28">
               <div className="flex h-full min-h-[calc(100vh-8.5rem)] flex-col overflow-hidden rounded-[3rem] border border-[#eadcc8] bg-gradient-to-b from-[#fff9ef] via-white to-[#f8ecdb] shadow-[0_28px_80px_rgba(17,8,5,0.12)]">
                 <div className="px-6 py-6">

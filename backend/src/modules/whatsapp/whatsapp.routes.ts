@@ -1,12 +1,13 @@
 import express from "express";
 import {
   AssistantResponse,
-  getChickenHouseAssistantReply,
+  getRuleBasedReply,
   logAssistantConversation,
 } from "../assistant/assistant.engine";
 import {
   isWhatsAppCloudConfigured,
   sendWhatsAppMessages,
+  verifyWhatsAppSignature,
 } from "./whatsapp.service";
 
 const router = express.Router();
@@ -51,6 +52,12 @@ router.get("/webhook", (req, res) => {
 });
 
 router.post("/webhook", async (req, res) => {
+  // Reject forged webhooks: verify Meta's HMAC signature over the raw body.
+  const signature = req.headers["x-hub-signature-256"] as string | undefined;
+  if (!verifyWhatsAppSignature((req as express.Request & { rawBody?: Buffer }).rawBody, signature)) {
+    return res.sendStatus(401);
+  }
+
   try {
     const entries = req.body?.entry ?? [];
     const adminNumber = process.env.META_WA_ADMIN_NUMBER || "+92 333 4880840";
@@ -70,7 +77,7 @@ router.post("/webhook", async (req, res) => {
             contacts.find((contact: any) => contact.wa_id === from)?.profile?.name ||
             "WhatsApp Customer";
 
-          const assistantReply = await getChickenHouseAssistantReply(customerText);
+          const assistantReply = await getRuleBasedReply(customerText);
 
           await logAssistantConversation({
             customerMessage: customerText,

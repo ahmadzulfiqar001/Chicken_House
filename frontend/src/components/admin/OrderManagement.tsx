@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { useToast } from "../layout/ToastProvider";
 
-type OrderStatus = "Pending" | "Preparing" | "Out for Delivery" | "Delivered" | "Cancelled";
+type OrderStatus = "Pending" | "Confirmed" | "Preparing" | "Out for Delivery" | "Delivered" | "Cancelled";
 type OrderType = "Delivery" | "Dine-in" | "Takeaway";
 
 type OrderDetail = {
@@ -39,6 +39,9 @@ type OrderRecord = {
   customerPhone?: string;
   deliveryAddress?: string;
   paymentMethod?: string;
+  paymentStatus?: string;
+  paymentReference?: string;
+  paymentVerifiedBy?: string;
   notes?: string;
   items: string;
   subtotal?: number;
@@ -79,6 +82,7 @@ const emptyForm = {
 
 const statusStyles: Record<OrderStatus, string> = {
   Pending: "bg-yellow-500/10 text-yellow-600",
+  Confirmed: "bg-emerald-500/10 text-emerald-600",
   Preparing: "bg-blue-500/10 text-blue-600",
   "Out for Delivery": "bg-purple-500/10 text-purple-600",
   Delivered: "bg-green-500/10 text-green-600",
@@ -398,6 +402,35 @@ const OrderManagement = () => {
     }
   };
 
+  const verifyPayment = async (order: OrderRecord, action: "verify" | "reject") => {
+    try {
+      const response = await fetch(`/api/orders/${order.id}/payment`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message ?? "Payment update failed.");
+      }
+
+      await fetchOrders();
+      setSelectedOrder(data);
+      showToast({
+        tone: action === "verify" ? "success" : "info",
+        title: action === "verify" ? "Payment verified" : "Payment rejected",
+        description: `${order.id} ${action === "verify" ? "confirmed" : "cancelled"}.`,
+      });
+    } catch (paymentError) {
+      console.error(paymentError);
+      const message =
+        paymentError instanceof Error ? paymentError.message : "Payment update failed.";
+      setError(message);
+      showToast({ tone: "error", title: "Payment update failed", description: message });
+    }
+  };
+
   const deleteOrder = async (id: string) => {
     const confirmed = window.confirm("Delete this order?");
     if (!confirmed) {
@@ -447,7 +480,7 @@ const OrderManagement = () => {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: 20 }}
               onSubmit={saveOrder}
-              className="relative w-full max-w-4xl rounded-[2.5rem] bg-white p-8 shadow-2xl"
+              className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] bg-white p-6 sm:p-8 shadow-2xl"
             >
               <h3 className="text-3xl font-bold text-dark">{editing ? "Edit Order" : "Create Order"}</h3>
               <p className="mt-2 text-sm text-muted">
@@ -602,7 +635,7 @@ const OrderManagement = () => {
               initial={{ opacity: 0, scale: 0.96, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: 20 }}
-              className="relative w-full max-w-5xl overflow-hidden rounded-[3rem] bg-white shadow-2xl"
+              className="relative w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-[3rem] bg-white shadow-2xl"
             >
               <div className="flex items-center justify-between border-b border-gray-100 p-8">
                 <div>
@@ -702,6 +735,54 @@ const OrderManagement = () => {
                         <span className="font-bold text-dark">{formatCurrency(Number(selectedOrder.deliveryFee ?? 0))}</span>
                       </div>
                     </div>
+                  </div>
+
+                  <div className="rounded-[2rem] bg-surface p-6">
+                    <p className="text-xs font-bold uppercase tracking-widest text-muted">Payment</p>
+                    <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+                      <span className="rounded-full bg-white px-3 py-2 font-bold text-dark">
+                        {selectedOrder.paymentMethod || "Cash on Delivery"}
+                      </span>
+                      {selectedOrder.paymentStatus && (
+                        <span
+                          className={`rounded-full px-3 py-2 text-xs font-bold ${
+                            selectedOrder.paymentStatus === "Verified"
+                              ? "bg-green-500/10 text-green-600"
+                              : selectedOrder.paymentStatus === "Rejected"
+                                ? "bg-red-500/10 text-red-500"
+                                : selectedOrder.paymentStatus === "Pending Verification"
+                                  ? "bg-amber-500/10 text-amber-600"
+                                  : "bg-slate-500/10 text-slate-600"
+                          }`}
+                        >
+                          {selectedOrder.paymentStatus}
+                        </span>
+                      )}
+                    </div>
+                    {selectedOrder.paymentReference && (
+                      <p className="mt-3 text-sm text-muted">
+                        Reference: <span className="font-mono font-bold text-dark">{selectedOrder.paymentReference}</span>
+                      </p>
+                    )}
+                    {selectedOrder.paymentVerifiedBy && (
+                      <p className="mt-1 text-xs text-muted">Handled by {selectedOrder.paymentVerifiedBy}</p>
+                    )}
+                    {selectedOrder.paymentStatus === "Pending Verification" && (
+                      <div className="mt-4 grid grid-cols-2 gap-3">
+                        <button
+                          onClick={() => verifyPayment(selectedOrder, "verify")}
+                          className="rounded-2xl bg-green-500 px-4 py-3 font-bold text-white transition hover:bg-green-600"
+                        >
+                          Verify Payment
+                        </button>
+                        <button
+                          onClick={() => verifyPayment(selectedOrder, "reject")}
+                          className="rounded-2xl bg-red-50 px-4 py-3 font-bold text-red-500 transition hover:bg-red-500 hover:text-white"
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   <div className="rounded-[2rem] bg-surface p-6">

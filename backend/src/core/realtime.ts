@@ -41,7 +41,10 @@ export const emitChange = (collection: string, payload: Record<string, unknown> 
 export const initRealtime = (server: HttpServer): IOServer => {
   io = new IOServer(server, {
     path: "/socket.io",
-    cors: { origin: true, credentials: true },
+    cors: {
+      origin: process.env.APP_ORIGIN ? process.env.APP_ORIGIN.split(",").map((o) => o.trim()) : true,
+      credentials: true,
+    },
   });
 
   io.on("connection", (socket) => {
@@ -60,12 +63,13 @@ export const startChangeStreams = () => {
 
   for (const { name, model } of WATCHED) {
     try {
-      const stream = model.watch([], { fullDocument: "updateLookup" });
+      const stream = model.watch([]);
       stream.on("change", (change: Record<string, any>) => {
+        // Broadcast only a non-sensitive change ping (NO document body / PII).
+        // Clients refetch via the access-controlled REST API.
         emitChange(name, {
           operationType: change.operationType,
           documentKey: change.documentKey ?? null,
-          fullDocument: change.fullDocument ?? null,
         });
       });
       stream.on("error", (error: Error) => {

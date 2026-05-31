@@ -165,6 +165,15 @@ export const connectToMongo = async () => {
     return true;
   }
 
+  // Observability: surface connection drops/recoveries (writes buffer in between).
+  mongoose.connection.on("disconnected", () =>
+    console.warn("MongoDB disconnected — operations will buffer until it reconnects."),
+  );
+  mongoose.connection.on("reconnected", () => console.log("MongoDB reconnected."));
+  mongoose.connection.on("error", (error) =>
+    console.error("MongoDB connection error:", (error as Error).message),
+  );
+
   try {
     await mongoose.connect(process.env.MONGODB_URI as string, {
       serverSelectionTimeoutMS: 10000,

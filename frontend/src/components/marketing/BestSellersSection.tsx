@@ -72,7 +72,7 @@ const BestSellersSection = () => {
                 <motion.button 
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
-                  className="absolute bottom-4 right-4 w-12 h-12 rounded-2xl bg-primary text-white flex items-center justify-center shadow-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  className="absolute bottom-4 right-4 w-12 h-12 rounded-2xl bg-primary text-white flex items-center justify-center shadow-xl opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300"
                 >
                   <Plus size={24} />
                 </motion.button>

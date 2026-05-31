@@ -2,12 +2,12 @@ import express from "express";
 import { requirePermission } from "../auth/auth.service";
 import { db } from "../../core/db";
 import { StaffModel } from "../../core/models";
-import { isMongoConnected } from "../../core/mongo";
+import { isMongoConfigured } from "../../core/mongo";
 
 const router = express.Router();
 
 router.get("/", requirePermission("hr:view"), async (req, res) => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const staff = await StaffModel.find().sort({ id: 1 }).lean();
     return res.json(staff);
   }
@@ -16,7 +16,7 @@ router.get("/", requirePermission("hr:view"), async (req, res) => {
 });
 
 router.post("/", requirePermission("hr:create"), async (req, res) => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const latest = await StaffModel.findOne().sort({ id: -1 }).select("id").lean();
     const newStaff = {
       ...req.body,
@@ -38,7 +38,7 @@ router.post("/", requirePermission("hr:create"), async (req, res) => {
 });
 
 router.patch("/:id", requirePermission("hr:update"), async (req, res) => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const updated = await StaffModel.findOneAndUpdate(
       { id: Number(req.params.id) },
       req.body,
@@ -69,7 +69,7 @@ router.patch("/:id", requirePermission("hr:update"), async (req, res) => {
 });
 
 router.delete("/:id", requirePermission("hr:delete"), async (req, res) => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const deleted = await StaffModel.findOneAndDelete({ id: Number(req.params.id) }).lean();
 
     if (!deleted) {

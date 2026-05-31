@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { 
+import {
   Calendar,
-  LayoutDashboard, 
+  Menu,
+  LayoutDashboard,
   Utensils, 
   Users, 
   ShoppingCart, 
@@ -80,7 +81,7 @@ const DASHBOARD_LINKS: SidebarLink[] = [
   { id: "bookings", name: "Bookings", icon: <Calendar size={20} />, allow: ["admin", "manager", "staff"] },
   { id: "menu", name: "Menu Management", icon: <Utensils size={20} />, allow: ["admin", "manager"] },
   { id: "accounts", name: "Accounts", icon: <DollarSign size={20} />, allow: ["admin", "manager"] },
-  { id: "hr", name: "HR & Workforce", icon: <Users size={20} />, allow: ["admin", "manager"] },
+  { id: "hr", name: "HR & Workforce", icon: <Users size={20} />, allow: ["admin", "manager", "hr"] },
   { id: "users", name: "User Management", icon: <UserPlus size={20} />, allow: ["admin"] },
   { id: "inventory", name: "Inventory & Stock", icon: <Package size={20} />, allow: ["admin", "manager"] },
   { id: "branches", name: "Branches", icon: <MapPin size={20} />, allow: ["admin"] },
@@ -98,6 +99,7 @@ const DASHBOARD_LINKS: SidebarLink[] = [
 const PANEL_META: Record<UserRole, { title: string; authority: string }> = {
   admin: { title: "Admin Panel", authority: "Admin Authority" },
   manager: { title: "Manager Panel", authority: "Operations Access" },
+  hr: { title: "HR Panel", authority: "Workforce Access" },
   rider: { title: "Rider Panel", authority: "Delivery Access" },
   staff: { title: "Staff Panel", authority: "Task-Based Access" },
   user: { title: "Customer Panel", authority: "Customer Access" },
@@ -105,21 +107,12 @@ const PANEL_META: Record<UserRole, { title: string; authority: string }> = {
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState<DashboardTabId>("dashboard");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const currentRole = user?.role ?? "admin";
   const staffWorkspaceRoles: UserRole[] = ["rider", "staff"];
 
-  if (staffWorkspaceRoles.includes(currentRole)) {
-    return <StaffWorkspace />;
-  }
-
-  if (currentRole === "manager") {
-    return <ManagerWorkspace />;
-  }
-
-  const panelMeta = PANEL_META[currentRole];
   const sidebarLinks = useMemo(
     () => DASHBOARD_LINKS.filter((link) => link.allow.includes(currentRole)),
     [currentRole],
@@ -165,37 +158,53 @@ const AdminDashboard = () => {
     };
   }, [currentRole]);
 
+  // Role-based shells — after all hooks (Rules of Hooks).
+  if (staffWorkspaceRoles.includes(currentRole)) {
+    return <StaffWorkspace />;
+  }
+  if (currentRole === "manager") {
+    return <ManagerWorkspace />;
+  }
+
+  const panelMeta = PANEL_META[currentRole];
+
   return (
     <div className="min-h-screen bg-surface flex">
-      {/* Sidebar */}
-      <motion.aside
-        initial={false}
-        animate={{ width: isSidebarOpen ? 280 : 80 }}
-        className="bg-dark text-white flex flex-col fixed h-full z-50 transition-all duration-300"
+      {/* Mobile overlay */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Sidebar (off-canvas drawer on mobile, fixed rail on desktop) */}
+      <aside
+        className={`fixed h-full w-[280px] z-50 bg-dark text-white flex flex-col transition-transform duration-300 ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0`}
       >
-              <div className="p-6 flex items-center gap-4 mb-8">
+        <div className="p-6 flex items-center gap-4 mb-2 shrink-0">
           <img
             src="/logo.jpg"
             alt="Chicken House"
             className="w-12 h-12 rounded-xl object-cover shrink-0 shadow-lg border border-white/10"
           />
-              {isSidebarOpen && (
-                <motion.span
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="font-display text-xl font-bold whitespace-nowrap"
-                >
-                  {panelMeta.title}
-                </motion.span>
-              )}
-            </div>
+          <span className="font-display text-xl font-bold whitespace-nowrap">
+            {panelMeta.title}
+          </span>
+        </div>
 
-        <nav className="flex-1 px-4 space-y-2">
+        <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-2">
           {sidebarLinks.map((link) => (
             <motion.button
               key={link.id}
               whileHover={{ x: 5 }}
-              onClick={() => setActiveTab(link.id)}
+              onClick={() => {
+                setActiveTab(link.id);
+                setIsSidebarOpen(false);
+              }}
               className={`w-full flex items-center gap-4 p-4 rounded-xl transition-all duration-300 ${
                 activeTab === link.id
                   ? "bg-primary text-white shadow-lg shadow-primary/20"
@@ -203,20 +212,12 @@ const AdminDashboard = () => {
               }`}
             >
               <div className="shrink-0">{link.icon}</div>
-              {isSidebarOpen && (
-                <motion.span
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="font-medium"
-                >
-                  {link.name}
-                </motion.span>
-              )}
+              <span className="font-medium">{link.name}</span>
             </motion.button>
           ))}
         </nav>
 
-        <div className="p-4 border-t border-white/10">
+        <div className="p-4 border-t border-white/10 shrink-0">
           <button
             onClick={() => {
               logout();
@@ -225,21 +226,22 @@ const AdminDashboard = () => {
             className="w-full flex items-center gap-4 p-4 rounded-xl text-white/60 hover:bg-red-500/10 hover:text-red-500 transition-all duration-300"
           >
             <LogOut size={20} />
-            {isSidebarOpen && <span className="font-medium">Logout</span>}
+            <span className="font-medium">Logout</span>
           </button>
         </div>
-      </motion.aside>
+      </aside>
 
       {/* Main Content */}
-      <main className={`flex-1 transition-all duration-300 ${isSidebarOpen ? "ml-[280px]" : "ml-[80px]"}`}>
+      <main className="flex-1 transition-all duration-300 md:ml-[280px]">
         {/* Top Header */}
-        <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 px-8 py-4 flex justify-between items-center">
+        <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 px-4 sm:px-8 py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-muted"
+              className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors text-muted"
+              aria-label="Toggle navigation menu"
             >
-              <ChevronRight className={`transition-transform duration-300 ${isSidebarOpen ? "rotate-180" : ""}`} />
+              <Menu size={24} />
             </button>
             <h1 className="text-2xl font-bold text-dark capitalize">{activeTab}</h1>
           </div>

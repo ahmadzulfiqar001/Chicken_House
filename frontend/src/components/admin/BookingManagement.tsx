@@ -151,7 +151,7 @@ const BookingManagement = () => {
               initial={{ opacity: 0, scale: 0.96, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: 20 }}
-              className="relative w-full max-w-4xl overflow-hidden rounded-[3rem] bg-white shadow-2xl"
+              className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-[3rem] bg-white shadow-2xl"
             >
               <div className="flex items-center justify-between border-b border-gray-100 p-8">
                 <div>

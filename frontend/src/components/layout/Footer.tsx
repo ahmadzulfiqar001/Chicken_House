@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { connectChannels, siteConfig, socialMediaLinks } from "../../lib/site";
+import { openCookieSettings } from "./CookieConsent";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -217,6 +218,13 @@ const Footer = () => {
                 {link.name}
               </Link>
             ))}
+            <button
+              type="button"
+              onClick={openCookieSettings}
+              className="font-mono text-[10px] uppercase tracking-widest text-white/20 transition-colors hover:text-white"
+            >
+              Cookie Settings
+            </button>
           </div>
         </div>
       </div>

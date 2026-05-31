@@ -171,7 +171,7 @@ const WhatsAppBot = () => {
             initial={{ opacity: 0, y: 80, scale: 0.7, transformOrigin: "bottom right" }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 80, scale: 0.7 }}
-            className="fixed bottom-28 right-4 z-[60] flex h-[38rem] w-[92vw] max-w-[430px] flex-col overflow-hidden rounded-[2.5rem] border border-white/10 bg-white shadow-2xl shadow-black/20 sm:bottom-32 sm:right-6 sm:h-[42rem]"
+            className="fixed bottom-28 right-4 z-[60] flex h-[min(38rem,calc(100dvh-9rem))] w-[92vw] max-w-[430px] flex-col overflow-hidden rounded-[2.5rem] border border-white/10 bg-white shadow-2xl shadow-black/20 sm:bottom-32 sm:right-6 sm:h-[min(42rem,calc(100dvh-10rem))]"
           >
             <div className="relative overflow-hidden bg-primary p-6 text-white">
               <div className="relative z-10 flex items-start justify-between gap-4">

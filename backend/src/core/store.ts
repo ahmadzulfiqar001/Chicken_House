@@ -2,10 +2,10 @@
  * Tiny repository layer over the dual store.
  * Each call uses MongoDB when connected (and a model exists for the collection),
  * otherwise the in-memory `db`. This keeps route handlers free of repeated
- * `isMongoConnected()` branching and guarantees both paths stay in sync.
+ * `isMongoConfigured()` branching and guarantees both paths stay in sync.
  */
 import { db } from "./db";
-import { isMongoConnected } from "./mongo";
+import { isMongoConfigured } from "./mongo";
 import {
   AttendanceModel,
   LeaveRequestModel,
@@ -50,7 +50,7 @@ const MODELS: Record<string, AnyModel> = {
   activityLogs: ActivityLogModel as never,
 };
 
-const useMongo = (name: string): boolean => isMongoConnected() && Boolean(MODELS[name]);
+const useMongo = (name: string): boolean => isMongoConfigured() && Boolean(MODELS[name]);
 
 const memList = (name: string): Doc[] => {
   const store = db as unknown as Record<string, Doc[]>;

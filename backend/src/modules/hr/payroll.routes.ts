@@ -2,7 +2,7 @@ import express from "express";
 import { requirePermission } from "../auth/auth.service";
 import { db } from "../../core/db";
 import { PayrollModel, AttendanceModel } from "../../core/models";
-import { isMongoConnected } from "../../core/mongo";
+import { isMongoConfigured } from "../../core/mongo";
 
 const router = express.Router();
 
@@ -10,7 +10,7 @@ const router = express.Router();
 router.get("/", requirePermission("hr:view"), async (req, res) => {
   const { staffId, month, year, status } = req.query;
   
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const filter: any = {};
     if (staffId) filter.staffId = Number(staffId);
     if (month) filter.month = month;
@@ -32,7 +32,14 @@ router.get("/", requirePermission("hr:view"), async (req, res) => {
 
 // Generate payroll for a staff member
 router.post("/generate", requirePermission("hr:create"), async (req, res) => {
-  const { staffId, staffName, month, year, baseSalary, bonus, deductions } = req.body;
+  const { staffId, staffName, month, year } = req.body;
+  const baseSalary = Number(req.body?.baseSalary);
+  const bonus = Number(req.body?.bonus ?? 0) || 0;
+  const deductions = Number(req.body?.deductions ?? 0) || 0;
+
+  if (!Number.isFinite(baseSalary) || baseSalary <= 0) {
+    return res.status(400).json({ message: "A valid base salary is required to generate payroll." });
+  }
 
   // Calculate attendance stats
   let presentDays = 0;
@@ -40,7 +47,7 @@ router.post("/generate", requirePermission("hr:create"), async (req, res) => {
   let leaveDays = 0;
   const workingDays = 26; // Standard working days
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const monthStr = String(month).padStart(2, '0');
     const startDate = `${year}-${monthStr}-01`;
     const endDate = `${year}-${monthStr}-31`;
@@ -73,7 +80,7 @@ router.post("/generate", requirePermission("hr:create"), async (req, res) => {
   const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   const monthName = monthNames[month - 1];
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const newPayroll = {
       id: `PAY-${Date.now()}`,
       staffId,
@@ -126,7 +133,7 @@ router.post("/generate", requirePermission("hr:create"), async (req, res) => {
 router.patch("/:id/pay", requirePermission("hr:update"), async (req, res) => {
   const { paymentMethod } = req.body;
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const payroll = await PayrollModel.findOne({ id: req.params.id });
     if (!payroll) {
       return res.status(404).json({ message: "Payroll record not found" });
@@ -154,7 +161,7 @@ router.patch("/:id/pay", requirePermission("hr:update"), async (req, res) => {
 
 // Update payroll
 router.patch("/:id", requirePermission("hr:update"), async (req, res) => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const updated = await PayrollModel.findOneAndUpdate(
       { id: req.params.id },
       req.body,
@@ -179,7 +186,7 @@ router.patch("/:id", requirePermission("hr:update"), async (req, res) => {
 
 // Delete payroll
 router.delete("/:id", requirePermission("hr:delete"), async (req, res) => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const deleted = await PayrollModel.findOneAndDelete({ id: req.params.id }).lean();
     if (!deleted) {
       return res.status(404).json({ message: "Payroll record not found" });

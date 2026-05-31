@@ -88,7 +88,7 @@ const TestimonialsSection = () => {
           </div>
         </div>
         
-        <div className="relative h-[600px] flex items-center justify-center perspective-1000">
+        <div className="relative h-auto min-h-[480px] md:h-[600px] flex items-center justify-center perspective-1000">
           <AnimatePresence initial={false} custom={direction}>
             <motion.div
               key={currentIndex}
@@ -103,7 +103,7 @@ const TestimonialsSection = () => {
                 scale: { duration: 0.5 },
                 rotateY: { duration: 0.5 }
               }}
-              className="absolute w-full max-w-4xl glass-morphism p-12 md:p-20 rounded-[4rem] border-white/10 relative group hover:bg-white/10 transition-all duration-500 shadow-2xl"
+              className="absolute w-full max-w-4xl glass-morphism p-6 sm:p-10 md:p-20 rounded-[3rem] md:rounded-[4rem] border-white/10 relative group hover:bg-white/10 transition-all duration-500 shadow-2xl"
             >
               <div className="absolute -top-10 -left-10 w-24 h-24 bg-accent rounded-full flex items-center justify-center shadow-2xl z-20">
                 <Quote size={40} className="text-dark" fill="currentColor" />
@@ -115,7 +115,7 @@ const TestimonialsSection = () => {
                 ))}
               </div>
               
-              <p className="text-white text-3xl md:text-5xl font-light italic leading-tight mb-16 font-serif tracking-tight">
+              <p className="text-white text-xl sm:text-2xl md:text-5xl font-light italic leading-tight mb-8 md:mb-16 font-serif tracking-tight">
                 "{testimonials[currentIndex].text}"
               </p>
               

@@ -14,7 +14,7 @@ import {
   verifyPassword,
 } from "./auth.service";
 import { UserAccountModel } from "../../core/models";
-import { isMongoConnected } from "../../core/mongo";
+import { isMongoConfigured } from "../../core/mongo";
 
 const router = express.Router();
 
@@ -103,7 +103,7 @@ router.post("/signup", async (req, res) => {
     },
   };
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     await UserAccountModel.create(accountRecord);
   } else {
     db.userAccounts.push(accountRecord);

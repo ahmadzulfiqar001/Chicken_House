@@ -226,7 +226,7 @@ const HRManagement = () => {
         </div>
       </div>
 
-      <div className="rounded-[3rem] border border-gray-50 bg-white p-10 shadow-xl shadow-dark/5">
+      <div className="rounded-3xl lg:rounded-[3rem] border border-gray-50 bg-white p-4 sm:p-6 lg:p-10 shadow-xl shadow-dark/5">
         <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <h2 className="text-2xl font-bold text-dark">Workforce Directory</h2>
           <div className="flex w-full flex-wrap gap-4 md:w-auto">

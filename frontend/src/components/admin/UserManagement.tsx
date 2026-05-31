@@ -9,7 +9,7 @@ type UserAccount = {
   id: string;
   name: string;
   email: string;
-  role: "admin" | "manager" | "rider" | "staff" | "user";
+  role: "admin" | "manager" | "hr" | "rider" | "staff" | "user";
   status: "Active" | "Suspended" | "Pending";
   phone: string;
   memberSince: string;
@@ -182,7 +182,7 @@ const UserManagement = () => {
     total: users.length,
     admins: users.filter(u => u.role === "admin").length,
     managers: users.filter(u => u.role === "manager").length,
-    staff: users.filter(u => ["manager", "rider", "staff"].includes(u.role)).length,
+    staff: users.filter(u => ["manager", "hr", "rider", "staff"].includes(u.role)).length,
     customers: users.filter(u => u.role === "user").length,
     active: users.filter(u => u.status === "Active").length,
   };
@@ -191,6 +191,7 @@ const UserManagement = () => {
     switch (role) {
       case "admin": return "bg-red-500/10 text-red-500";
       case "manager": return "bg-blue-500/10 text-blue-500";
+      case "hr": return "bg-amber-500/10 text-amber-600";
       case "rider": return "bg-cyan-500/10 text-cyan-600";
       case "staff": return "bg-purple-500/10 text-purple-500";
       case "user": return "bg-slate-500/10 text-slate-600";
@@ -203,6 +204,7 @@ const UserManagement = () => {
       case "user": return "Customer";
       case "staff": return "General Staff";
       case "rider": return "Rider";
+      case "hr": return "HR";
       case "manager": return "Manager";
       case "admin": return "Admin";
       default: return role;
@@ -247,6 +249,7 @@ const UserManagement = () => {
                   <option value="user">User (Customer)</option>
                   <option value="staff">General Staff</option>
                   <option value="rider">Rider</option>
+                  <option value="hr">HR / Human Resources</option>
                   <option value="manager">Manager</option>
                   <option value="admin">Admin</option>
                 </select>
@@ -334,6 +337,7 @@ const UserManagement = () => {
               <option value="All">All Roles</option>
               <option value="admin">Admin</option>
               <option value="manager">Manager</option>
+              <option value="hr">HR</option>
               <option value="rider">Rider</option>
               <option value="staff">General Staff</option>
               <option value="user">Customer</option>

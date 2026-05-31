@@ -558,7 +558,7 @@ const InventoryManagement = () => {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.97, y: 24 }}
               onSubmit={saveInventoryItem}
-              className="relative z-10 w-full max-w-4xl rounded-[2.5rem] bg-white p-8 shadow-2xl"
+              className="relative z-10 w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] bg-white p-6 sm:p-8 shadow-2xl"
             >
               <div className="mb-8 flex items-start justify-between gap-4">
                 <div>
@@ -661,7 +661,7 @@ const InventoryManagement = () => {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.97, y: 24 }}
               onSubmit={saveVendorRecord}
-              className="relative z-10 w-full max-w-5xl rounded-[2.5rem] bg-white p-8 shadow-2xl"
+              className="relative z-10 w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] bg-white p-6 sm:p-8 shadow-2xl"
             >
               <div className="mb-8 flex items-start justify-between gap-4">
                 <div>

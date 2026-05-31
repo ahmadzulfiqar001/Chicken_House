@@ -1,8 +1,36 @@
+import crypto from "crypto";
+
 type OutboundMessage =
   | { type: "text"; text: string }
   | { type: "image"; text: string; imageUrl: string };
 
 const GRAPH_API_VERSION = "v22.0";
+
+let warnedNoSecret = false;
+
+/**
+ * Verify Meta's X-Hub-Signature-256 over the raw request body using the app
+ * secret (META_WA_APP_SECRET). If no secret is configured, verification is
+ * skipped (dev / not-yet-configured) — set the secret in production.
+ */
+export const verifyWhatsAppSignature = (rawBody: Buffer | undefined, signature?: string): boolean => {
+  const secret = process.env.META_WA_APP_SECRET?.trim();
+
+  if (!secret) {
+    if (!warnedNoSecret) {
+      console.warn("WhatsApp webhook signature verification disabled — set META_WA_APP_SECRET to enable it.");
+      warnedNoSecret = true;
+    }
+    return true;
+  }
+
+  if (!rawBody || !signature) return false;
+
+  const expected = "sha256=" + crypto.createHmac("sha256", secret).update(rawBody).digest("hex");
+  const sigBuf = Buffer.from(signature);
+  const expBuf = Buffer.from(expected);
+  return sigBuf.length === expBuf.length && crypto.timingSafeEqual(sigBuf, expBuf);
+};
 
 const getConfig = () => ({
   accessToken: process.env.META_WA_ACCESS_TOKEN,
