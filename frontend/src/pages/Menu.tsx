@@ -627,7 +627,7 @@ const MenuPage = () => {
                         aria-hidden="true"
                         animate={{ y: activeIndicatorOffset }}
                         transition={{ type: "spring", stiffness: 280, damping: 26 }}
-                        className="pointer-events-none absolute inset-x-0 top-0 h-[44px] rounded-[1.1rem] bg-[linear-gradient(135deg,rgba(127,18,21,0.96),rgba(151,36,24,0.95),rgba(216,168,47,0.92))] shadow-[0_18px_28px_rgba(127,18,21,0.18)]"
+                        className="pointer-events-none absolute left-3 right-3 top-3 h-[44px] rounded-[1.1rem] bg-[linear-gradient(135deg,rgba(127,18,21,0.96),rgba(151,36,24,0.95),rgba(216,168,47,0.92))] shadow-[0_18px_28px_rgba(127,18,21,0.18)]"
                       />
                     ) : null}
                     {categories.map((category, index) => {
