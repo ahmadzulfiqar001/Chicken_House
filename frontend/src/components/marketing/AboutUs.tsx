@@ -44,7 +44,7 @@ const AboutUs = () => {
               </h2>
             </div>
             <p className="text-lg leading-relaxed text-muted">
-              Chicken House serves Renala Khurd from a landmark location near Mitchell&apos;s Fair Price Shop on GT Road. The focus is simple: flavorful food, clean presentation, comfortable seating, and a digital experience that makes ordering and booking easy.
+              Chicken House serves Renala Khurd from a landmark location near Mitchell&apos;s Main Gate and Railways Phatak. The focus is simple: flavorful food, clean presentation, comfortable seating, and a digital experience that makes ordering and booking easy.
             </p>
             <p className="text-lg leading-relaxed text-muted">
               From dine-in and takeaway to delivery, events, and customer support, the brand is designed to feel professional, welcoming, and ready for real restaurant operations.
@@ -71,8 +71,8 @@ const AboutUs = () => {
           >
             <div className="relative z-10 overflow-hidden rounded-[3rem] shadow-2xl">
               <img
-                src={siteConfig.imageFallback}
-                alt="Chicken House restaurant ambiance"
+                src={siteConfig.aboutAmbienceImage}
+                alt="Chicken House restaurant location"
                 className="h-[600px] w-full object-cover"
               />
             </div>

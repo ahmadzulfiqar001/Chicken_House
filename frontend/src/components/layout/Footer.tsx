@@ -10,10 +10,14 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { connectChannels, siteConfig, socialMediaLinks } from "../../lib/site";
-import { openCookieSettings } from "./CookieConsent";
 
 const Footer = () => {
-  const currentYear = new Date().getFullYear();
+  const extendedSiteConfig = siteConfig as typeof siteConfig & {
+    phoneSecondary?: string;
+    deliveryHours?: string;
+  };
+  const secondaryPhone = extendedSiteConfig.phoneSecondary?.trim();
+  const deliveryHours = extendedSiteConfig.deliveryHours ?? siteConfig.hours;
 
   const footerLinks = [
     { name: "About Us", href: "/about" },
@@ -126,7 +130,7 @@ const Footer = () => {
             </h2>
 
             <p className="max-w-xl text-xl font-light leading-relaxed text-white/50">
-              Chicken House serves dine-in, takeaway, delivery, and special event bookings near Mitchell&apos;s Fair Price Shop on GT Road, Renala Khurd.
+              Chicken House serves dine-in, takeaway, delivery, and special event bookings near Mitchell&apos;s Main Gate and Railways Phatak, Renala Khurd.
             </p>
           </div>
 
@@ -155,13 +159,13 @@ const Footer = () => {
 
             <div>
               <span className="mb-8 block font-mono text-[10px] uppercase tracking-[0.5em] text-accent">
-                Contact
+                Contact Us
               </span>
               <ul className="space-y-8">
                 <li className="flex items-start gap-6">
                   <MapPin size={24} className="shrink-0 text-accent" />
                   <a href={siteConfig.googleMapsUrl} target="_blank" rel="noreferrer" className="text-lg font-light leading-relaxed text-white/60 hover:text-white">
-                    {siteConfig.addressLine1}, {siteConfig.city}
+                    {siteConfig.addressLine1}, {siteConfig.addressLine2}
                   </a>
                 </li>
                 <li className="flex items-center gap-6">
@@ -170,6 +174,14 @@ const Footer = () => {
                     {siteConfig.phone}
                   </a>
                 </li>
+                {secondaryPhone ? (
+                  <li className="flex items-center gap-6">
+                    <Phone size={24} className="shrink-0 text-accent" />
+                    <a href={`tel:${secondaryPhone.replace(/\s+/g, "")}`} className="text-lg font-light text-white/60 hover:text-white">
+                      {secondaryPhone}
+                    </a>
+                  </li>
+                ) : null}
                 <li className="flex items-center gap-6">
                   <Mail size={24} className="shrink-0 text-accent" />
                   <a href={`mailto:${siteConfig.email}`} className="text-lg font-light text-white/60 hover:text-white">
@@ -178,7 +190,17 @@ const Footer = () => {
                 </li>
               </ul>
 
-              <div className="mt-16">
+              <div className="mt-12">
+                <span className="mb-5 block font-mono text-[10px] uppercase tracking-[0.5em] text-accent">
+                  Opening Hours
+                </span>
+                <div className="space-y-3 text-lg font-light text-white/60">
+                  <p>Mon-Sun: {siteConfig.hours}</p>
+                  <p>Delivery: {deliveryHours}</p>
+                </div>
+              </div>
+
+              <div className="mt-12">
                 <span className="mb-6 block font-mono text-[10px] uppercase tracking-[0.5em] text-accent">
                   Connect
                 </span>
@@ -205,7 +227,7 @@ const Footer = () => {
           <div className="flex items-center gap-4">
             <span className="h-2 w-2 rounded-full bg-accent animate-pulse" />
             <p className="font-mono text-[10px] uppercase tracking-widest text-white/40">
-              © {currentYear} Chicken House. Built for real restaurant service.
+              Copyright 2026 ChickenHouse. All rights reserved.
             </p>
           </div>
           <div className="flex items-center gap-12">
@@ -218,13 +240,6 @@ const Footer = () => {
                 {link.name}
               </Link>
             ))}
-            <button
-              type="button"
-              onClick={openCookieSettings}
-              className="font-mono text-[10px] uppercase tracking-widest text-white/20 transition-colors hover:text-white"
-            >
-              Cookie Settings
-            </button>
           </div>
         </div>
       </div>
