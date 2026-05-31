@@ -39,6 +39,7 @@ const Navbar = () => {
     { name: "Gallery", icon: <Image size={18} />, href: "/gallery" },
     { name: "Services", icon: <Briefcase size={18} />, href: "/services" },
     { name: "Booking", icon: <Calendar size={18} />, href: "/booking" },
+    { name: "Careers", icon: <Briefcase size={18} />, href: "/careers" },
     { name: "Contact", icon: <Phone size={18} />, href: "/contact" },
   ];
 

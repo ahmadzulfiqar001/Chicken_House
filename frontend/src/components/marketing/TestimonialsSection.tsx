@@ -47,11 +47,24 @@ const initialTestimonials = [
   }
 ];
 
+const avatarImages = initialTestimonials.map((item) => item.image);
+
+const mapReview = (review, index) => ({
+  name: review.customerName,
+  role: review.source === "website" ? "Verified Guest" : (review.source || "Guest Review"),
+  text: review.comment,
+  rating: review.rating || 5,
+  image: avatarImages[index % avatarImages.length]
+});
+
 const TestimonialsSection = () => {
   const [testimonials, setTestimonials] = useState(initialTestimonials);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const [reviewForm, setReviewForm] = useState({ name: "", text: "" });
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState(null);
 
   const nextTestimonial = () => {
     setDirection(1);
@@ -64,6 +77,26 @@ const TestimonialsSection = () => {
   };
 
   useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const response = await fetch("/api/reviews?limit=12");
+        const data = await response.json();
+
+        if (response.ok && Array.isArray(data) && data.length > 0) {
+          setTestimonials(data.map(mapReview));
+          setCurrentIndex(0);
+        }
+      } catch (error) {
+        console.error("Failed to load reviews", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReviews();
+  }, []);
+
+  useEffect(() => {
     const timer = setInterval(() => {
       setDirection(1);
       setCurrentIndex((prev) => (prev + 1) % testimonials.length);
@@ -71,28 +104,43 @@ const TestimonialsSection = () => {
     return () => clearInterval(timer);
   }, [testimonials.length]);
 
-  const handleReviewSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleReviewSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const name = reviewForm.name.trim();
     const text = reviewForm.text.trim();
 
-    if (!name || !text) {
+    if (!name || !text || submitting) {
       return;
     }
 
-    setTestimonials((items) => [
-      ...items,
-      {
-        name,
-        text,
-        role: "Guest Review",
-        rating: 5,
-        image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80"
+    setSubmitting(true);
+    setFeedback(null);
+
+    try {
+      const response = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ customerName: name, comment: text, rating: 5 })
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        setFeedback({ type: "error", message: data?.message || "Could not post your review. Please try again." });
+        return;
       }
-    ]);
-    setDirection(1);
-    setCurrentIndex(testimonials.length);
-    setReviewForm({ name: "", text: "" });
+
+      const newTestimonial = mapReview(data, 0);
+      setTestimonials((items) => [newTestimonial, ...items]);
+      setDirection(-1);
+      setCurrentIndex(0);
+      setReviewForm({ name: "", text: "" });
+      setFeedback({ type: "success", message: "Thanks for sharing! Your review now appears in the carousel." });
+    } catch (error) {
+      console.error("Failed to post review", error);
+      setFeedback({ type: "error", message: "Could not post your review. Please try again." });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const variants = {
@@ -134,11 +182,13 @@ const TestimonialsSection = () => {
           </div>
           <div className="flex items-center gap-4">
             <div className="w-24 h-[1px] bg-white/20" />
-            <span className="text-white/40 font-mono text-xs uppercase tracking-widest">Scroll to explore</span>
+            <span className="text-white/40 font-mono text-xs uppercase tracking-widest">
+              {loading ? "Loading reviews..." : "Scroll to explore"}
+            </span>
           </div>
         </div>
         
-        <div className="grid gap-8 lg:grid-cols-[1fr,360px]">
+        <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
           <div className="relative h-[460px] flex items-center justify-center perspective-1000">
             <AnimatePresence initial={false} custom={direction}>
               <motion.div
@@ -238,11 +288,21 @@ const TestimonialsSection = () => {
               rows={5}
               className="mt-4 w-full resize-none rounded-2xl border border-white/10 bg-black/20 px-5 py-4 text-white outline-none placeholder:text-white/35 focus:border-accent"
             />
-            <button type="submit" className="mt-5 inline-flex w-full items-center justify-center gap-3 rounded-2xl bg-accent px-6 py-4 font-bold text-dark transition hover:bg-white">
-              Post Review
+            <button
+              type="submit"
+              disabled={submitting}
+              className="mt-5 inline-flex w-full items-center justify-center gap-3 rounded-2xl bg-accent px-6 py-4 font-bold text-dark transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {submitting ? "Posting..." : "Post Review"}
               <Send size={18} />
             </button>
-            <p className="mt-4 text-sm leading-6 text-white/45">Your review appears instantly on this page for preview.</p>
+            {feedback ? (
+              <p className={`mt-4 text-sm leading-6 ${feedback.type === "error" ? "text-red-300" : "text-accent"}`}>
+                {feedback.message}
+              </p>
+            ) : (
+              <p className="mt-4 text-sm leading-6 text-white/45">Your review appears instantly on this page for preview.</p>
+            )}
           </form>
         </div>
       </div>

@@ -350,4 +350,61 @@ router.post("/wallet/topup", async (req, res) => {
   });
 });
 
+// Redeem a loyalty reward — deducts points server-side and records the redemption.
+router.post("/redeem", async (req, res) => {
+  const authUser = getRequestAuthUser(req);
+
+  if (!authUser) {
+    return res.status(401).json({ message: "Please sign in to continue." });
+  }
+
+  const rewardName = String(req.body?.rewardName ?? req.body?.reward ?? "").trim();
+  const pointsCost = Math.round(Number(req.body?.pointsCost ?? req.body?.points ?? 0));
+
+  if (!rewardName) {
+    return res.status(400).json({ message: "Please choose a reward to redeem." });
+  }
+  if (!Number.isFinite(pointsCost) || pointsCost <= 0) {
+    return res.status(400).json({ message: "Invalid reward cost." });
+  }
+
+  const transaction = {
+    id: `RDM-${Date.now()}`,
+    type: "Redeem",
+    amount: pointsCost,
+    reason: `Redeemed reward: ${rewardName}`,
+    time: new Date().toISOString(),
+  };
+
+  if (isMongoConfigured()) {
+    const customer = await ensureCustomerDocument(authUser.email, authUser.name, authUser.phone);
+    if (customer.loyaltyPoints < pointsCost) {
+      return res.status(400).json({ message: "You don't have enough points for this reward." });
+    }
+    customer.loyaltyPoints -= pointsCost;
+    customer.walletTransactions.unshift(transaction);
+    customer.activity.unshift(`Redeemed "${rewardName}" for ${pointsCost} points.`);
+    await customer.save();
+    return res.status(201).json({
+      loyaltyPoints: customer.loyaltyPoints,
+      transaction,
+      profile: customer.toObject(),
+    });
+  }
+
+  const customer = ensureCustomer(authUser.email, authUser.name, authUser.phone);
+  if (customer.loyaltyPoints < pointsCost) {
+    return res.status(400).json({ message: "You don't have enough points for this reward." });
+  }
+  customer.loyaltyPoints -= pointsCost;
+  customer.walletTransactions.unshift(transaction);
+  customer.activity.unshift(`Redeemed "${rewardName}" for ${pointsCost} points.`);
+
+  return res.status(201).json({
+    loyaltyPoints: customer.loyaltyPoints,
+    transaction,
+    profile: customer,
+  });
+});
+
 export default router;

@@ -1,4 +1,5 @@
 import express from "express";
+import crypto from "crypto";
 import {
   getAuthenticatedUser,
   getRequestAuthUser,
@@ -10,6 +11,7 @@ import { priceOrderDetails, reserveInventoryForOrder } from "../menu/menu.servic
 import { CustomerModel, FinanceModel, OrderModel, ReviewModel } from "../../core/models";
 import { isMongoConfigured } from "../../core/mongo";
 import { calculateDeliveryFee, validateOrderPayload } from "./orders.pricing";
+import { deliverNotification } from "../notifications/notify.service";
 
 const router = express.Router();
 const validStatuses = ["Pending", "Confirmed", "Preparing", "Out for Delivery", "Delivered", "Cancelled"];
@@ -38,6 +40,33 @@ const recordSaleCredit = async (orderId: string, total: number) => {
   } else {
     db.finance.unshift(tx);
   }
+};
+
+// Email the customer when their order is approved (payment verified) or cancelled.
+const emailOrderDecision = async (order: Record<string, unknown>, action: string, note: string) => {
+  const email = String(order.customerEmail ?? "").trim();
+  if (!email) return null;
+
+  const id = String(order.id ?? "");
+  const name = String(order.customer ?? "there");
+  const total = Number(order.total ?? 0);
+
+  const subject =
+    action === "verify"
+      ? `Your Chicken House order ${id} is confirmed ✅`
+      : `Your Chicken House order ${id} was cancelled`;
+
+  const message =
+    action === "verify"
+      ? `Hi ${name},\n\nGood news — your payment for order ${id} (Rs. ${total.toLocaleString()}) has been verified and your order is now confirmed. Our kitchen has started preparing it, and you can track it live on our website.${note ? `\n\nNote from our team: ${note}` : ""}\n\nThank you for ordering with Chicken House!`
+      : `Hi ${name},\n\nWe're sorry — the payment for order ${id} (Rs. ${total.toLocaleString()}) could not be verified, so the order has been cancelled. If you have already paid or believe this is a mistake, please reply to this email or contact us and we'll make it right.${note ? `\n\nNote: ${note}` : ""}\n\nThank you,\nChicken House Team`;
+
+  return deliverNotification({
+    channel: "email",
+    title: subject,
+    message,
+    recipients: [{ email, name }],
+  });
 };
 
 const buildTimeline = (status: string) => {
@@ -207,7 +236,9 @@ router.post("/", async (req, res) => {
   }
 
   const orderRecord = {
-    id: `ORD-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    // High-entropy random suffix so order IDs can't be enumerated/guessed
+    // (the tracking endpoint is public by design).
+    id: `ORD-${Date.now()}-${crypto.randomBytes(6).toString("hex")}`,
     customer,
     customerEmail,
     customerPhone,
@@ -384,6 +415,7 @@ router.patch("/:id/payment", requireRole(["admin", "manager"]), async (req, res)
     if (action === "verify" && wasPending) {
       await recordSaleCredit(String(order.id), Number(order.total ?? 0));
     }
+    await emailOrderDecision(order.toObject(), action, note);
     return res.json(order.toObject());
   }
 
@@ -396,6 +428,7 @@ router.patch("/:id/payment", requireRole(["admin", "manager"]), async (req, res)
   if (action === "verify" && wasPending) {
     await recordSaleCredit(String(db.orders[index].id), Number(db.orders[index].total ?? 0));
   }
+  await emailOrderDecision(db.orders[index], action, note);
   return res.json(db.orders[index]);
 });
 
@@ -464,8 +497,19 @@ router.post("/:id/feedback", async (req, res) => {
 });
 
 router.patch("/:id", requirePermission("orders:update"), async (req, res) => {
+  const actor = getRequestAuthUser(req);
+  const isManagerOrAdmin = actor?.role === "admin" || actor?.role === "manager";
   const status = String(req.body?.status ?? "").trim();
-  const nextPayload = { ...req.body } as Record<string, unknown>;
+
+  if (status && !validStatuses.includes(status)) {
+    return res.status(400).json({ message: "Invalid order status." });
+  }
+
+  // Operational fields any orders:update role (incl. staff/rider) may change.
+  const nextPayload: Record<string, unknown> = {};
+  if (status) nextPayload.status = status;
+  if (req.body?.assignedRole !== undefined) nextPayload.assignedRole = String(req.body.assignedRole);
+  if (req.body?.notes !== undefined) nextPayload.notes = String(req.body.notes);
 
   if (req.body?.assignedStaffId !== undefined) {
     const assignedStaffId = Math.max(0, Number(req.body.assignedStaffId));
@@ -474,8 +518,23 @@ router.patch("/:id", requirePermission("orders:update"), async (req, res) => {
     nextPayload.assignedStaffName = assignedStaff?.name ?? "";
   }
 
-  if (status && !validStatuses.includes(status)) {
-    return res.status(400).json({ message: "Invalid order status." });
+  // Admin/manager may also edit order content (customer info, items, money, type).
+  // SECURITY: payment-verification state (paymentStatus / paymentVerifiedBy /
+  // paymentVerifiedAt) is NEVER set here for ANY role — it changes only via the
+  // admin/manager PATCH /:id/payment route. This stops staff/rider (who also hold
+  // orders:update) from forging a "Verified" payment or rewriting the verifier.
+  if (isManagerOrAdmin) {
+    for (const field of ["customer", "customerEmail", "customerPhone", "deliveryAddress", "items", "type", "paymentMethod", "paymentReference"]) {
+      if (req.body?.[field] !== undefined) nextPayload[field] = String(req.body[field]);
+    }
+    if (Array.isArray(req.body?.details)) nextPayload.details = req.body.details;
+    if (req.body?.subtotal !== undefined) nextPayload.subtotal = Math.max(0, Number(req.body.subtotal));
+    if (req.body?.deliveryFee !== undefined) nextPayload.deliveryFee = Math.max(0, Number(req.body.deliveryFee));
+    if (req.body?.total !== undefined) nextPayload.total = Math.max(0, Number(req.body.total));
+  }
+
+  if (Object.keys(nextPayload).length === 0) {
+    return res.status(400).json({ message: "No editable fields provided." });
   }
 
   if (isMongoConfigured()) {

@@ -1,8 +1,9 @@
 import { motion } from "motion/react";
 import { Star, ArrowRight, ChevronRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const SpecialtiesSection = () => {
+  const navigate = useNavigate();
   const specialties = [
     {
       id: "CH-001",
@@ -98,9 +99,11 @@ const SpecialtiesSection = () => {
                 
                 {/* Quick View Overlay */}
                 <div className="absolute inset-0 bg-dark/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
-                  <motion.button 
+                  <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
+                    onClick={() => navigate("/menu")}
+                    aria-label={`Quick view ${item.name} on the menu`}
                     className="px-6 py-3 bg-white text-dark font-bold rounded-full text-sm uppercase tracking-widest"
                   >
                     Quick View

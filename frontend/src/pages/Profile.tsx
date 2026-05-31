@@ -268,13 +268,33 @@ const ProfilePage = () => {
 
   // Points ko redeem karne ki functionality
   const [redeemSuccess, setRedeemSuccess] = useState("");
-  const redeemReward = (rewardName: string, pointsCost: number) => {
+  const redeemReward = async (rewardName: string, pointsCost: number) => {
     if (!customer || customer.loyaltyPoints < pointsCost) return;
-    setCustomer((prev) =>
-      prev ? { ...prev, loyaltyPoints: prev.loyaltyPoints - pointsCost } : prev,
-    );
-    setRedeemSuccess(`"${rewardName}" successfully redeemed! Check your orders for confirmation.`);
-    setTimeout(() => setRedeemSuccess(""), 4000);
+    setError("");
+
+    try {
+      const response = await fetch("/api/customer/redeem", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rewardName, pointsCost }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message ?? "Reward could not be redeemed.");
+
+      // Server is the source of truth: merge the returned profile / points.
+      setCustomer((prev) =>
+        data.profile
+          ? data.profile
+          : prev
+            ? { ...prev, loyaltyPoints: data.loyaltyPoints ?? prev.loyaltyPoints }
+            : prev,
+      );
+      setRedeemSuccess(`"${rewardName}" successfully redeemed! Check your orders for confirmation.`);
+      setTimeout(() => setRedeemSuccess(""), 4000);
+    } catch (redeemError) {
+      console.error(redeemError);
+      setError(redeemError instanceof Error ? redeemError.message : "Unable to redeem this reward right now.");
+    }
   };
 
   const addWishlistItem = async (item: MenuSuggestion) => {

@@ -1,7 +1,9 @@
 import { motion } from "motion/react";
-import { ShoppingCart, Star, Plus } from "lucide-react";
+import { Star, Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const BestSellersSection = () => {
+  const navigate = useNavigate();
   const bestSellers = [
     {
       id: "BS-001",
@@ -69,9 +71,11 @@ const BestSellersSection = () => {
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   referrerPolicy="no-referrer"
                 />
-                <motion.button 
+                <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
+                  onClick={() => navigate("/menu")}
+                  aria-label={`Order ${item.name} from the menu`}
                   className="absolute bottom-4 right-4 w-12 h-12 rounded-2xl bg-primary text-white flex items-center justify-center shadow-xl opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300"
                 >
                   <Plus size={24} />

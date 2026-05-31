@@ -1,16 +1,80 @@
-import { useState } from "react";
-import { motion } from "motion/react";
-import { ShoppingCart, Package, Truck, CreditCard, Search, Filter, Download, Plus, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ShoppingCart, Package, Truck, CreditCard, Search, Filter, Download, ArrowUpRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+const formatCurrency = (value) => `Rs. ${Number(value ?? 0).toLocaleString()}`;
 
 const EcommerceModule = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const onlineOrders = [
-    { id: "ORD-E001", customer: "Ahmed Raza", items: 3, total: "Rs. 2,450", status: "Processing", payment: "EasyPaisa", time: "10 mins ago" },
-    { id: "ORD-E002", customer: "Sana Malik", items: 1, total: "Rs. 550", status: "Shipped", payment: "COD", time: "25 mins ago" },
-    { id: "ORD-E003", customer: "Zubair Khan", items: 5, total: "Rs. 4,800", status: "Delivered", payment: "Bank Transfer", time: "1 hour ago" },
-    { id: "ORD-E004", customer: "Farhan Ali", items: 2, total: "Rs. 1,200", status: "Cancelled", payment: "JazzCash", time: "2 hours ago" },
-  ];
+  const fetchOrders = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/orders");
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message ?? "Failed to load orders.");
+      }
+      setOrders(data);
+    } catch (fetchError) {
+      console.error(fetchError);
+      setError("Online orders could not be loaded right now.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void fetchOrders();
+  }, []);
+
+  const filteredOrders = orders.filter((order) => {
+    const q = searchTerm.trim().toLowerCase();
+    if (!q) return true;
+    return order.id.toLowerCase().includes(q) || (order.customer ?? "").toLowerCase().includes(q);
+  });
+
+  const stats = useMemo(() => {
+    const totalOrders = orders.length;
+    const revenue = orders.reduce((sum, order) => sum + Number(order.total ?? 0), 0);
+    const pending = orders.filter((order) => order.status === "Pending").length;
+    const inTransit = orders.filter((order) => order.status === "Out for Delivery").length;
+    return { totalOrders, revenue, pending, inTransit };
+  }, [orders]);
+
+  const exportCsv = () => {
+    const header = ["Order ID", "Customer", "Items", "Total", "Status", "Payment", "Time"];
+    const rows = filteredOrders.map((order) => [
+      order.id,
+      order.customer ?? "",
+      order.items ?? "",
+      String(order.total ?? 0),
+      order.status ?? "",
+      order.paymentMethod ?? "",
+      order.time ?? "",
+    ]);
+
+    const csv = [header, ...rows]
+      .map((row) =>
+        row
+          .map((cell) => `"${String(cell ?? "").replaceAll(`"`, `""`)}"`)
+          .join(","),
+      )
+      .join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "chicken-house-online-orders.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="space-y-8">
@@ -20,13 +84,12 @@ const EcommerceModule = () => {
           <p className="text-muted">Manage online orders, shipping, and delivery.</p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <button className="px-6 py-3 bg-white text-dark rounded-xl font-bold flex items-center gap-2 shadow-sm border border-gray-100">
+          <button
+            onClick={exportCsv}
+            className="px-6 py-3 bg-white text-dark rounded-xl font-bold flex items-center gap-2 shadow-sm border border-gray-100"
+          >
             <Download size={20} />
             Export Orders
-          </button>
-          <button className="px-6 py-3 bg-primary text-white rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-primary/20">
-            <Plus size={20} />
-            Add Manual Order
           </button>
         </div>
       </div>
@@ -39,12 +102,12 @@ const EcommerceModule = () => {
             </div>
             <div>
               <p className="text-sm font-bold text-muted uppercase tracking-widest">Total Orders</p>
-              <h3 className="text-2xl font-bold text-dark">1,240</h3>
+              <h3 className="text-2xl font-bold text-dark">{stats.totalOrders.toLocaleString()}</h3>
             </div>
           </div>
           <div className="flex items-center gap-2 text-green-500 text-sm font-bold">
             <ArrowUpRight size={16} />
-            <span>+12% vs last month</span>
+            <span>All online orders</span>
           </div>
         </div>
 
@@ -55,7 +118,7 @@ const EcommerceModule = () => {
             </div>
             <div>
               <p className="text-sm font-bold text-muted uppercase tracking-widest">Revenue</p>
-              <h3 className="text-2xl font-bold text-dark">Rs. 850k</h3>
+              <h3 className="text-2xl font-bold text-dark">{formatCurrency(stats.revenue)}</h3>
             </div>
           </div>
           <p className="text-muted text-xs">Online sales only</p>
@@ -68,7 +131,7 @@ const EcommerceModule = () => {
             </div>
             <div>
               <p className="text-sm font-bold text-muted uppercase tracking-widest">Pending</p>
-              <h3 className="text-2xl font-bold text-dark">45</h3>
+              <h3 className="text-2xl font-bold text-dark">{stats.pending}</h3>
             </div>
           </div>
           <p className="text-muted text-xs">Awaiting processing</p>
@@ -81,7 +144,7 @@ const EcommerceModule = () => {
             </div>
             <div>
               <p className="text-sm font-bold text-muted uppercase tracking-widest">In Transit</p>
-              <h3 className="text-2xl font-bold text-dark">12</h3>
+              <h3 className="text-2xl font-bold text-dark">{stats.inTransit}</h3>
             </div>
           </div>
           <p className="text-muted text-xs">Out for delivery</p>
@@ -92,8 +155,8 @@ const EcommerceModule = () => {
         <div className="p-8 border-b border-gray-100 flex flex-col md:flex-row justify-between gap-4">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={18} />
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Search online orders..."
               className="w-full pl-12 pr-4 py-3 rounded-xl bg-surface border-none focus:ring-2 focus:ring-primary/20 transition-all"
               value={searchTerm}
@@ -107,6 +170,8 @@ const EcommerceModule = () => {
             </button>
           </div>
         </div>
+
+        {error ? <div className="px-8 py-4 text-sm font-medium text-red-500">{error}</div> : null}
 
         <div className="overflow-x-auto">
           <table className="w-full text-left">
@@ -123,30 +188,38 @@ const EcommerceModule = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {onlineOrders.map((order) => (
+              {filteredOrders.map((order) => (
                 <tr key={order.id} className="hover:bg-surface/50 transition-colors">
                   <td className="px-8 py-6 font-mono text-sm">{order.id}</td>
                   <td className="px-8 py-6 font-bold text-dark">{order.customer}</td>
-                  <td className="px-8 py-6 text-sm text-muted">{order.items} items</td>
-                  <td className="px-8 py-6 font-bold text-primary">{order.total}</td>
+                  <td className="px-8 py-6 text-sm text-muted">{order.items}</td>
+                  <td className="px-8 py-6 font-bold text-primary">{formatCurrency(order.total)}</td>
                   <td className="px-8 py-6">
                     <span className={`px-3 py-1 rounded-lg text-xs font-bold ${
-                      order.status === 'Delivered' ? 'bg-green-50 text-green-500' : 
-                      order.status === 'Processing' ? 'bg-blue-50 text-blue-500' : 
-                      order.status === 'Shipped' ? 'bg-yellow-50 text-yellow-500' : 'bg-red-50 text-red-500'
+                      order.status === 'Delivered' ? 'bg-green-50 text-green-500' :
+                      order.status === 'Preparing' || order.status === 'Confirmed' ? 'bg-blue-50 text-blue-500' :
+                      order.status === 'Out for Delivery' || order.status === 'Pending' ? 'bg-yellow-50 text-yellow-500' : 'bg-red-50 text-red-500'
                     }`}>
                       {order.status}
                     </span>
                   </td>
-                  <td className="px-8 py-6 text-sm text-muted">{order.payment}</td>
-                  <td className="px-8 py-6 text-sm text-muted">{order.time}</td>
+                  <td className="px-8 py-6 text-sm text-muted">{order.paymentMethod || "N/A"}</td>
+                  <td className="px-8 py-6 text-sm text-muted">{order.time ? new Date(order.time).toLocaleString("en-PK") : "-"}</td>
                   <td className="px-8 py-6">
-                    <button className="text-primary font-bold hover:underline">Track Order</button>
+                    <button onClick={() => navigate(`/track?orderId=${order.id}`)} className="text-primary font-bold hover:underline">Track Order</button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+
+          {!loading && filteredOrders.length === 0 ? (
+            <div className="p-10 text-center text-muted">
+              {orders.length === 0 ? "No online orders yet." : "No orders matched your search."}
+            </div>
+          ) : null}
+
+          {loading ? <div className="p-10 text-center text-muted">Loading online orders...</div> : null}
         </div>
       </div>
     </div>

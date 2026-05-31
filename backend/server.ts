@@ -1,5 +1,7 @@
 import "express-async-errors"; // must load first: routes async throws -> error middleware
 import express from "express";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import http from "http";
 import { createServer as createViteServer } from "vite";
 import path from "path";
@@ -23,6 +25,15 @@ import contactRoutes from "./src/modules/contact/contact.routes";
 import usersRoutes from "./src/modules/users/users.routes";
 import staffPanelRoutes from "./src/modules/hr/staff-panel.routes";
 import operationsRoutes from "./src/modules/operations/operations.routes";
+import reviewRoutes from "./src/modules/reviews/reviews.routes";
+import branchRoutes from "./src/modules/branches/branches.routes";
+import promotionRoutes from "./src/modules/promotions/promotions.routes";
+import notificationRoutes from "./src/modules/notifications/notifications.routes";
+import riderRoutes from "./src/modules/riders/riders.routes";
+import settingsRoutes from "./src/modules/settings/settings.routes";
+import securityRoutes from "./src/modules/security/security.routes";
+import newsletterRoutes from "./src/modules/newsletter/newsletter.routes";
+import careerRoutes from "./src/modules/careers/careers.routes";
 import { connectToMongo, getMongoHealth, isMongoConnected } from "./src/core/mongo";
 import { initRealtime, startChangeStreams } from "./src/core/realtime";
 
@@ -44,15 +55,43 @@ async function startServer() {
 
   const app = express();
   const PORT = 3000;
+  const isProd = process.env.NODE_ENV === "production";
+
+  // Security headers. CSP/COEP are intentionally left off so the SPA's external
+  // assets (menu images, Google Maps embed, fonts) and Vite dev keep working —
+  // apply a tuned CSP at the reverse-proxy / CDN layer in production.
+  app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
+  // Behind a proxy/CDN in prod so rate-limit & secure cookies see the real IP.
+  if (isProd) app.set("trust proxy", 1);
 
   // Capture the raw body so the WhatsApp webhook can verify its HMAC signature.
   app.use(
     express.json({
+      limit: "1mb",
       verify: (req, _res, buf) => {
         (req as express.Request & { rawBody?: Buffer }).rawBody = buf;
       },
     }),
   );
+
+  // Rate limiting: strict on auth (brute-force / credential-stuffing), generous
+  // global cap on the API to blunt public-form flooding & email fan-out.
+  const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 40,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { message: "Too many attempts. Please try again in a few minutes." },
+  });
+  const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 1000,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { message: "Too many requests. Please slow down." },
+  });
+  app.use("/api/auth", authLimiter);
+  app.use("/api", apiLimiter);
 
   // API Routes
   app.get("/api/health", (req, res) => {
@@ -84,6 +123,15 @@ async function startServer() {
   app.use("/api/users", usersRoutes);
   app.use("/api/staff-panel", staffPanelRoutes);
   app.use("/api/operations", operationsRoutes);
+  app.use("/api/reviews", reviewRoutes);
+  app.use("/api/branches", branchRoutes);
+  app.use("/api/promotions", promotionRoutes);
+  app.use("/api/notifications", notificationRoutes);
+  app.use("/api/riders", riderRoutes);
+  app.use("/api/settings", settingsRoutes);
+  app.use("/api/security", securityRoutes);
+  app.use("/api/newsletter", newsletterRoutes);
+  app.use("/api/careers", careerRoutes);
 
   // Unknown API route -> JSON 404 (don't fall through to the SPA HTML).
   app.use("/api", (_req, res) => {

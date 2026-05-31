@@ -411,7 +411,7 @@ const userAccountSchema = new Schema(
     passwordHash: { type: String, default: "" },
     role: {
       type: String,
-      enum: ["admin", "manager", "rider", "staff", "user"],
+      enum: ["admin", "manager", "hr", "rider", "staff", "user"],
       default: "user",
       index: true,
     },
@@ -776,6 +776,54 @@ const activityLogSchema = new Schema(
   { versionKey: false },
 );
 
+const newsletterSubscriberSchema = new Schema(
+  {
+    id: { type: String, required: true, unique: true, index: true },
+    email: { type: String, required: true, unique: true, index: true },
+    name: { type: String, default: "" },
+    source: { type: String, default: "website" },
+    status: { type: String, enum: ["Subscribed", "Unsubscribed"], default: "Subscribed", index: true },
+    createdAt: { type: String, default: () => new Date().toISOString(), index: true },
+  },
+  { versionKey: false },
+);
+
+const jobOpeningSchema = new Schema(
+  {
+    id: { type: String, required: true, unique: true, index: true },
+    title: { type: String, required: true, index: true },
+    department: { type: String, default: "General", index: true },
+    type: { type: String, enum: ["Full-time", "Part-time", "Contract", "Internship"], default: "Full-time" },
+    location: { type: String, default: "Renala Khurd" },
+    description: { type: String, default: "" },
+    requirements: { type: [String], default: [] },
+    salaryRange: { type: String, default: "" },
+    status: { type: String, enum: ["Open", "Closed"], default: "Open", index: true },
+    createdAt: { type: String, default: () => new Date().toISOString(), index: true },
+  },
+  { versionKey: false },
+);
+
+const jobApplicationSchema = new Schema(
+  {
+    id: { type: String, required: true, unique: true, index: true },
+    jobId: { type: String, default: "", index: true },
+    jobTitle: { type: String, default: "General Application" },
+    name: { type: String, required: true, index: true },
+    email: { type: String, required: true, index: true },
+    phone: { type: String, default: "" },
+    experience: { type: String, default: "" },
+    coverLetter: { type: String, default: "" },
+    resumeUrl: { type: String, default: "" },
+    status: { type: String, enum: ["Pending", "Reviewing", "Approved", "Rejected"], default: "Pending", index: true },
+    reviewedBy: { type: String, default: "" },
+    reviewedAt: { type: String, default: "" },
+    decisionNote: { type: String, default: "" },
+    appliedAt: { type: String, default: () => new Date().toISOString(), index: true },
+  },
+  { versionKey: false },
+);
+
 export const InventoryModel =
   mongoose.models.InventoryItem || mongoose.model("InventoryItem", inventorySchema, "inventory");
 export const VendorPurchaseModel =
@@ -841,3 +889,10 @@ export const StaffRequestModel =
   mongoose.models.StaffRequest || mongoose.model("StaffRequest", staffRequestSchema, "staffRequests");
 export const ActivityLogModel =
   mongoose.models.ActivityLog || mongoose.model("ActivityLog", activityLogSchema, "activityLogs");
+export const NewsletterSubscriberModel =
+  mongoose.models.NewsletterSubscriber ||
+  mongoose.model("NewsletterSubscriber", newsletterSubscriberSchema, "newsletterSubscribers");
+export const JobOpeningModel =
+  mongoose.models.JobOpening || mongoose.model("JobOpening", jobOpeningSchema, "jobOpenings");
+export const JobApplicationModel =
+  mongoose.models.JobApplication || mongoose.model("JobApplication", jobApplicationSchema, "jobApplications");

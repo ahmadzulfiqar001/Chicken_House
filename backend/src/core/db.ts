@@ -567,6 +567,27 @@ export const createDb = () => ({
       ],
     },
   ],
+  reviews: [],
+  promotions: [],
+  notifications: [],
+  jobApplications: [],
+  riders: [
+    { id: "RD-001", name: "Bilal Ahmed", phone: "+92 333 4880841", status: "Available", shift: "Evening", vehicleType: "Bike", plateNumber: "OKR-1234", zone: "Renala Khurd", rating: 4.8, activeOrders: 0 },
+    { id: "RD-002", name: "Usman Ghani", phone: "+92 333 4880842", status: "On Delivery", shift: "Day", vehicleType: "Bike", plateNumber: "OKR-5678", zone: "Okara City", rating: 4.6, activeOrders: 1 },
+    { id: "RD-003", name: "Ali Raza", phone: "+92 333 4880843", status: "Offline", shift: "Night", vehicleType: "Bike", plateNumber: "OKR-9012", zone: "GT Road", rating: 4.9, activeOrders: 0 },
+  ],
+  jobOpenings: [
+    { id: "JOB-chef", title: "Chef / Cook", department: "Kitchen", type: "Full-time", location: "Renala Khurd", description: "Prepare BBQ, karahi, and fast-food items to Chicken House standards.", requirements: ["2+ years kitchen experience", "Knowledge of desi & fast food", "Hygiene & food safety"], salaryRange: "Rs. 40,000 - 70,000", status: "Open", createdAt: "2026-01-01T00:00:00.000Z" },
+    { id: "JOB-rider", title: "Delivery Rider", department: "Delivery", type: "Full-time", location: "Renala Khurd / Okara", description: "Deliver orders quickly and safely across the service area.", requirements: ["Own bike + valid license", "Knows local routes", "Smartphone"], salaryRange: "Rs. 30,000 + fuel", status: "Open", createdAt: "2026-01-01T00:00:00.000Z" },
+    { id: "JOB-cashier", title: "Cashier / Counter Staff", department: "Front of House", type: "Full-time", location: "Renala Khurd", description: "Handle billing, takeaway orders, and customer service at the counter.", requirements: ["Basic POS skills", "Good communication", "Honest & punctual"], salaryRange: "Rs. 28,000 - 40,000", status: "Open", createdAt: "2026-01-01T00:00:00.000Z" },
+    { id: "JOB-server", title: "Waiter / Server", department: "Front of House", type: "Part-time", location: "Renala Khurd", description: "Serve dine-in guests and keep the seating area clean and welcoming.", requirements: ["Friendly attitude", "Team player", "Flexible hours"], salaryRange: "Rs. 25,000 - 35,000", status: "Open", createdAt: "2026-01-01T00:00:00.000Z" },
+  ],
+  branches: [
+    { id: "renala-khurd-main", name: "Chicken House Main Branch", slug: "renala-khurd-main", status: "Active", manager: "", email: "info@chickenhouse.pk", phone: "+92 333 4880840", addressLine1: "Near Mitchell's, GT Road", addressLine2: "Close to Mitchell's Fruit Farm", city: "Renala Khurd, Okara", landmark: "Mitchell's Fruit Farm", coordinates: { lat: 0, lng: 0 }, timings: [], amenities: ["Family Seating", "Takeaway", "Delivery"], parkingAvailable: true, staffCount: 0, rating: 4.7, averageDailyOrders: 0, averageDailyRevenue: 0, gallery: [] },
+  ],
+  siteSettings: [
+    { key: "default", brandName: "Chicken House", tagline: "A Symbol of Quality & Freshness", logoUrl: "", faviconUrl: "", primaryColor: "#7f1215", accentColor: "#d8a82f", contactEmail: "info@chickenhouse.pk", contactPhone: "+92 333 4880840", whatsappNumber: "923334880840", addressLine1: "Near Mitchell's, GT Road", city: "Renala Khurd, Okara", mapEmbedUrl: "", businessHours: [], socialLinks: [], seoTitle: "", seoDescription: "", maintenanceMode: false, settings: { currency: "PKR", timezone: "Asia/Karachi", twoFactorAuth: false, autoBackup: true, orderNotifications: true } },
+  ],
   menu: clone(menuSeed),
 });
 

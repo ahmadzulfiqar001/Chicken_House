@@ -21,6 +21,16 @@ import {
   StaffNoticeModel,
   StaffRequestModel,
   ActivityLogModel,
+  ReviewModel,
+  BranchModel,
+  PromotionModel,
+  NotificationModel,
+  RiderModel,
+  AuthSessionModel,
+  NewsletterSubscriberModel,
+  SiteSettingModel,
+  JobOpeningModel,
+  JobApplicationModel,
 } from "./models";
 
 type Doc = Record<string, any>;
@@ -48,6 +58,16 @@ const MODELS: Record<string, AnyModel> = {
   staffNotices: StaffNoticeModel as never,
   staffRequests: StaffRequestModel as never,
   activityLogs: ActivityLogModel as never,
+  reviews: ReviewModel as never,
+  branches: BranchModel as never,
+  promotions: PromotionModel as never,
+  notifications: NotificationModel as never,
+  riders: RiderModel as never,
+  authSessions: AuthSessionModel as never,
+  newsletterSubscribers: NewsletterSubscriberModel as never,
+  siteSettings: SiteSettingModel as never,
+  jobOpenings: JobOpeningModel as never,
+  jobApplications: JobApplicationModel as never,
 };
 
 const useMongo = (name: string): boolean => isMongoConfigured() && Boolean(MODELS[name]);

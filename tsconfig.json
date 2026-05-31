@@ -32,7 +32,6 @@
   "exclude": [
     "node_modules",
     "dist",
-    "frontend/dist",
-    "backend/assignment-2-crud-api/node_modules"
+    "frontend/dist"
   ]
 }
