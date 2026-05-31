@@ -2,7 +2,7 @@ import express from "express";
 import { getRequestAuthUser, requireAuth } from "../auth/auth.service";
 import { db } from "../../core/db";
 import { CustomerModel, OrderModel } from "../../core/models";
-import { isMongoConnected } from "../../core/mongo";
+import { isMongoConfigured } from "../../core/mongo";
 
 const router = express.Router();
 
@@ -66,7 +66,7 @@ router.get("/", async (req, res) => {
     return res.status(401).json({ message: "Please sign in to continue." });
   }
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const customer = await ensureCustomerDocument(authUser.email, authUser.name, authUser.phone);
     const orders = await OrderModel.find({
       customerEmail: authUser.email.toLowerCase(),
@@ -98,7 +98,7 @@ router.patch("/profile", async (req, res) => {
     return res.status(401).json({ message: "Please sign in to continue." });
   }
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const customer = await ensureCustomerDocument(authUser.email, authUser.name, authUser.phone);
 
     customer.name = String(req.body?.name ?? customer.name).trim() || customer.name;
@@ -146,7 +146,7 @@ router.patch("/preferences", async (req, res) => {
     return res.status(401).json({ message: "Please sign in to continue." });
   }
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const customer = await ensureCustomerDocument(authUser.email, authUser.name, authUser.phone);
     customer.preferences = {
       ...customer.preferences,
@@ -184,7 +184,7 @@ router.post("/addresses", async (req, res) => {
     return res.status(400).json({ message: "Please enter the address line." });
   }
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const customer = await ensureCustomerDocument(authUser.email, authUser.name, authUser.phone);
     customer.addresses.unshift(address);
     customer.address = address.line || customer.address;
@@ -207,7 +207,7 @@ router.delete("/addresses/:id", async (req, res) => {
     return res.status(401).json({ message: "Please sign in to continue." });
   }
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const customer = await ensureCustomerDocument(authUser.email, authUser.name, authUser.phone);
     const index = customer.addresses.findIndex((item) => item.id === req.params.id);
 
@@ -248,7 +248,7 @@ router.post("/wishlist", async (req, res) => {
     image: String(req.body?.image ?? "").trim(),
   };
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const customer = await ensureCustomerDocument(authUser.email, authUser.name, authUser.phone);
     customer.wishlist.unshift(item);
     customer.activity.unshift(`${item.name} added to wishlist.`);
@@ -269,7 +269,7 @@ router.delete("/wishlist/:id", async (req, res) => {
     return res.status(401).json({ message: "Please sign in to continue." });
   }
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const customer = await ensureCustomerDocument(authUser.email, authUser.name, authUser.phone);
     const index = customer.wishlist.findIndex((item) => item.id === req.params.id);
 
@@ -308,7 +308,7 @@ router.post("/wallet/topup", async (req, res) => {
     return res.status(400).json({ message: "Please enter a valid top-up amount." });
   }
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const customer = await ensureCustomerDocument(authUser.email, authUser.name, authUser.phone);
     customer.walletBalance += amount;
 

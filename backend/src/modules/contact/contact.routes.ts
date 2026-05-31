@@ -1,12 +1,14 @@
 import express from "express";
+import { requirePermission } from "../auth/auth.service";
 import { db } from "../../core/db";
 import { ContactMessageModel } from "../../core/models";
-import { isMongoConnected } from "../../core/mongo";
+import { isMongoConfigured } from "../../core/mongo";
 
 const router = express.Router();
 
-router.get("/", async (_req, res) => {
-  if (isMongoConnected()) {
+// Viewing the contact inbox is staff-only; POST stays public for the website form.
+router.get("/", requirePermission("users:view"), async (_req, res) => {
+  if (isMongoConfigured()) {
     const messages = await ContactMessageModel.find().sort({ createdAt: -1 }).lean();
     return res.json(messages);
   }
@@ -45,7 +47,7 @@ router.post("/", async (req, res) => {
   }
 
   const messageRecord = {
-    id: `MSG-${Date.now()}`,
+    id: `MSG-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     ...payload,
     status: "Unread",
     priority: "Normal",
@@ -55,7 +57,7 @@ router.post("/", async (req, res) => {
     respondedAt: "",
   };
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const created = await ContactMessageModel.create(messageRecord);
     return res.status(201).json(created.toObject());
   }

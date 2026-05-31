@@ -39,7 +39,7 @@ const SeatingMap = () => {
         </div>
       </div>
 
-      <div className="relative aspect-[16/9] bg-surface rounded-[2rem] border-4 border-surface-strong p-8 overflow-hidden">
+      <div className="relative aspect-[4/5] sm:aspect-[16/9] min-h-[420px] sm:min-h-0 bg-surface rounded-[2rem] border-4 border-surface-strong p-4 sm:p-8 overflow-hidden">
         {/* Grid Background */}
         <div className="absolute inset-0 opacity-5" style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
         

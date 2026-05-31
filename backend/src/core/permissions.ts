@@ -6,6 +6,7 @@
 export type UserRole =
   | "admin"
   | "manager"
+  | "hr"
   | "rider"
   | "staff"
   | "user";
@@ -78,6 +79,11 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "hr:view", "hr:create", "hr:update",
     "users:view",
     "analytics:view",
+  ],
+  hr: [
+    // Human Resources — full workforce access only (staff, attendance, leave,
+    // payroll, shifts, performance). No orders/menu/inventory/finance/users.
+    "hr:view", "hr:create", "hr:update", "hr:delete",
   ],
   rider: [
     "orders:view", "orders:update",

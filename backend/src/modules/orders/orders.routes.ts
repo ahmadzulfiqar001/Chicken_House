@@ -1,16 +1,44 @@
 import express from "express";
-import { getAuthenticatedUser, requirePermission } from "../auth/auth.service";
+import {
+  getAuthenticatedUser,
+  getRequestAuthUser,
+  requirePermission,
+  requireRole,
+} from "../auth/auth.service";
 import { db } from "../../core/db";
-import { reserveInventoryForOrder } from "../menu/menu.service";
-import { CustomerModel, FinanceModel, OrderModel } from "../../core/models";
-import { isMongoConnected } from "../../core/mongo";
+import { priceOrderDetails, reserveInventoryForOrder } from "../menu/menu.service";
+import { CustomerModel, FinanceModel, OrderModel, ReviewModel } from "../../core/models";
+import { isMongoConfigured } from "../../core/mongo";
 import { calculateDeliveryFee, validateOrderPayload } from "./orders.pricing";
 
 const router = express.Router();
-const validStatuses = ["Pending", "Preparing", "Out for Delivery", "Delivered", "Cancelled"];
+const validStatuses = ["Pending", "Confirmed", "Preparing", "Out for Delivery", "Delivered", "Cancelled"];
+
+// Every non-cash method (Easypaisa, JazzCash, bank transfer) is a manual transfer
+// that admin/manager must verify before the order proceeds. Cash on Delivery does not.
+const requiresPaymentVerification = (method: string) =>
+  /easypaisa|jazz\s*cash|bank|transfer|wallet|online/i.test(method);
 
 const findCustomerDocument = async (email: string) =>
   CustomerModel.findOne({ email: email.toLowerCase() });
+
+// Record a Sales credit in finance (used at placement for instant-pay methods,
+// and at verification time for bank transfers).
+const recordSaleCredit = async (orderId: string, total: number) => {
+  const tx = {
+    id: `TX-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    type: "Credit",
+    amount: total,
+    source: `Order ${orderId}`,
+    date: new Date().toISOString(),
+    category: "Sales",
+  };
+  if (isMongoConfigured()) {
+    await FinanceModel.create(tx);
+  } else {
+    db.finance.unshift(tx);
+  }
+};
 
 const buildTimeline = (status: string) => {
   const states = ["Pending", "Confirmed", "Preparing", "Out for Delivery", "Delivered"];
@@ -31,12 +59,12 @@ const buildTimeline = (status: string) => {
   }));
 };
 
-router.get("/", async (req, res) => {
+router.get("/", requirePermission("orders:view"), async (req, res) => {
   const authUser = await getAuthenticatedUser(req);
   const email = String(req.query.email ?? "").toLowerCase();
   const customerName = String(req.query.customer ?? "").toLowerCase();
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const query: Record<string, unknown> = {};
 
     if (authUser?.role === "user") {
@@ -85,7 +113,7 @@ router.get("/:id", async (req, res) => {
     return res.status(400).json({ message: "Order ID is required." });
   }
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const order = await OrderModel.findOne({ id }).lean();
 
     if (!order) {
@@ -131,17 +159,21 @@ router.post("/", async (req, res) => {
   const customerPhone = String(req.body?.customerPhone ?? authUser?.phone ?? "").trim();
   const orderType = String(req.body?.type ?? "Delivery").trim() || "Delivery";
   const paymentMethod = String(req.body?.paymentMethod ?? "Cash on Delivery").trim();
+  const paymentReference = String(req.body?.paymentReference ?? "").trim();
+  const needsVerification = requiresPaymentVerification(paymentMethod);
   const deliveryAddress = String(req.body?.deliveryAddress ?? "").trim();
   const city = String(req.body?.city ?? "").trim();
   const notes = String(req.body?.notes ?? "").trim();
   const assignedStaffId = Math.max(0, Number(req.body?.assignedStaffId ?? 0));
   const assignedRole = String(req.body?.assignedRole ?? "").trim();
-  const details = Array.isArray(req.body?.details) ? req.body.details : [];
-  const subtotal = details.reduce((sum, item) => {
-    const quantity = Math.max(1, Number((item as Record<string, unknown>).quantity ?? 1));
-    const price = Math.max(0, Number((item as Record<string, unknown>).price ?? 0));
-    return sum + quantity * price;
-  }, 0);
+  const rawDetails = Array.isArray(req.body?.details) ? req.body.details : [];
+  // Server-side re-pricing against the menu — never trust client-supplied prices.
+  const pricing = await priceOrderDetails(rawDetails);
+  if (!pricing.ok) {
+    return res.status(400).json({ message: "One or more selected items are unavailable.", errors: pricing.errors });
+  }
+  const details = pricing.priced;
+  const subtotal = pricing.subtotal;
   const deliveryFee = calculateDeliveryFee({
     orderType,
     city,
@@ -175,7 +207,7 @@ router.post("/", async (req, res) => {
   }
 
   const orderRecord = {
-    id: `ORD-${Date.now()}`,
+    id: `ORD-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     customer,
     customerEmail,
     customerPhone,
@@ -190,6 +222,15 @@ router.post("/", async (req, res) => {
     time: new Date().toISOString(),
     type: orderType,
     paymentMethod,
+    paymentStatus: needsVerification ? "Pending Verification" : "Unpaid",
+    paymentReference,
+    paymentVerifiedBy: "",
+    paymentVerifiedAt: "",
+    paymentNote: "",
+    rating: 0,
+    feedback: "",
+    reviewId: "",
+    ratedAt: "",
     details,
     branchId: "renala-khurd-main",
     deliveryAddress,
@@ -202,7 +243,7 @@ router.post("/", async (req, res) => {
     assignedRole,
   };
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const createdOrder = await OrderModel.create(orderRecord);
     let existingCustomer = await findCustomerDocument(customerEmail);
 
@@ -249,14 +290,10 @@ router.post("/", async (req, res) => {
       await existingCustomer.save();
     }
 
-    await FinanceModel.create({
-      id: `TX-${Date.now()}`,
-      type: "Credit",
-      amount: total,
-      source: `Order ${orderRecord.id}`,
-      date: new Date().toISOString(),
-      category: "Sales",
-    });
+    // Bank-transfer revenue is only booked once payment is verified (see PATCH /:id/payment).
+    if (!needsVerification) {
+      await recordSaleCredit(orderRecord.id, total);
+    }
 
     return res.status(201).json(createdOrder.toObject());
   }
@@ -310,16 +347,120 @@ router.post("/", async (req, res) => {
     existingCustomer.activity.unshift(`New order ${orderRecord.id} placed.`);
   }
 
-  db.finance.unshift({
-    id: `TX-${Date.now()}`,
-    type: "Credit",
-    amount: total,
-    source: `Order ${orderRecord.id}`,
-    date: new Date().toISOString(),
-    category: "Sales",
-  });
+  if (!needsVerification) {
+    await recordSaleCredit(orderRecord.id, total);
+  }
 
   return res.status(201).json(orderRecord);
+});
+
+// Admin/manager verifies or rejects a bank-transfer payment. Verifying confirms the
+// order and books revenue; rejecting cancels it. The update flows through the orders
+// change stream, so the customer's tracking page reflects it in realtime.
+router.patch("/:id/payment", requireRole(["admin", "manager"]), async (req, res) => {
+  const action = String(req.body?.action ?? "").trim().toLowerCase();
+  const note = String(req.body?.note ?? "").trim();
+  const verifier = getRequestAuthUser(req);
+  const verifierName = verifier?.name || verifier?.role || "Staff";
+  const now = new Date().toISOString();
+
+  if (action !== "verify" && action !== "reject") {
+    return res.status(400).json({ message: "Action must be 'verify' or 'reject'." });
+  }
+
+  const patch: Record<string, unknown> =
+    action === "verify"
+      ? { paymentStatus: "Verified", status: "Confirmed", paymentVerifiedBy: verifierName, paymentVerifiedAt: now, paymentNote: note }
+      : { paymentStatus: "Rejected", status: "Cancelled", paymentVerifiedBy: verifierName, paymentVerifiedAt: now, paymentNote: note };
+
+  if (isMongoConfigured()) {
+    const order = await OrderModel.findOne({ id: req.params.id });
+    if (!order) return res.status(404).json({ message: "Order not found." });
+
+    const wasPending = order.paymentStatus === "Pending Verification";
+    Object.assign(order, patch);
+    await order.save();
+
+    if (action === "verify" && wasPending) {
+      await recordSaleCredit(String(order.id), Number(order.total ?? 0));
+    }
+    return res.json(order.toObject());
+  }
+
+  const index = db.orders.findIndex((order) => order.id === req.params.id);
+  if (index === -1) return res.status(404).json({ message: "Order not found." });
+
+  const wasPending = (db.orders[index] as Record<string, unknown>).paymentStatus === "Pending Verification";
+  db.orders[index] = { ...db.orders[index], ...patch };
+
+  if (action === "verify" && wasPending) {
+    await recordSaleCredit(String(db.orders[index].id), Number(db.orders[index].total ?? 0));
+  }
+  return res.json(db.orders[index]);
+});
+
+// Customer submits a star rating + feedback after delivery. Stored as a real Review
+// (Mongo) and linked back to the order. Allowed once, only after delivery.
+router.post("/:id/feedback", async (req, res) => {
+  const rating = Math.round(Number(req.body?.rating ?? 0));
+  const comment = String(req.body?.comment ?? "").trim();
+  const now = new Date().toISOString();
+
+  if (!Number.isFinite(rating) || rating < 1 || rating > 5) {
+    return res.status(400).json({ message: "Please provide a rating between 1 and 5 stars." });
+  }
+
+  const buildReview = (order: Record<string, unknown>) => ({
+    id: `REV-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    customerName: String(order.customer ?? "Guest"),
+    customerEmail: String(order.customerEmail ?? ""),
+    source: "website",
+    rating,
+    title: "",
+    comment: comment || `${rating}-star rating`,
+    tags: [],
+    status: "Pending",
+    isFeatured: false,
+    branchId: String(order.branchId ?? ""),
+    orderId: String(order.id ?? ""),
+  });
+
+  if (isMongoConfigured()) {
+    const order = await OrderModel.findOne({ id: req.params.id });
+    if (!order) return res.status(404).json({ message: "Order not found." });
+    if (order.status !== "Delivered") {
+      return res.status(400).json({ message: "Feedback can be submitted once your order is delivered." });
+    }
+    if (order.ratedAt) {
+      return res.status(409).json({ message: "Feedback already submitted for this order." });
+    }
+
+    const review = buildReview(order.toObject());
+    await ReviewModel.create(review);
+    order.rating = rating;
+    order.feedback = comment;
+    order.reviewId = review.id;
+    order.ratedAt = now;
+    await order.save();
+
+    return res.status(201).json({ message: "Thank you for your feedback!", rating, reviewId: review.id });
+  }
+
+  const index = db.orders.findIndex((order) => order.id === req.params.id);
+  if (index === -1) return res.status(404).json({ message: "Order not found." });
+
+  const order = db.orders[index] as Record<string, unknown>;
+  if (order.status !== "Delivered") {
+    return res.status(400).json({ message: "Feedback can be submitted once your order is delivered." });
+  }
+  if (order.ratedAt) {
+    return res.status(409).json({ message: "Feedback already submitted for this order." });
+  }
+
+  const review = buildReview(order);
+  const feedbackPatch: Record<string, unknown> = { rating, feedback: comment, reviewId: review.id, ratedAt: now };
+  db.orders[index] = { ...db.orders[index], ...feedbackPatch };
+  return res.status(201).json({ message: "Thank you for your feedback!", rating, reviewId: review.id });
 });
 
 router.patch("/:id", requirePermission("orders:update"), async (req, res) => {
@@ -337,7 +478,7 @@ router.patch("/:id", requirePermission("orders:update"), async (req, res) => {
     return res.status(400).json({ message: "Invalid order status." });
   }
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const updated = await OrderModel.findOneAndUpdate(
       { id: req.params.id },
       nextPayload,
@@ -362,7 +503,7 @@ router.patch("/:id", requirePermission("orders:update"), async (req, res) => {
 });
 
 router.delete("/:id", requirePermission("orders:delete"), async (req, res) => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const deleted = await OrderModel.findOneAndDelete({ id: req.params.id }).lean();
 
     if (!deleted) {

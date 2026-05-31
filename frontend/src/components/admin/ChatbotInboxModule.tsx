@@ -132,7 +132,7 @@ const ChatbotInboxModule = () => {
         </motion.div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-[360px,1fr] gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-[360px_1fr] gap-8">
         <div className="bg-white rounded-[3rem] p-6 shadow-xl shadow-dark/5 border border-gray-50">
           <div className="flex items-center justify-between mb-6">
             <div>

@@ -2,7 +2,7 @@ import express from "express";
 import { requirePermission } from "../auth/auth.service";
 import { db } from "../../core/db";
 import { ShiftScheduleModel } from "../../core/models";
-import { isMongoConnected } from "../../core/mongo";
+import { isMongoConfigured } from "../../core/mongo";
 
 const router = express.Router();
 
@@ -10,7 +10,7 @@ const router = express.Router();
 router.get("/", requirePermission("hr:view"), async (req, res) => {
   const { staffId, date, startDate, endDate } = req.query;
   
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const filter: any = {};
     if (staffId) filter.staffId = Number(staffId);
     if (date) filter.date = date;
@@ -34,7 +34,7 @@ router.get("/", requirePermission("hr:view"), async (req, res) => {
 
 // Create shift schedule
 router.post("/", requirePermission("hr:create"), async (req, res) => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const newShift = {
       ...req.body,
       id: `SH-${Date.now()}`,
@@ -75,7 +75,7 @@ router.post("/bulk", requirePermission("hr:create"), async (req, res) => {
     });
   }
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const created = await ShiftScheduleModel.insertMany(shifts);
     return res.status(201).json(created);
   }
@@ -86,7 +86,7 @@ router.post("/bulk", requirePermission("hr:create"), async (req, res) => {
 
 // Update shift schedule
 router.patch("/:id", requirePermission("hr:update"), async (req, res) => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const updated = await ShiftScheduleModel.findOneAndUpdate(
       { id: req.params.id },
       req.body,
@@ -111,7 +111,7 @@ router.patch("/:id", requirePermission("hr:update"), async (req, res) => {
 
 // Delete shift schedule
 router.delete("/:id", requirePermission("hr:delete"), async (req, res) => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const deleted = await ShiftScheduleModel.findOneAndDelete({ id: req.params.id }).lean();
     if (!deleted) {
       return res.status(404).json({ message: "Shift schedule not found" });

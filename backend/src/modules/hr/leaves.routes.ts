@@ -2,7 +2,7 @@ import express from "express";
 import { requirePermission } from "../auth/auth.service";
 import { db } from "../../core/db";
 import { LeaveRequestModel, StaffModel } from "../../core/models";
-import { isMongoConnected } from "../../core/mongo";
+import { isMongoConfigured } from "../../core/mongo";
 
 const router = express.Router();
 
@@ -10,7 +10,7 @@ const router = express.Router();
 router.get("/", requirePermission("hr:view"), async (req, res) => {
   const { staffId, status } = req.query;
   
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const filter: any = {};
     if (staffId) filter.staffId = Number(staffId);
     if (status) filter.status = status;
@@ -28,7 +28,7 @@ router.get("/", requirePermission("hr:view"), async (req, res) => {
 
 // Create leave request
 router.post("/", requirePermission("hr:create"), async (req, res) => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const newLeave = {
       ...req.body,
       id: `LV-${Date.now()}`,
@@ -55,19 +55,20 @@ router.post("/", requirePermission("hr:create"), async (req, res) => {
 router.patch("/:id/status", requirePermission("hr:update"), async (req, res) => {
   const { status, approvedBy, rejectionReason } = req.body;
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const leave = await LeaveRequestModel.findOne({ id: req.params.id });
     if (!leave) {
       return res.status(404).json({ message: "Leave request not found" });
     }
 
+    const wasApproved = leave.status === "Approved";
     leave.status = status;
     leave.approvedBy = approvedBy || "";
     leave.approvedAt = status === "Approved" ? new Date().toISOString() : "";
     leave.rejectionReason = rejectionReason || "";
 
-    // Update staff leave balance if approved
-    if (status === "Approved") {
+    // Decrement balance only on a real transition INTO Approved (idempotent).
+    if (status === "Approved" && !wasApproved) {
       await StaffModel.findOneAndUpdate(
         { id: leave.staffId },
         { $inc: { leaveBalance: -leave.days } }
@@ -83,13 +84,14 @@ router.patch("/:id/status", requirePermission("hr:update"), async (req, res) => 
     return res.status(404).json({ message: "Leave request not found" });
   }
 
+  const wasApprovedMem = leave.status === "Approved";
   leave.status = status;
   leave.approvedBy = approvedBy || "";
   leave.approvedAt = status === "Approved" ? new Date().toISOString() : "";
   leave.rejectionReason = rejectionReason || "";
 
-  // Update staff leave balance if approved
-  if (status === "Approved") {
+  // Decrement balance only on a real transition INTO Approved (idempotent).
+  if (status === "Approved" && !wasApprovedMem) {
     const staff = db.staff.find(s => s.id === leave.staffId);
     if (staff) {
       staff.leaveBalance = (staff.leaveBalance || 20) - leave.days;
@@ -101,7 +103,7 @@ router.patch("/:id/status", requirePermission("hr:update"), async (req, res) => 
 
 // Update leave request
 router.patch("/:id", requirePermission("hr:update"), async (req, res) => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const updated = await LeaveRequestModel.findOneAndUpdate(
       { id: req.params.id },
       req.body,
@@ -126,7 +128,7 @@ router.patch("/:id", requirePermission("hr:update"), async (req, res) => {
 
 // Delete leave request
 router.delete("/:id", requirePermission("hr:delete"), async (req, res) => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const deleted = await LeaveRequestModel.findOneAndDelete({ id: req.params.id }).lean();
     if (!deleted) {
       return res.status(404).json({ message: "Leave request not found" });

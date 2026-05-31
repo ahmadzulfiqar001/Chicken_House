@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from "
 export type UserRole =
   | "admin"
   | "manager"
+  | "hr"
   | "rider"
   | "staff"
   | "user";
@@ -58,6 +59,12 @@ const demoAccounts: AuthContextType["demoAccounts"] = [
     email: "zubair@chickenhouse.com",
     password: "manager123",
     label: "Manager Demo",
+  },
+  {
+    role: "hr",
+    email: "hr@chickenhouse.com",
+    password: "hr123",
+    label: "HR Demo",
   },
   {
     role: "rider",

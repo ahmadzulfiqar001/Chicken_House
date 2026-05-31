@@ -2,7 +2,7 @@ import crypto from "crypto";
 import type { NextFunction, Request, Response } from "express";
 import { db } from "../../core/db";
 import { AuthSessionModel, CustomerModel, UserAccountModel } from "../../core/models";
-import { isMongoConnected } from "../../core/mongo";
+import { isMongoConfigured } from "../../core/mongo";
 
 const AUTH_COOKIE_NAME = "chicken_house_session";
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7;
@@ -98,7 +98,7 @@ export const getAuthenticatedUser = async (req: Request): Promise<AuthUser | nul
 
   const tokenHash = hashSessionToken(token);
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const session = await AuthSessionModel.findOne({
       accessTokenHash: tokenHash,
       isActive: true,
@@ -223,7 +223,7 @@ export const createSessionForUser = async (req: Request, user: AuthUser) => {
     expiresAt: new Date(Date.now() + SESSION_TTL_MS).toISOString(),
   };
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     await AuthSessionModel.create(sessionRecord);
     await UserAccountModel.updateOne(
       { id: user.id },
@@ -249,7 +249,7 @@ export const deactivateSession = async (req: Request) => {
 
   const tokenHash = hashSessionToken(token);
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     await AuthSessionModel.updateMany(
       { accessTokenHash: tokenHash, isActive: true },
       { isActive: false },
@@ -267,7 +267,7 @@ export const deactivateSession = async (req: Request) => {
 export const findAccountByEmail = async (email: string) => {
   const normalizedEmail = normalizeEmail(email);
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     return UserAccountModel.findOne({ email: normalizedEmail }).lean();
   }
 
@@ -315,7 +315,7 @@ export const createCustomerProfile = async ({
     activity: ["Customer account created."],
   };
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     await CustomerModel.create(customerProfile);
     return customerProfile.id;
   }

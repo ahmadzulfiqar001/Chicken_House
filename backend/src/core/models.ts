@@ -300,6 +300,22 @@ const orderSchema = new Schema(
     time: { type: String, default: () => new Date().toISOString() },
     type: { type: String, default: "Delivery" },
     paymentMethod: { type: String, default: "Cash" },
+    // Local payment verification flow (bank transfer is verified by admin/manager).
+    paymentStatus: {
+      type: String,
+      enum: ["Unpaid", "Pending Verification", "Verified", "Rejected"],
+      default: "Unpaid",
+      index: true,
+    },
+    paymentReference: { type: String, default: "" },
+    paymentVerifiedBy: { type: String, default: "" },
+    paymentVerifiedAt: { type: String, default: "" },
+    paymentNote: { type: String, default: "" },
+    // Post-delivery customer feedback.
+    rating: { type: Number, default: 0 },
+    feedback: { type: String, default: "" },
+    reviewId: { type: String, default: "" },
+    ratedAt: { type: String, default: "" },
     details: { type: [orderDetailSchema], default: [] },
     branchId: { type: String, default: "" },
     deliveryAddress: { type: String, default: "" },

@@ -14,9 +14,9 @@ const BranchesModule = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-3xl font-bold text-dark">Branches Management</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-dark">Branches Management</h2>
           <p className="text-muted">Manage restaurant locations and performance.</p>
         </div>
         <button className="px-6 py-3 bg-primary text-white rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-primary/20">

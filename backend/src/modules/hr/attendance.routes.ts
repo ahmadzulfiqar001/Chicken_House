@@ -2,7 +2,7 @@ import express from "express";
 import { requirePermission } from "../auth/auth.service";
 import { db } from "../../core/db";
 import { AttendanceModel } from "../../core/models";
-import { isMongoConnected } from "../../core/mongo";
+import { isMongoConfigured } from "../../core/mongo";
 
 const router = express.Router();
 
@@ -10,7 +10,7 @@ const router = express.Router();
 router.get("/", requirePermission("hr:view"), async (req, res) => {
   const { staffId, date, month, year } = req.query;
   
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const filter: any = {};
     if (staffId) filter.staffId = Number(staffId);
     if (date) filter.date = date;
@@ -37,7 +37,7 @@ router.post("/clock-in", requirePermission("hr:update"), async (req, res) => {
   const today = new Date().toISOString().slice(0, 10);
   const currentTime = new Date().toTimeString().slice(0, 5);
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const existing = await AttendanceModel.findOne({ staffId, date: today }).lean();
     if (existing) {
       return res.status(400).json({ message: "Already clocked in today" });
@@ -85,7 +85,7 @@ router.post("/clock-out", requirePermission("hr:update"), async (req, res) => {
   const today = new Date().toISOString().slice(0, 10);
   const currentTime = new Date().toTimeString().slice(0, 5);
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const attendance = await AttendanceModel.findOne({ staffId, date: today });
     if (!attendance) {
       return res.status(404).json({ message: "No clock-in record found" });
@@ -97,7 +97,9 @@ router.post("/clock-out", requirePermission("hr:update"), async (req, res) => {
 
     const clockInTime = new Date(`2000-01-01T${attendance.clockIn}`);
     const clockOutTime = new Date(`2000-01-01T${currentTime}`);
-    const workHours = (clockOutTime.getTime() - clockInTime.getTime()) / (1000 * 60 * 60);
+    let workHours = (clockOutTime.getTime() - clockInTime.getTime()) / (1000 * 60 * 60);
+    if (workHours < 0) workHours += 24; // overnight shift rollover
+    workHours = Math.max(0, workHours);
 
     attendance.clockOut = currentTime;
     attendance.workHours = Math.round(workHours * 100) / 100;
@@ -127,7 +129,7 @@ router.post("/clock-out", requirePermission("hr:update"), async (req, res) => {
 
 // Mark attendance manually
 router.post("/", requirePermission("hr:create"), async (req, res) => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const newAttendance = {
       ...req.body,
       id: `ATT-${Date.now()}`,
@@ -148,7 +150,7 @@ router.post("/", requirePermission("hr:create"), async (req, res) => {
 
 // Update attendance
 router.patch("/:id", requirePermission("hr:update"), async (req, res) => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const updated = await AttendanceModel.findOneAndUpdate(
       { id: req.params.id },
       req.body,
@@ -173,7 +175,7 @@ router.patch("/:id", requirePermission("hr:update"), async (req, res) => {
 
 // Delete attendance
 router.delete("/:id", requirePermission("hr:delete"), async (req, res) => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const deleted = await AttendanceModel.findOneAndDelete({ id: req.params.id }).lean();
     if (!deleted) {
       return res.status(404).json({ message: "Attendance record not found" });

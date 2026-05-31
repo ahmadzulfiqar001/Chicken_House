@@ -3,7 +3,7 @@ import { requirePermission } from "../auth/auth.service";
 import { db } from "../../core/db";
 import { buildFinanceSummary } from "./finance.reporting";
 import { FinanceModel, OrderModel } from "../../core/models";
-import { isMongoConnected } from "../../core/mongo";
+import { isMongoConfigured } from "../../core/mongo";
 
 const router = express.Router();
 
@@ -42,7 +42,7 @@ const normalizeFinancePayload = (body: Record<string, unknown>) => {
 };
 
 router.get("/summary", requirePermission("finance:view"), async (_req, res) => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const [transactions, orders] = await Promise.all([
       FinanceModel.find().sort({ date: -1 }).lean(),
       OrderModel.find().lean(),
@@ -55,7 +55,7 @@ router.get("/summary", requirePermission("finance:view"), async (_req, res) => {
 });
 
 router.get("/", requirePermission("finance:view"), async (req, res) => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const transactions = await FinanceModel.find().sort({ date: -1 }).lean();
     return res.json(transactions);
   }
@@ -75,7 +75,7 @@ router.post("/", requirePermission("finance:create"), async (req, res) => {
     id: `TX-${Date.now()}`,
   };
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const created = await FinanceModel.create(newTx);
     return res.status(201).json(created.toObject());
   }
@@ -91,7 +91,7 @@ router.patch("/:id", requirePermission("finance:update"), async (req, res) => {
     return res.status(400).json({ message: normalized.error });
   }
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const updated = await FinanceModel.findOneAndUpdate(
       { id: req.params.id },
       normalized.data,
@@ -121,7 +121,7 @@ router.patch("/:id", requirePermission("finance:update"), async (req, res) => {
 });
 
 router.delete("/:id", requirePermission("finance:delete"), async (req, res) => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const deleted = await FinanceModel.findOneAndDelete({ id: req.params.id }).lean();
 
     if (!deleted) {

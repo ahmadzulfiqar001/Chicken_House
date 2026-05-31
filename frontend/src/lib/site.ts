@@ -20,6 +20,31 @@ export const siteConfig = {
     instagram: "",
     twitter: "",
   },
+  // Local payment accounts shown at checkout for the non-cash methods.
+  // `method` matches the value selected in the checkout payment dropdown.
+  bankAccounts: [
+    {
+      method: "Easypaisa",
+      bank: "Easypaisa",
+      accountTitle: "Chicken House",
+      accountNumber: "0312-3456789",
+      note: "Include your order ID in the transaction",
+    },
+    {
+      method: "JazzCash",
+      bank: "JazzCash",
+      accountTitle: "Chicken House",
+      accountNumber: "0300-1234567",
+      note: "Include your order ID in the transaction",
+    },
+    {
+      method: "Bank Transfer (HBL)",
+      bank: "HBL",
+      accountTitle: "Chicken House",
+      accountNumber: "12345678901",
+      note: "Include your order ID in the transaction",
+    },
+  ],
   imageFallback: "/restaurant-placeholder.svg",
   aboutHeroImage: "/about-hero.svg",
   aboutAmbienceImage: "/about-ambience.svg",

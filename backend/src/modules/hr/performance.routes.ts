@@ -2,7 +2,7 @@ import express from "express";
 import { requirePermission } from "../auth/auth.service";
 import { db } from "../../core/db";
 import { PerformanceReviewModel, StaffModel } from "../../core/models";
-import { isMongoConnected } from "../../core/mongo";
+import { isMongoConfigured } from "../../core/mongo";
 
 const router = express.Router();
 
@@ -10,7 +10,7 @@ const router = express.Router();
 router.get("/", requirePermission("hr:view"), async (req, res) => {
   const { staffId } = req.query;
   
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const filter: any = {};
     if (staffId) filter.staffId = Number(staffId);
     
@@ -31,7 +31,7 @@ router.post("/", requirePermission("hr:create"), async (req, res) => {
   // Calculate overall score
   const overallScore = ((punctuality + quality + teamwork + communication) / 4).toFixed(1);
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const newReview = {
       ...req.body,
       id: `PR-${Date.now()}`,
@@ -68,7 +68,7 @@ router.post("/", requirePermission("hr:create"), async (req, res) => {
 
 // Update performance review
 router.patch("/:id", requirePermission("hr:update"), async (req, res) => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     // Recalculate overall score if metrics are updated
     if (req.body.punctuality || req.body.quality || req.body.teamwork || req.body.communication) {
       const review = await PerformanceReviewModel.findOne({ id: req.params.id });
@@ -132,7 +132,7 @@ router.patch("/:id", requirePermission("hr:update"), async (req, res) => {
 
 // Delete performance review
 router.delete("/:id", requirePermission("hr:delete"), async (req, res) => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const deleted = await PerformanceReviewModel.findOneAndDelete({ id: req.params.id }).lean();
     if (!deleted) {
       return res.status(404).json({ message: "Performance review not found" });

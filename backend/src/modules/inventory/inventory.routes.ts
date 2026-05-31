@@ -3,7 +3,7 @@ import { requirePermission } from "../auth/auth.service";
 import { db } from "../../core/db";
 import { buildInventoryReport, enrichInventoryItems, getVendorPaymentStatus } from "./inventory.reporting";
 import { InventoryModel, MenuModel, OrderModel, VendorPurchaseModel } from "../../core/models";
-import { isMongoConnected } from "../../core/mongo";
+import { isMongoConfigured } from "../../core/mongo";
 
 const router = express.Router();
 
@@ -101,7 +101,7 @@ const adjustInventoryStock = async (itemName: string, delta: number, vendorName?
     return;
   }
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const item = await InventoryModel.findOne({ name: itemName });
 
     if (!item) {
@@ -133,7 +133,7 @@ const adjustInventoryStock = async (itemName: string, delta: number, vendorName?
 };
 
 const loadInventoryContext = async () => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const [inventory, orders, menu, vendors] = await Promise.all([
       InventoryModel.find().sort({ id: 1 }).lean(),
       OrderModel.find().lean(),
@@ -164,7 +164,7 @@ router.get("/reports", requirePermission("inventory:view"), async (req, res) => 
 });
 
 router.get("/vendors", requirePermission("inventory:view"), async (_req, res) => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const entries = await VendorPurchaseModel.find().sort({ purchaseDate: -1 }).lean();
     return res.json(entries);
   }
@@ -186,7 +186,7 @@ router.post("/vendors", requirePermission("inventory:create"), async (req, res) 
 
   await adjustInventoryStock(record.itemName, record.quantityReceived, record.vendorName);
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const created = await VendorPurchaseModel.create(record);
     return res.status(201).json(created.toObject());
   }
@@ -202,7 +202,7 @@ router.patch("/vendors/:id", requirePermission("inventory:update"), async (req, 
     return res.status(400).json({ message: normalized.error });
   }
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const existing = await VendorPurchaseModel.findOne({ id: req.params.id });
 
     if (!existing) {
@@ -250,7 +250,7 @@ router.patch("/vendors/:id", requirePermission("inventory:update"), async (req, 
 });
 
 router.delete("/vendors/:id", requirePermission("inventory:delete"), async (req, res) => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const existing = await VendorPurchaseModel.findOne({ id: req.params.id });
 
     if (!existing) {
@@ -280,7 +280,7 @@ router.post("/", requirePermission("inventory:create"), async (req, res) => {
     return res.status(400).json({ message: normalized.error });
   }
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const latest = await InventoryModel.findOne().sort({ id: -1 }).select("id").lean();
     const nextId = (latest?.id ?? 0) + 1;
 
@@ -308,7 +308,7 @@ router.patch("/:id", requirePermission("inventory:update"), async (req, res) => 
     return res.status(400).json({ message: normalized.error });
   }
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const updated = await InventoryModel.findOneAndUpdate(
       { id: Number(req.params.id) },
       normalized.data,
@@ -338,7 +338,7 @@ router.patch("/:id", requirePermission("inventory:update"), async (req, res) => 
 });
 
 router.delete("/:id", requirePermission("inventory:delete"), async (req, res) => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const deleted = await InventoryModel.findOneAndDelete({ id: Number(req.params.id) }).lean();
 
     if (!deleted) {

@@ -2,16 +2,17 @@ import express from "express";
 import { hashPassword, normalizeEmailInput, requirePermission } from "../auth/auth.service";
 import { db } from "../../core/db";
 import { CustomerModel, StaffModel, UserAccountModel } from "../../core/models";
-import { isMongoConnected } from "../../core/mongo";
+import { isMongoConfigured } from "../../core/mongo";
 import type { UserRole } from "../../core/permissions";
 
 const router = express.Router();
 
-const staffRoles: UserRole[] = ["manager", "rider", "staff"];
+const staffRoles: UserRole[] = ["manager", "hr", "rider", "staff"];
 
 const roleLabelMap: Record<UserRole, string> = {
   admin: "Admin",
   manager: "Manager / Branch Supervisor",
+  hr: "HR / Human Resources",
   rider: "Rider / Delivery Staff",
   staff: "General Staff",
   user: "Customer",
@@ -20,6 +21,7 @@ const roleLabelMap: Record<UserRole, string> = {
 const roleDepartmentMap: Record<UserRole, string> = {
   admin: "Administration",
   manager: "Management",
+  hr: "Human Resources",
   rider: "Delivery",
   staff: "Operations",
   user: "Customer",
@@ -28,6 +30,7 @@ const roleDepartmentMap: Record<UserRole, string> = {
 const roleShiftMap: Record<UserRole, string> = {
   admin: "Morning",
   manager: "Evening",
+  hr: "Morning",
   rider: "Night",
   staff: "Evening",
   user: "Morning",
@@ -170,7 +173,7 @@ const attachLinkedProfile = (user: Record<string, unknown>) => {
 };
 
 router.get("/", requirePermission("users:view"), async (req, res) => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const users = await UserAccountModel.find()
       .select("-passwordHash")
       .sort({ createdAt: -1 })
@@ -183,7 +186,7 @@ router.get("/", requirePermission("users:view"), async (req, res) => {
 });
 
 router.get("/:id", requirePermission("users:view"), async (req, res) => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const user = await UserAccountModel.findOne({ id: req.params.id })
       .select("-passwordHash")
       .lean();
@@ -220,11 +223,11 @@ router.post("/", requirePermission("users:create"), async (req, res) => {
     return res.status(400).json({ message: "Name and email are required" });
   }
 
-  if (!["admin", "manager", "rider", "staff", "user"].includes(role)) {
+  if (!["admin", "manager", "hr", "rider", "staff", "user"].includes(role)) {
     return res.status(400).json({ message: "Invalid role selected." });
   }
 
-  const existing = isMongoConnected()
+  const existing = isMongoConfigured()
     ? await UserAccountModel.findOne({ email }).lean()
     : db.userAccounts.find((entry) => String(entry.email).toLowerCase() === email);
 
@@ -259,7 +262,7 @@ router.post("/", requirePermission("users:create"), async (req, res) => {
   };
 
   if (isStaffRole(role)) {
-    if (isMongoConnected()) {
+    if (isMongoConfigured()) {
       const latest = await StaffModel.findOne().sort({ id: -1 }).select("id").lean();
       const staffId = Number(latest?.id ?? 0) + 1;
       await StaffModel.create(
@@ -306,7 +309,7 @@ router.post("/", requirePermission("users:create"), async (req, res) => {
     const customerProfileId = `customer-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     nextUser.customerProfileId = customerProfileId;
 
-    if (isMongoConnected()) {
+    if (isMongoConfigured()) {
       await CustomerModel.create(
         buildCustomerRecord({
           id: customerProfileId,
@@ -327,7 +330,7 @@ router.post("/", requirePermission("users:create"), async (req, res) => {
     }
   }
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const created = await UserAccountModel.create(nextUser);
     return res.status(201).json(sanitizeUser(created.toObject()));
   }
@@ -337,9 +340,9 @@ router.post("/", requirePermission("users:create"), async (req, res) => {
 });
 
 router.patch("/:id", requirePermission("users:update"), async (req, res) => {
-  const allowedRoles: UserRole[] = ["admin", "manager", "rider", "staff", "user"];
+  const allowedRoles: UserRole[] = ["admin", "manager", "hr", "rider", "staff", "user"];
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const user = await UserAccountModel.findOne({ id: req.params.id });
 
     if (!user) {
@@ -457,7 +460,7 @@ router.patch("/:id", requirePermission("users:update"), async (req, res) => {
 });
 
 router.delete("/:id", requirePermission("users:delete"), async (req, res) => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const deleted = await UserAccountModel.findOneAndDelete({ id: req.params.id })
       .select("-passwordHash")
       .lean();

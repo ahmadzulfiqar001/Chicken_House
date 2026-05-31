@@ -42,6 +42,7 @@ import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/layout/ProtectedRoute";
 import { ToastProvider } from "./components/layout/ToastProvider";
+import CookieConsent from "./components/layout/CookieConsent";
 
 const Home = () => (
   <motion.div
@@ -96,6 +97,7 @@ const PublicLayout = () => (
     <Footer />
     <WhatsAppBot />
     <WhatsAppButton />
+    <CookieConsent />
   </>
 );
 
@@ -135,11 +137,11 @@ function App() {
                   <Route path="*" element={<NotFoundPage />} />
                 </Route>
 
-                {/* Backoffice Dashboard — admin, manager, staff, rider ke liye */}
+                {/* Backoffice Dashboard — admin, manager, hr, staff, rider ke liye */}
                 <Route
                   path="/admin"
                   element={
-                    <ProtectedRoute allow={["admin", "manager", "rider", "staff"]}>
+                    <ProtectedRoute allow={["admin", "manager", "hr", "rider", "staff"]}>
                       <AdminDashboard />
                     </ProtectedRoute>
                   }

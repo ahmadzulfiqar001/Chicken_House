@@ -6,6 +6,7 @@ import {
   Clock3,
   FileText,
   LogOut,
+  Menu,
   Send,
   ShieldAlert,
   User,
@@ -159,6 +160,7 @@ const StaffWorkspace = () => {
   const navigate = useNavigate();
   const currentRole = user?.role ?? "staff";
   const [activeTab, setActiveTab] = useState<WorkspaceTab>("dashboard");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [summary, setSummary] = useState<SummaryPayload | null>(null);
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
   const [leaves, setLeaves] = useState<LeaveRecord[]>([]);
@@ -362,12 +364,43 @@ const StaffWorkspace = () => {
   }
 
   if (!summary) {
-    return <div className="min-h-screen bg-surface pt-40 text-center text-muted">{error || "Unable to open staff workspace."}</div>;
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-5 bg-surface px-4 text-center">
+        <p className="max-w-md text-muted">{error || "Unable to open staff workspace."}</p>
+        <div className="flex flex-wrap justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => void loadData()}
+            className="rounded-full bg-primary px-6 py-3 font-bold text-white transition hover:bg-primary-strong"
+          >
+            Retry
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              void logout();
+              navigate("/login");
+            }}
+            className="rounded-full border border-gray-200 px-6 py-3 font-bold text-dark transition hover:bg-white"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-surface flex">
-      <aside className="fixed inset-y-0 left-0 z-40 w-[18rem] border-r border-white/10 bg-dark px-5 py-6 text-white shadow-2xl">
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-40 bg-black/50 md:hidden" onClick={() => setSidebarOpen(false)} aria-hidden="true" />
+      )}
+
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 flex w-[18rem] flex-col overflow-y-auto border-r border-white/10 bg-dark px-5 py-6 text-white shadow-2xl transition-transform duration-300 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0`}
+      >
         <div className="flex items-center gap-3">
           <img src="/logo.jpg" alt="Chicken House" className="h-12 w-12 rounded-2xl object-cover border border-white/10" />
           <div>
@@ -388,7 +421,10 @@ const StaffWorkspace = () => {
             <button
               key={tab.id}
               type="button"
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => {
+                setActiveTab(tab.id);
+                setSidebarOpen(false);
+              }}
               className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition-all ${
                 activeTab === tab.id
                   ? "bg-primary text-white shadow-lg shadow-primary/20"
@@ -414,7 +450,7 @@ const StaffWorkspace = () => {
         </button>
       </aside>
 
-      <main className="ml-[18rem] flex-1 p-8">
+      <main className="ml-0 md:ml-[18rem] flex-1 p-4 md:p-8">
         {snackbar ? (
           <div className="fixed right-6 top-6 z-[70] max-w-sm rounded-[1.5rem] border border-white/70 bg-white px-5 py-4 shadow-2xl shadow-dark/15">
             <p className={`text-sm font-bold ${snackbar.tone === "success" ? "text-green-700" : "text-red-700"}`}>
@@ -426,9 +462,19 @@ const StaffWorkspace = () => {
 
         <header className="sticky top-0 z-20 mb-8 rounded-[2rem] border border-gray-100 bg-white/85 px-6 py-5 shadow-lg shadow-dark/5 backdrop-blur-md">
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.24em] text-muted">{summary.roleLabel}</p>
-              <h1 className="mt-2 text-3xl font-display font-bold text-dark">{tabs.find((tab) => tab.id === activeTab)?.label}</h1>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setSidebarOpen(true)}
+                className="md:hidden rounded-lg p-2 text-muted hover:bg-gray-100"
+                aria-label="Open menu"
+              >
+                <Menu size={22} />
+              </button>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.24em] text-muted">{summary.roleLabel}</p>
+                <h1 className="mt-2 text-2xl sm:text-3xl font-display font-bold text-dark">{tabs.find((tab) => tab.id === activeTab)?.label}</h1>
+              </div>
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <span className="rounded-full bg-surface px-4 py-3 text-sm font-bold text-dark">

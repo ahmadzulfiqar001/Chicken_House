@@ -1,3 +1,4 @@
+import "express-async-errors"; // must load first: routes async throws -> error middleware
 import express from "express";
 import http from "http";
 import { createServer as createViteServer } from "vite";
@@ -30,13 +31,28 @@ const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, "..");
 const frontendRoot = path.join(projectRoot, "frontend");
 
+// Safety net: a single failing request must never take down the whole server.
+process.on("unhandledRejection", (reason) => {
+  console.error("Unhandled promise rejection:", reason);
+});
+process.on("uncaughtException", (error) => {
+  console.error("Uncaught exception:", error);
+});
+
 async function startServer() {
   await connectToMongo();
 
   const app = express();
   const PORT = 3000;
 
-  app.use(express.json());
+  // Capture the raw body so the WhatsApp webhook can verify its HMAC signature.
+  app.use(
+    express.json({
+      verify: (req, _res, buf) => {
+        (req as express.Request & { rawBody?: Buffer }).rawBody = buf;
+      },
+    }),
+  );
 
   // API Routes
   app.get("/api/health", (req, res) => {
@@ -68,6 +84,21 @@ async function startServer() {
   app.use("/api/users", usersRoutes);
   app.use("/api/staff-panel", staffPanelRoutes);
   app.use("/api/operations", operationsRoutes);
+
+  // Unknown API route -> JSON 404 (don't fall through to the SPA HTML).
+  app.use("/api", (_req, res) => {
+    res.status(404).json({ message: "Not found." });
+  });
+
+  // Central API error handler — clean 500, never leak stack traces to clients.
+  app.use(
+    "/api",
+    (err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+      console.error("API error:", err?.message ?? err);
+      if (res.headersSent) return;
+      res.status(500).json({ message: "Something went wrong. Please try again." });
+    },
+  );
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {

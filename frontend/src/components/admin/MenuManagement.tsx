@@ -374,7 +374,7 @@ const MenuManagement = () => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.96 }}
               onSubmit={saveItem}
-              className="relative w-full max-w-5xl rounded-[2.5rem] bg-white p-8 shadow-2xl"
+              className="relative w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] bg-white p-6 sm:p-8 shadow-2xl"
             >
               <h3 className="text-3xl font-bold text-dark">{editing ? "Edit Menu Item" : "Add Menu Item"}</h3>
               <p className="mt-2 text-sm text-muted">

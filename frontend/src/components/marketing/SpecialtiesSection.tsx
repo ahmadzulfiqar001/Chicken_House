@@ -42,7 +42,7 @@ const SpecialtiesSection = () => {
         <div className="flex flex-col md:flex-row justify-between items-end mb-24 gap-12 border-b border-white/10 pb-12">
           <div className="max-w-3xl">
             <span className="text-accent font-mono text-xs uppercase tracking-[0.5em] mb-8 block">The Catalog</span>
-            <h2 className="text-7xl md:text-9xl font-anton uppercase leading-[0.8] tracking-tighter mb-12">
+            <h2 className="text-5xl sm:text-7xl md:text-9xl font-anton uppercase leading-[0.85] sm:leading-[0.8] tracking-tighter mb-8 md:mb-12">
               Signature <br />
               <span className="text-stroke text-accent">Specialties</span>
             </h2>

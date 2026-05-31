@@ -1,6 +1,7 @@
 import { db } from "../../core/db";
 import { AssistantConversationModel, MenuModel, OrderModel } from "../../core/models";
-import { isMongoConnected } from "../../core/mongo";
+import { isMongoConfigured } from "../../core/mongo";
+import { generateGroqReply, isGroqConfigured } from "./groq-service";
 
 export type AssistantMessage =
   | { type: "text"; text: string }
@@ -22,7 +23,7 @@ const WHATSAPP_TEXT = "For WhatsApp, call or chat at +92 333 4880840.";
 const normalize = (value: string) => value.toLowerCase().trim();
 
 const getMenuItems = async () => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     return MenuModel.find().lean();
   }
 
@@ -30,7 +31,7 @@ const getMenuItems = async () => {
 };
 
 const getOrders = async () => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     return OrderModel.find().lean();
   }
 
@@ -38,7 +39,7 @@ const getOrders = async () => {
 };
 
 const getAssistantSessions = async () => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     return AssistantConversationModel.find().sort({ updatedAt: -1 }).lean();
   }
 
@@ -361,11 +362,13 @@ const buildFallbackResponse = (): AssistantResponse => ({
   ],
 });
 
-export const getChickenHouseAssistantReply = async (rawMessage = ""): Promise<AssistantResponse> => {
+// Deterministic rule-based replies. Used directly by the WhatsApp bot (kept simple,
+// no LLM) and as the fallback for the Groq-powered website chatbot.
+export const getRuleBasedReply = async (rawMessage = ""): Promise<AssistantResponse> => {
   const message = normalize(rawMessage);
   const menuItems = await getMenuItems();
 
-  if (!message || /(hi|hello|salam|assalam|aoa|hey)/.test(message)) {
+  if (!message || /\b(hi|hello|salam|assalam|aoa|hey)\b/.test(message)) {
     return buildWelcomeResponse(menuItems);
   }
 
@@ -444,6 +447,27 @@ export const getChickenHouseAssistantReply = async (rawMessage = ""): Promise<As
   return buildFallbackResponse();
 };
 
+/**
+ * Primary assistant entry point used by the web chat widget and the WhatsApp bot.
+ * Uses the Groq LLM for general conversation when GROQ_API_KEY is set; keeps order
+ * tracking and the welcome flow deterministic; always falls back to the rule-based
+ * engine on any error so the assistant never breaks.
+ */
+export const getChickenHouseAssistantReply = async (rawMessage = ""): Promise<AssistantResponse> => {
+  const message = normalize(rawMessage);
+
+  if (isGroqConfigured() && message && !/ord-\d+/i.test(message)) {
+    try {
+      const reply = await generateGroqReply(rawMessage, await getMenuItems());
+      if (reply) return reply;
+    } catch (error) {
+      console.error("Groq reply failed, using rule-based fallback:", (error as Error).message);
+    }
+  }
+
+  return getRuleBasedReply(rawMessage);
+};
+
 export const getChickenHouseWelcomePack = async () => buildWelcomeResponse(await getMenuItems());
 
 type ConversationMessage = {
@@ -481,7 +505,7 @@ export const logAssistantConversation = async ({
   const normalizedCustomerNumber = customerNumber?.trim() || "unknown-customer";
   const normalizedAdminNumber = adminNumber?.trim() || "+92 333 4880840";
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     let session = await AssistantConversationModel.findOne({
       customerNumber: normalizedCustomerNumber,
       adminNumber: normalizedAdminNumber,

@@ -14,12 +14,12 @@ const EcommerceModule = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
         <div>
-          <h2 className="text-3xl font-bold text-dark">E-commerce Management</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-dark">E-commerce Management</h2>
           <p className="text-muted">Manage online orders, shipping, and delivery.</p>
         </div>
-        <div className="flex gap-4">
+        <div className="flex flex-wrap gap-3">
           <button className="px-6 py-3 bg-white text-dark rounded-xl font-bold flex items-center gap-2 shadow-sm border border-gray-100">
             <Download size={20} />
             Export Orders

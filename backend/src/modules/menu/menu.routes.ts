@@ -4,7 +4,7 @@ import { db } from "../../core/db";
 import { imageFor } from "../../core/catalog";
 import { getMenuItemsWithAvailability } from "./menu.service";
 import { MenuModel } from "../../core/models";
-import { isMongoConnected } from "../../core/mongo";
+import { isMongoConfigured } from "../../core/mongo";
 
 const router = express.Router();
 
@@ -96,7 +96,7 @@ router.post("/", requirePermission("menu:create"), async (req, res) => {
       ),
   };
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const created = await MenuModel.create(newItem);
     return res.status(201).json(created.toObject());
   }
@@ -113,7 +113,7 @@ router.patch("/:id", requirePermission("menu:update"), async (req, res) => {
     return res.status(400).json({ message: normalized.error });
   }
 
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const existing = await MenuModel.findOne({ id: req.params.id }).lean();
 
     if (!existing) {
@@ -165,7 +165,7 @@ router.patch("/:id", requirePermission("menu:update"), async (req, res) => {
 
 // Delete menu item - requires menu:delete permission
 router.delete("/:id", requirePermission("menu:delete"), async (req, res) => {
-  if (isMongoConnected()) {
+  if (isMongoConfigured()) {
     const deleted = await MenuModel.findOneAndDelete({ id: req.params.id }).lean();
 
     if (!deleted) {

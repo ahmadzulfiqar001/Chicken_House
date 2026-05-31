@@ -7,6 +7,7 @@ import {
   Clock3,
   Layers3,
   LogOut,
+  Menu,
   Package,
   RefreshCw,
   ShieldCheck,
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useRealtime } from "../../lib/realtime";
 
 type OverviewPayload = {
   panelRole: string;
@@ -126,6 +128,8 @@ const ManagerWorkspace = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [overview, setOverview] = useState<OverviewPayload | null>(null);
+  const [pendingPayments, setPendingPayments] = useState<Array<Record<string, any>>>([]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const tabs = useMemo(
     () => [
@@ -160,21 +164,91 @@ const ManagerWorkspace = () => {
     }
   };
 
+  const loadPendingPayments = async () => {
+    try {
+      const response = await fetch("/api/orders");
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        setPendingPayments(
+          data.filter((order: Record<string, any>) => order.paymentStatus === "Pending Verification"),
+        );
+      }
+    } catch (loadError) {
+      console.error(loadError);
+    }
+  };
+
+  const handlePayment = async (orderId: string, action: "verify" | "reject") => {
+    try {
+      const response = await fetch(`/api/orders/${orderId}/payment`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(String(data.message ?? "Payment update failed."));
+      }
+      await Promise.all([loadPendingPayments(), loadOverview()]);
+    } catch (paymentError) {
+      console.error(paymentError);
+      setError(paymentError instanceof Error ? paymentError.message : "Payment update failed.");
+    }
+  };
+
   useEffect(() => {
     void loadOverview();
+    void loadPendingPayments();
   }, []);
+
+  // Live: refresh overview + pending payments whenever any order changes.
+  useRealtime("orders", () => {
+    void loadOverview();
+    void loadPendingPayments();
+  });
 
   if (loading && !overview) {
     return <div className="min-h-screen bg-surface pt-40 text-center text-muted">Loading manager workspace...</div>;
   }
 
   if (!overview) {
-    return <div className="min-h-screen bg-surface pt-40 text-center text-muted">{error || "Unable to open manager workspace."}</div>;
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-5 bg-surface px-4 text-center">
+        <p className="max-w-md text-muted">{error || "Unable to open manager workspace."}</p>
+        <div className="flex flex-wrap justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => void loadOverview()}
+            className="rounded-full bg-primary px-6 py-3 font-bold text-white transition hover:bg-primary-strong"
+          >
+            Retry
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              void logout();
+              navigate("/login");
+            }}
+            className="rounded-full border border-gray-200 px-6 py-3 font-bold text-dark transition hover:bg-white"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-surface flex">
-      <aside className="fixed inset-y-0 left-0 z-40 w-[19rem] border-r border-white/10 bg-dark px-5 py-6 text-white shadow-2xl">
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-40 bg-black/50 md:hidden" onClick={() => setSidebarOpen(false)} aria-hidden="true" />
+      )}
+
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 flex w-[19rem] flex-col overflow-y-auto border-r border-white/10 bg-dark px-5 py-6 text-white shadow-2xl transition-transform duration-300 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0`}
+      >
         <div className="flex items-center gap-3">
           <img src="/logo.jpg" alt="Chicken House" className="h-12 w-12 rounded-2xl border border-white/10 object-cover" />
           <div>
@@ -203,7 +277,10 @@ const ManagerWorkspace = () => {
             <button
               key={tab.id}
               type="button"
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => {
+                setActiveTab(tab.id);
+                setSidebarOpen(false);
+              }}
               className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition-all ${
                 activeTab === tab.id
                   ? "bg-primary text-white shadow-lg shadow-primary/20"
@@ -229,14 +306,24 @@ const ManagerWorkspace = () => {
         </button>
       </aside>
 
-      <main className="ml-[19rem] flex-1 p-8">
+      <main className="ml-0 md:ml-[19rem] flex-1 p-4 md:p-8">
         <header className="sticky top-0 z-20 mb-8 rounded-[2rem] border border-gray-100 bg-white/85 px-6 py-5 shadow-lg shadow-dark/5 backdrop-blur-md">
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.24em] text-muted">Manager Operations Desk</p>
-              <h1 className="mt-2 text-3xl font-display font-bold text-dark">
-                {tabs.find((tab) => tab.id === activeTab)?.label}
-              </h1>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setSidebarOpen(true)}
+                className="md:hidden rounded-lg p-2 text-muted hover:bg-gray-100"
+                aria-label="Open menu"
+              >
+                <Menu size={22} />
+              </button>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.24em] text-muted">Manager Operations Desk</p>
+                <h1 className="mt-2 text-2xl sm:text-3xl font-display font-bold text-dark">
+                  {tabs.find((tab) => tab.id === activeTab)?.label}
+                </h1>
+              </div>
             </div>
             <button
               type="button"
@@ -253,6 +340,58 @@ const ManagerWorkspace = () => {
             </div>
           ) : null}
         </header>
+
+        {pendingPayments.length > 0 && (
+          <div className="mb-8 rounded-[2.5rem] border border-amber-200 bg-amber-50/70 p-8 shadow-xl shadow-dark/5">
+            <div className="flex items-center gap-3">
+              <ShieldCheck className="text-amber-600" />
+              <h2 className="text-xl font-bold text-dark">
+                Payments to verify <span className="text-amber-600">({pendingPayments.length})</span>
+              </h2>
+            </div>
+            <p className="mt-1 text-sm text-muted">
+              Confirm the bank transfer was received, then verify or reject. The customer is updated live.
+            </p>
+            <div className="mt-6 space-y-3">
+              {pendingPayments.map((order) => (
+                <div
+                  key={String(order.id)}
+                  className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-amber-100 bg-white px-5 py-4"
+                >
+                  <div>
+                    <p className="font-bold text-dark">
+                      {String(order.id)} · {String(order.customer ?? "")}
+                    </p>
+                    <p className="text-sm text-muted">
+                      Rs. {Number(order.total ?? 0).toLocaleString()} · {String(order.paymentMethod ?? "Bank Transfer")}
+                      {order.paymentReference ? (
+                        <>
+                          {" "}· Ref: <span className="font-mono font-bold text-dark">{String(order.paymentReference)}</span>
+                        </>
+                      ) : null}
+                    </p>
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => void handlePayment(String(order.id), "verify")}
+                      className="rounded-xl bg-green-500 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-green-600"
+                    >
+                      Verify
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handlePayment(String(order.id), "reject")}
+                      className="rounded-xl bg-red-50 px-5 py-2.5 text-sm font-bold text-red-500 transition hover:bg-red-500 hover:text-white"
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {activeTab === "overview" ? (
           <div className="space-y-8">
