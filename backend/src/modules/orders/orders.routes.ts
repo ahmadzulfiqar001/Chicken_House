@@ -8,13 +8,15 @@ import {
 } from "../auth/auth.service";
 import { db } from "../../core/db";
 import { priceOrderDetails, reserveInventoryForOrder } from "../menu/menu.service";
-import { CustomerModel, FinanceModel, OrderModel, ReviewModel } from "../../core/models";
+import { CustomerModel, FinanceModel, OrderModel, ReviewModel, StaffModel } from "../../core/models";
 import { isMongoConfigured } from "../../core/mongo";
 import { calculateDeliveryFee, validateOrderPayload } from "./orders.pricing";
 import { deliverNotification } from "../notifications/notify.service";
+import { emitChange } from "../../core/realtime";
 
 const router = express.Router();
 const validStatuses = ["Pending", "Confirmed", "Preparing", "Out for Delivery", "Delivered", "Cancelled"];
+const staffOrderRoles = new Set(["staff", "rider"]);
 
 // Every non-cash method (Easypaisa, JazzCash, bank transfer) is a manual transfer
 // that admin/manager must verify before the order proceeds. Cash on Delivery does not.
@@ -23,6 +25,31 @@ const requiresPaymentVerification = (method: string) =>
 
 const findCustomerDocument = async (email: string) =>
   CustomerModel.findOne({ email: email.toLowerCase() });
+
+const resolveStaffMemberId = async (authUser: Awaited<ReturnType<typeof getAuthenticatedUser>>) => {
+  const linkedId = Number(authUser?.staffMemberId ?? 0);
+  if (linkedId) return linkedId;
+  if (!authUser?.email) return 0;
+
+  if (isMongoConfigured()) {
+    const staffMember = await StaffModel.findOne({ email: authUser.email.toLowerCase() }).lean();
+    return Number(staffMember?.id ?? 0);
+  }
+
+  return Number(
+    db.staff.find((member) => String(member.email ?? "").toLowerCase() === authUser.email.toLowerCase())?.id ?? 0,
+  );
+};
+
+const canAccessStaffOrder = (order: Record<string, unknown>, role: string, staffMemberId: number) => {
+  if (!staffOrderRoles.has(role)) return true;
+  if (!staffMemberId) return false;
+
+  const assignedStaffId = Number(order.assignedStaffId ?? 0);
+  const assignedRole = String(order.assignedRole ?? "").toLowerCase();
+
+  return assignedStaffId === staffMemberId || (!assignedStaffId && assignedRole === role);
+};
 
 // Record a Sales credit in finance (used at placement for instant-pay methods,
 // and at verification time for bank transfers).
@@ -92,12 +119,20 @@ router.get("/", requirePermission("orders:view"), async (req, res) => {
   const authUser = await getAuthenticatedUser(req);
   const email = String(req.query.email ?? "").toLowerCase();
   const customerName = String(req.query.customer ?? "").toLowerCase();
+  const role = String(authUser?.role ?? "");
 
   if (isMongoConfigured()) {
     const query: Record<string, unknown> = {};
 
     if (authUser?.role === "user") {
       query.customerEmail = authUser.email.toLowerCase();
+    } else if (staffOrderRoles.has(role)) {
+      const staffMemberId = await resolveStaffMemberId(authUser);
+      if (!staffMemberId) return res.json([]);
+      query.$or = [
+        { assignedStaffId: staffMemberId },
+        { assignedStaffId: 0, assignedRole: role },
+      ];
     } else if (email && customerName) {
       query.$or = [
         { customerEmail: email },
@@ -119,6 +154,9 @@ router.get("/", requirePermission("orders:view"), async (req, res) => {
     filtered = filtered.filter(
       (order) => String(order.customerEmail ?? "").toLowerCase() === authUser.email.toLowerCase(),
     );
+  } else if (staffOrderRoles.has(role)) {
+    const staffMemberId = await resolveStaffMemberId(authUser);
+    filtered = filtered.filter((order) => canAccessStaffOrder(order, role, staffMemberId));
   } else if (email || customerName) {
     filtered = filtered.filter((order) => {
       const matchesEmail = email
@@ -326,7 +364,9 @@ router.post("/", async (req, res) => {
       await recordSaleCredit(orderRecord.id, total);
     }
 
-    return res.status(201).json(createdOrder.toObject());
+    const responseOrder = createdOrder.toObject();
+    emitChange("orders", { operationType: "insert", orderId: orderRecord.id });
+    return res.status(201).json(responseOrder);
   }
 
   db.orders.push(orderRecord);
@@ -382,6 +422,7 @@ router.post("/", async (req, res) => {
     await recordSaleCredit(orderRecord.id, total);
   }
 
+  emitChange("orders", { operationType: "insert", orderId: orderRecord.id });
   return res.status(201).json(orderRecord);
 });
 
@@ -416,6 +457,7 @@ router.patch("/:id/payment", requireRole(["admin", "manager"]), async (req, res)
       await recordSaleCredit(String(order.id), Number(order.total ?? 0));
     }
     await emailOrderDecision(order.toObject(), action, note);
+    emitChange("orders", { operationType: "update", orderId: String(order.id) });
     return res.json(order.toObject());
   }
 
@@ -429,6 +471,7 @@ router.patch("/:id/payment", requireRole(["admin", "manager"]), async (req, res)
     await recordSaleCredit(String(db.orders[index].id), Number(db.orders[index].total ?? 0));
   }
   await emailOrderDecision(db.orders[index], action, note);
+  emitChange("orders", { operationType: "update", orderId: String(db.orders[index].id) });
   return res.json(db.orders[index]);
 });
 
@@ -476,6 +519,7 @@ router.post("/:id/feedback", async (req, res) => {
     order.ratedAt = now;
     await order.save();
 
+    emitChange("orders", { operationType: "update", orderId: String(order.id) });
     return res.status(201).json({ message: "Thank you for your feedback!", rating, reviewId: review.id });
   }
 
@@ -493,6 +537,7 @@ router.post("/:id/feedback", async (req, res) => {
   const review = buildReview(order);
   const feedbackPatch: Record<string, unknown> = { rating, feedback: comment, reviewId: review.id, ratedAt: now };
   db.orders[index] = { ...db.orders[index], ...feedbackPatch };
+  emitChange("orders", { operationType: "update", orderId: String(db.orders[index].id) });
   return res.status(201).json({ message: "Thank you for your feedback!", rating, reviewId: review.id });
 });
 
@@ -538,6 +583,19 @@ router.patch("/:id", requirePermission("orders:update"), async (req, res) => {
   }
 
   if (isMongoConfigured()) {
+    const target = await OrderModel.findOne({ id: req.params.id }).lean();
+
+    if (!target) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    if (staffOrderRoles.has(String(actor?.role ?? ""))) {
+      const staffMemberId = await resolveStaffMemberId(actor ?? null);
+      if (!canAccessStaffOrder(target as Record<string, unknown>, String(actor?.role ?? ""), staffMemberId)) {
+        return res.status(403).json({ message: "You can update only orders assigned to your role." });
+      }
+    }
+
     const updated = await OrderModel.findOneAndUpdate(
       { id: req.params.id },
       nextPayload,
@@ -548,6 +606,7 @@ router.patch("/:id", requirePermission("orders:update"), async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
+    emitChange("orders", { operationType: "update", orderId: req.params.id });
     return res.json(updated);
   }
 
@@ -557,7 +616,15 @@ router.patch("/:id", requirePermission("orders:update"), async (req, res) => {
     return res.status(404).json({ message: "Order not found" });
   }
 
+  if (staffOrderRoles.has(String(actor?.role ?? ""))) {
+    const staffMemberId = await resolveStaffMemberId(actor ?? null);
+    if (!canAccessStaffOrder(db.orders[index], String(actor?.role ?? ""), staffMemberId)) {
+      return res.status(403).json({ message: "You can update only orders assigned to your role." });
+    }
+  }
+
   db.orders[index] = { ...db.orders[index], ...nextPayload };
+  emitChange("orders", { operationType: "update", orderId: req.params.id });
   return res.json(db.orders[index]);
 });
 
@@ -569,6 +636,7 @@ router.delete("/:id", requirePermission("orders:delete"), async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
+    emitChange("orders", { operationType: "delete", orderId: req.params.id });
     return res.json({ message: "Order deleted", order: deleted });
   }
 
@@ -579,6 +647,7 @@ router.delete("/:id", requirePermission("orders:delete"), async (req, res) => {
   }
 
   const [deleted] = db.orders.splice(index, 1);
+  emitChange("orders", { operationType: "delete", orderId: req.params.id });
   return res.json({ message: "Order deleted", order: deleted });
 });
 

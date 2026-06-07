@@ -1,6 +1,7 @@
 import express from "express";
 import { getRequestAuthUser, normalizeEmailInput, requireAuth } from "../auth/auth.service";
 import { findOne, insertDoc, loadAll, removeDoc, updateDoc, updateManyDocs } from "../../core/store";
+import { emitChange } from "../../core/realtime";
 
 const router = express.Router();
 
@@ -110,11 +111,31 @@ const deriveAttendanceStatus = (staffMember: { shift?: string }, checkInTime: st
   return inTotal > shiftTotal + 5 ? "Late" : "Present";
 };
 
+const toDateValue = (value: unknown) => {
+  const parsed = Date.parse(String(value ?? ""));
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const getNotificationSeenBy = (notification: Doc) => {
+  const seenBy = notification.metadata?.seenByStaffIds;
+  return Array.isArray(seenBy) ? seenBy.map(Number) : [];
+};
+
+const isStaffNotificationVisible = (notification: Doc) => {
+  const audience = String(notification.audience ?? "all");
+  const status = String(notification.status ?? "");
+
+  return ["staff", "all"].includes(audience) && status !== "Draft" && status !== "Failed";
+};
+
 const getVisibleNotices = async (role: string, staffMemberId: number) => {
   const canSeeAllNotices = role === "manager";
-  const notices = await loadAll("staffNotices");
+  const [notices, notifications] = await Promise.all([
+    loadAll("staffNotices"),
+    loadAll("notifications"),
+  ]);
 
-  return notices
+  const staffNotices: Doc[] = notices
     .filter(
       (notice) =>
         canSeeAllNotices ||
@@ -125,6 +146,21 @@ const getVisibleNotices = async (role: string, staffMemberId: number) => {
       ...notice,
       seen: (notice.seenBy ?? []).includes(staffMemberId),
     }));
+
+  const notificationNotices: Doc[] = notifications
+    .filter(isStaffNotificationVisible)
+    .map((notification) => ({
+      id: notification.id,
+      title: notification.title,
+      message: notification.message,
+      createdAt: notification.sentAt || notification.createdAt,
+      seen: getNotificationSeenBy(notification).includes(staffMemberId),
+      source: "notification",
+    }));
+
+  return [...staffNotices, ...notificationNotices].sort(
+    (left: Doc, right: Doc) => toDateValue(right.createdAt) - toDateValue(left.createdAt),
+  );
 };
 
 const buildRoleTasks = async (role: string, staffMemberId: number) => {
@@ -440,16 +476,36 @@ router.post("/notices/:id/seen", async (req, res) => {
 
   const notice = await findOne("staffNotices", { id: req.params.id });
 
-  if (!notice) {
+  const staffId = Number(context.staffMember.id);
+
+  if (notice) {
+    const seenBy: number[] = Array.isArray(notice.seenBy) ? notice.seenBy.map(Number) : [];
+
+    if (!seenBy.includes(staffId)) {
+      await updateDoc("staffNotices", { id: notice.id }, { seenBy: [...seenBy, staffId] });
+      await addActivityLog(context.staffMember as Doc, context.authUser.role, "Notice seen", `${context.staffMember.name} viewed notice ${notice.title}.`);
+    }
+
+    return res.json({ message: "Notice marked as seen." });
+  }
+
+  const notification = await findOne("notifications", { id: req.params.id });
+
+  if (!notification || !isStaffNotificationVisible(notification)) {
     return res.status(404).json({ message: "Notice not found." });
   }
 
-  const staffId = Number(context.staffMember.id);
-  const seenBy: number[] = Array.isArray(notice.seenBy) ? notice.seenBy.map(Number) : [];
+  const seenByStaffIds = getNotificationSeenBy(notification);
 
-  if (!seenBy.includes(staffId)) {
-    await updateDoc("staffNotices", { id: notice.id }, { seenBy: [...seenBy, staffId] });
-    await addActivityLog(context.staffMember as Doc, context.authUser.role, "Notice seen", `${context.staffMember.name} viewed notice ${notice.title}.`);
+  if (!seenByStaffIds.includes(staffId)) {
+    await updateDoc("notifications", { id: notification.id }, {
+      metadata: {
+        ...(notification.metadata ?? {}),
+        seenByStaffIds: [...seenByStaffIds, staffId],
+      },
+    });
+    emitChange("notifications", { operationType: "update" });
+    await addActivityLog(context.staffMember as Doc, context.authUser.role, "Notice seen", `${context.staffMember.name} viewed notice ${notification.title}.`);
   }
 
   return res.json({ message: "Notice marked as seen." });

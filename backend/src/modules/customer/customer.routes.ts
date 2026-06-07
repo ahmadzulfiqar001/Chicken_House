@@ -57,6 +57,11 @@ const ensureCustomerDocument = async (email: string, name?: string, phone?: stri
   return customer;
 };
 
+const withComputedOrderCount = <T extends Record<string, any>>(profile: T, orders: unknown[]) => ({
+  ...profile,
+  orderCount: Math.max(Number(profile.orderCount ?? 0), orders.length),
+});
+
 router.use(requireAuth);
 
 router.get("/", async (req, res) => {
@@ -75,7 +80,7 @@ router.get("/", async (req, res) => {
       .lean();
 
     return res.json({
-      profile: customer.toObject(),
+      profile: withComputedOrderCount(customer.toObject(), orders),
       orders,
     });
   }
@@ -86,7 +91,7 @@ router.get("/", async (req, res) => {
     .sort((a, b) => Date.parse(b.time) - Date.parse(a.time));
 
   return res.json({
-    profile: customer,
+    profile: withComputedOrderCount(customer, orders),
     orders,
   });
 });

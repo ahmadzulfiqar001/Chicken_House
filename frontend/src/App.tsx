@@ -23,6 +23,7 @@ import ProfilePage from "./pages/Profile";
 import GalleryPage from "./pages/Gallery";
 import ContactPage from "./pages/Contact";
 import AboutPage from "./pages/About";
+import CareerPage from "./pages/Career";
 import PrivacyPolicyPage from "./pages/PrivacyPolicy";
 import TermsPage from "./pages/Terms";
 import CookiesPage from "./pages/Cookies";
@@ -111,6 +112,7 @@ function App() {
                   <Route path="/booking" element={<BookingPage />} />
                   <Route path="/track" element={<OrderTrackingPage />} />
                   <Route path="/gallery" element={<GalleryPage />} />
+                  <Route path="/careers" element={<CareerPage />} />
                   <Route path="/contact" element={<ContactPage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/signup" element={<SignupPage />} />

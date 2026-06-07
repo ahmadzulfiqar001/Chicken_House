@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { Menu, X, ShoppingCart, Home, Utensils, Calendar, Image, Phone, Shield, Info } from "lucide-react";
+import { Menu, X, ShoppingCart, Home, Utensils, Calendar, Image, Phone, Shield, Info, Briefcase } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../context/AuthContext";
 
@@ -38,6 +38,7 @@ const Navbar = () => {
     { name: "About", icon: <Info size={18} />, href: "/about" },
     { name: "Gallery", icon: <Image size={18} />, href: "/gallery" },
     { name: "Booking", icon: <Calendar size={18} />, href: "/booking" },
+    { name: "Careers", icon: <Briefcase size={18} />, href: "/careers" },
     { name: "Contact", icon: <Phone size={18} />, href: "/contact" },
   ];
 

@@ -167,7 +167,7 @@ const ProfilePage = () => {
 
   const summaryCards = useMemo(
     () => [
-      { label: "Orders", value: customer?.orderCount ?? orders.length, icon: ShoppingBag },
+      { label: "Orders", value: Math.max(customer?.orderCount ?? 0, orders.length), icon: ShoppingBag },
       { label: "Wishlist", value: customer?.wishlist.length ?? 0, icon: Heart },
       { label: "Points", value: (customer?.loyaltyPoints ?? 0).toLocaleString(), icon: Sparkles },
       { label: "Tier", value: REWARD_TIERS.find(t => (customer?.loyaltyPoints ?? 0) >= t.minPoints && (customer?.loyaltyPoints ?? 0) <= t.maxPoints)?.icon ?? "🥉", icon: Trophy },

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useRealtime } from "../../lib/realtime";
 
 type AttendanceRecord = {
   id: string;
@@ -253,6 +254,10 @@ const StaffWorkspace = () => {
   useEffect(() => {
     void loadData();
   }, []);
+
+  useRealtime("notifications", () => {
+    void loadData();
+  });
 
   useEffect(() => {
     if (!summary) return;

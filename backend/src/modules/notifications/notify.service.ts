@@ -67,9 +67,11 @@ export const deliverNotification = async (params: {
   const { channel, title, message, recipients } = params;
   const result: DeliverResult = { channel, attempted: 0, delivered: 0, skipped: false, errors: [] };
 
-  // In-app notifications are persisted by the caller; nothing to send externally.
+  // In-app notifications are persisted by the caller; count them as delivered
+  // so the admin panel does not show a successful in-app notice as "Queued".
   if (channel === "in-app") {
-    result.skipped = true;
+    result.attempted = recipients.length;
+    result.delivered = recipients.length;
     return result;
   }
 

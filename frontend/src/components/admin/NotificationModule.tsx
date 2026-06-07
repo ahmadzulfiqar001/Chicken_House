@@ -26,6 +26,7 @@ const emptyForm = {
 const statusStyles = {
   Sent: "bg-green-500/10 text-green-600",
   Queued: "bg-blue-500/10 text-blue-500",
+  Live: "bg-amber-500/10 text-amber-600",
   Draft: "bg-surface-strong text-muted",
   Failed: "bg-red-500/10 text-red-500",
 };
@@ -35,6 +36,15 @@ const channelLabels = {
   email: "Email",
   sms: "SMS",
   whatsapp: "WhatsApp",
+};
+
+const sourceLabels = {
+  orders: "Orders",
+  bookings: "Bookings",
+  contact: "Support",
+  inventory: "Inventory",
+  careers: "Careers",
+  reviews: "Reviews",
 };
 
 const formatTime = (value) => {
@@ -263,8 +273,8 @@ const NotificationModule = () => {
           <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center mb-4">
             <FileText size={24} />
           </div>
-          <p className="text-muted text-xs font-bold uppercase tracking-widest mb-1">Drafts</p>
-          <p className="text-2xl font-display font-bold text-dark">{metrics?.drafts ?? 0}</p>
+          <p className="text-muted text-xs font-bold uppercase tracking-widest mb-1">Live Alerts</p>
+          <p className="text-2xl font-display font-bold text-dark">{metrics?.live ?? 0}</p>
         </motion.div>
 
         <motion.div
@@ -305,77 +315,93 @@ const NotificationModule = () => {
           {error ? <p className="mb-6 text-sm font-medium text-red-500">{error}</p> : null}
 
           <div className="space-y-6">
-            {filteredNotifications.map((notif) => (
-              <div
-                key={notif.id}
-                className="flex items-start gap-6 p-6 rounded-3xl bg-surface hover:bg-surface-strong transition-all group"
-              >
+            {filteredNotifications.map((notif) => {
+              const isSystemAlert = Boolean(notif.system || notif.metadata?.system);
+              const sourceLabel = notif.metadata?.source ? sourceLabels[notif.metadata.source] ?? notif.metadata.source : "";
+
+              return (
                 <div
-                  className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
-                    notif.channel === "email"
-                      ? "bg-purple-500/10 text-purple-500"
-                      : notif.channel === "sms"
-                        ? "bg-blue-500/10 text-blue-500"
-                        : notif.channel === "whatsapp"
-                          ? "bg-green-500/10 text-green-500"
-                          : "bg-primary/10 text-primary"
-                  }`}
+                  key={notif.id}
+                  className="flex items-start gap-6 p-6 rounded-3xl bg-surface hover:bg-surface-strong transition-all group"
                 >
-                  {notif.channel === "email" ? (
-                    <Mail size={24} />
-                  ) : notif.channel === "sms" ? (
-                    <Smartphone size={24} />
-                  ) : notif.channel === "whatsapp" ? (
-                    <MessageSquare size={24} />
-                  ) : (
-                    <Bell size={24} />
-                  )}
+                  <div
+                    className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
+                      notif.channel === "email"
+                        ? "bg-purple-500/10 text-purple-500"
+                        : notif.channel === "sms"
+                          ? "bg-blue-500/10 text-blue-500"
+                          : notif.channel === "whatsapp"
+                            ? "bg-green-500/10 text-green-500"
+                            : isSystemAlert
+                              ? "bg-amber-500/10 text-amber-600"
+                              : "bg-primary/10 text-primary"
+                    }`}
+                  >
+                    {notif.channel === "email" ? (
+                      <Mail size={24} />
+                    ) : notif.channel === "sms" ? (
+                      <Smartphone size={24} />
+                    ) : notif.channel === "whatsapp" ? (
+                      <MessageSquare size={24} />
+                    ) : isSystemAlert ? (
+                      <AlertCircle size={24} />
+                    ) : (
+                      <Bell size={24} />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap justify-between items-start gap-2 mb-2">
+                      <span className="text-dark font-bold">{notif.title}</span>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-bold ${
+                          statusStyles[notif.status] ?? "bg-surface-strong text-muted"
+                        }`}
+                      >
+                        {isSystemAlert ? "Live Alert" : notif.status}
+                      </span>
+                    </div>
+                    <p className="text-muted text-sm leading-relaxed">{notif.message}</p>
+                    <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted">
+                      <span className="px-2 py-1 rounded-full bg-white">
+                        {channelLabels[notif.channel] ?? notif.channel}
+                      </span>
+                      <span className="px-2 py-1 rounded-full bg-white">{notif.audience}</span>
+                      {sourceLabel ? <span className="px-2 py-1 rounded-full bg-white">{sourceLabel}</span> : null}
+                      <span>{formatTime(notif.sentAt)}</span>
+                      {!isSystemAlert && notif.metadata ? (
+                        <span className="text-primary">{notif.metadata.delivered ?? 0} delivered</span>
+                      ) : null}
+                    </div>
+                    {!isSystemAlert ? (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <button
+                          onClick={() => sendNotification(notif)}
+                          className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-bold text-dark transition hover:bg-primary hover:text-white"
+                        >
+                          <Send size={14} />
+                          {notif.status === "Sent" ? "Resend" : "Send"}
+                        </button>
+                        <button
+                          onClick={() => deleteNotification(notif)}
+                          className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-bold text-dark transition hover:bg-red-500 hover:text-white"
+                        >
+                          <Trash2 size={14} />
+                          Delete
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="mt-4 text-xs font-medium text-muted">
+                        Auto alert from live restaurant data. Handle it from its related module.
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap justify-between items-start gap-2 mb-2">
-                    <span className="text-dark font-bold">{notif.title}</span>
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-bold ${
-                        statusStyles[notif.status] ?? "bg-surface-strong text-muted"
-                      }`}
-                    >
-                      {notif.status}
-                    </span>
-                  </div>
-                  <p className="text-muted text-sm leading-relaxed">{notif.message}</p>
-                  <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted">
-                    <span className="px-2 py-1 rounded-full bg-white">
-                      {channelLabels[notif.channel] ?? notif.channel}
-                    </span>
-                    <span className="px-2 py-1 rounded-full bg-white">{notif.audience}</span>
-                    <span>{formatTime(notif.sentAt)}</span>
-                    {notif.metadata ? (
-                      <span className="text-primary">{notif.metadata.delivered ?? 0} delivered</span>
-                    ) : null}
-                  </div>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <button
-                      onClick={() => sendNotification(notif)}
-                      className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-bold text-dark transition hover:bg-primary hover:text-white"
-                    >
-                      <Send size={14} />
-                      {notif.status === "Sent" ? "Resend" : "Send"}
-                    </button>
-                    <button
-                      onClick={() => deleteNotification(notif)}
-                      className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-bold text-dark transition hover:bg-red-500 hover:text-white"
-                    >
-                      <Trash2 size={14} />
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
 
             {!filteredNotifications.length ? (
               <div className="rounded-3xl bg-surface px-6 py-12 text-center text-muted">
-                {search ? "No notifications matched your search." : "No notifications yet."}
+                {search ? "No notifications matched your search." : "No manual notifications or live alerts yet."}
               </div>
             ) : null}
           </div>
@@ -467,7 +493,7 @@ const NotificationModule = () => {
 
           <div className="mt-10 p-6 rounded-2xl bg-white/5 border border-white/10">
             <p className="text-white/60 text-xs leading-relaxed">
-              In-app notifications are always delivered. Email, SMS, and WhatsApp depend on configured providers — channels marked "Not configured" fall back to in-app delivery.
+              In-app notifications are saved here immediately. Email, SMS, and WhatsApp depend on configured providers; if a provider is not configured, the notification stays queued for sending later.
             </p>
           </div>
         </div>
