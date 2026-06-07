@@ -1,36 +1,27 @@
 import { motion } from "motion/react";
-import { Instagram, Facebook, Twitter, Star } from "lucide-react";
-import { siteConfig, hasConfiguredUrl } from "../../lib/site";
+import { Star } from "lucide-react";
+
+const chefOne = new URL("../../../assets/source-images/Cafe Images/chef 1.png", import.meta.url).href;
+const chefTwo = new URL("../../../assets/source-images/Cafe Images/chef 2.png", import.meta.url).href;
+const chefThree = new URL("../../../assets/source-images/Cafe Images/chef 3.png", import.meta.url).href;
 
 const chefs = [
   {
-    name: "Chef Imran Qureshi",
-    role: "Executive Chef",
-    image: "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&w=600&q=80",
-    specialty: "BBQ & Grill Specialist",
-    experience: "15 Years"
+    image: chefOne,
+    description: "Focused live-kitchen preparation with clean handling and careful service.",
+    badge: "Live Kitchen"
   },
   {
-    name: "Chef Salman Raza",
-    role: "Head Karahi Chef",
-    image: "https://images.unsplash.com/photo-1581299894007-aaa50297cf16?auto=format&fit=crop&w=600&q=80",
-    specialty: "Karahi Expert",
-    experience: "12 Years"
+    image: chefTwo,
+    description: "Fresh ingredients are prepared daily for reliable taste and quality.",
+    badge: "Fresh Prep"
   },
   {
-    name: "Chef Naveed Akram",
-    role: "Sous Chef",
-    image: "https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?auto=format&fit=crop&w=600&q=80",
-    specialty: "Desi Meals & Platters",
-    experience: "8 Years"
+    image: chefThree,
+    description: "Fresh ingredients are prepared daily with care and packed with love.",
+    badge: "Grill Craft"
   }
 ];
-
-const chefSocials = [
-  { Icon: Instagram, href: siteConfig.socialLinks.instagram },
-  { Icon: Facebook, href: siteConfig.socialLinks.facebook },
-  { Icon: Twitter, href: siteConfig.socialLinks.twitter },
-].filter((social) => hasConfiguredUrl(social.href));
 
 const ChefsSection = () => {
   return (
@@ -60,48 +51,21 @@ const ChefsSection = () => {
               <div className="relative aspect-[3/4] rounded-[3rem] overflow-hidden shadow-2xl mb-8">
                 <img 
                   src={chef.image} 
-                  alt={chef.name} 
+                  alt={chef.description} 
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 grayscale group-hover:grayscale-0"
-                  referrerPolicy="no-referrer"
                 />
-                
-                {/* Social Overlay */}
-                {chefSocials.length > 0 && (
-                  <div className="absolute inset-0 bg-dark/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center gap-4">
-                    {chefSocials.map(({ Icon, href }, i) => (
-                      <motion.a
-                        key={i}
-                        href={href}
-                        target="_blank"
-                        rel="noreferrer"
-                        whileHover={{ scale: 1.2, backgroundColor: "#FF6B6B" }}
-                        whileTap={{ scale: 0.9 }}
-                        aria-label={`${chef.name} social profile`}
-                        className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white transition-colors"
-                      >
-                        <Icon size={20} />
-                      </motion.a>
-                    ))}
-                  </div>
-                )}
 
                 {/* Experience Badge */}
                 <div className="absolute top-6 left-6 px-4 py-2 bg-accent text-dark font-bold text-[10px] uppercase tracking-widest rounded-full shadow-lg">
-                  {chef.experience} Exp.
+                  {chef.badge}
                 </div>
               </div>
 
               {/* Info */}
               <div className="text-center">
-                <h3 className="text-3xl font-display font-bold text-dark mb-2 group-hover:text-primary transition-colors">
-                  {chef.name}
-                </h3>
-                <p className="text-muted font-mono text-xs uppercase tracking-widest mb-4">
-                  {chef.role}
-                </p>
-                <div className="flex items-center justify-center gap-2 text-accent">
+                <div className="flex items-start justify-center gap-2 text-accent">
                   <Star size={14} fill="currentColor" />
-                  <span className="text-dark font-bold text-sm">{chef.specialty}</span>
+                  <span className="max-w-xs text-dark font-bold text-base leading-7">{chef.description}</span>
                 </div>
               </div>
             </motion.div>

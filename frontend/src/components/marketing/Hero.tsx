@@ -22,7 +22,7 @@ const Hero = () => {
           poster={siteConfig.imageFallback}
           aria-hidden="true"
         >
-          <source src="/bg-video.mp4" type="video/mp4" />
+          <source src={siteConfig.heroVideo} type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,170,73,0.14),transparent_34%)]" />
         <div className="absolute inset-0 bg-gradient-to-b from-dark/42 via-dark/28 to-dark/58" />

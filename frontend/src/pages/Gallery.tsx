@@ -1,418 +1,665 @@
-import { useEffect, useMemo, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import {
   CalendarDays,
   Camera,
+  ChefHat,
   ChevronRight,
   Flame,
   Heart,
-  Instagram,
-  MapPin,
-  PartyPopper,
-  Play,
-  ShieldCheck,
+  Home,
   Sparkles,
-  Star,
   Users,
   UtensilsCrossed,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
-type MenuItem = {
-  id?: string | number;
-  name?: string;
-  category?: string;
-  image?: string;
-  startingPrice?: number;
-  variants?: Array<{ price: number }>;
-};
+const cafeEntrance = new URL("../../assets/source-images/Cafe Images/enterance.png", import.meta.url).href;
+const cafeEntranceSitting = new URL("../../assets/source-images/Cafe Images/enterance_sitting.png", import.meta.url).href;
+const cafeFront = new URL("../../assets/source-images/Cafe Images/front.png", import.meta.url).href;
+const cafeIndoorSitting = new URL("../../assets/source-images/Cafe Images/indor sitting.png", import.meta.url).href;
+const cafeBbqSection = new URL("../../assets/source-images/Cafe Images/bbq section.png", import.meta.url).href;
+const cafeCookingArea = new URL("../../assets/source-images/Cafe Images/cooking area.png", import.meta.url).href;
+const cafeBirthdaySequence = new URL("../../assets/source-images/Cafe Images/birthday sequence.png", import.meta.url).href;
+const cafeChickBranding = new URL("../../assets/source-images/Cafe Images/chick branding.png", import.meta.url).href;
+const cafeClassFarewell = new URL("../../assets/source-images/Cafe Images/class 10 farewull.png", import.meta.url).href;
+const cafeCrockery = new URL("../../assets/source-images/Cafe Images/crockery.png", import.meta.url).href;
+const cafeCrockerySetting = new URL("../../assets/source-images/Cafe Images/crockery setting.png", import.meta.url).href;
+const cafeChefOne = new URL("../../assets/source-images/Cafe Images/chef 1.png", import.meta.url).href;
+const cafeChefTwo = new URL("../../assets/source-images/Cafe Images/chef 2.png", import.meta.url).href;
+const cafeChefThree = new URL("../../assets/source-images/Cafe Images/chef 3.png", import.meta.url).href;
+const cafeDeliveryBikes = new URL("../../assets/source-images/Cafe Images/delevery bikes.png", import.meta.url).href;
+const cafeEatingInCafe = new URL("../../assets/source-images/Cafe Images/eating in cafe.png", import.meta.url).href;
+const cafeGalleryVideo = new URL("../../assets/source-images/Cafe Images/gallery_page.mp4", import.meta.url).href;
+const cafeGetTogether = new URL("../../assets/source-images/Cafe Images/get to gether.png", import.meta.url).href;
+const cafeKidsEnjoying = new URL("../../assets/source-images/Cafe Images/kids enjoying at play area.png", import.meta.url).href;
+const cafeLiveKitchenVideo = new URL("../../assets/source-images/Cafe Images/live kitchen.mp4", import.meta.url).href;
+const cafeParking = new URL("../../assets/source-images/Cafe Images/parking.png", import.meta.url).href;
+const cafePlayFestival = new URL("../../assets/source-images/Cafe Images/play area with festival.png", import.meta.url).href;
+const cafePlayZoom = new URL("../../assets/source-images/Cafe Images/play area zoom.png", import.meta.url).href;
+const cafeSaladBar2 = new URL("../../assets/source-images/Cafe Images/salad bar 2.png", import.meta.url).href;
+const cafeSaladBarPeople = new URL("../../assets/source-images/Cafe Images/salad bar people.png", import.meta.url).href;
+const cafeSaladBar = new URL("../../assets/source-images/Cafe Images/salad bar.png", import.meta.url).href;
+const cafeSideposeFront = new URL("../../assets/source-images/Cafe Images/sidepose front.png", import.meta.url).href;
+const cafeSittingLawn = new URL("../../assets/source-images/Cafe Images/sitting lawn.png", import.meta.url).href;
+const cafeSittingPlayArea = new URL("../../assets/source-images/Cafe Images/sitting with play area.png", import.meta.url).href;
+const cafeWorkingKitchen = new URL("../../assets/source-images/Cafe Images/working in kitchen.png", import.meta.url).href;
+const pinterestBroast = new URL("../../assets/source-images/Arabic Broast/full arabic broast.png", import.meta.url).href;
+const pinterestChickenTikka = new URL("../../assets/source-images/BBQ/Chicken Tikka.jpg", import.meta.url).href;
+const pinterestBarBQPlatter = new URL("../../assets/source-images/bbq platter/Bar-B-Q Platter.jpg", import.meta.url).href;
+const pinterestBlackPepper = new URL("../../assets/source-images/bbq platter/Black Pepper.jpg", import.meta.url).href;
+const pinterestBurger = new URL("../../assets/source-images/Burger/Chicken Grilled Burger.png", import.meta.url).href;
+const pinterestKarahi = new URL("../../assets/source-images/Continental/Chicken Makhni Karahi.jpg", import.meta.url).href;
+const pinterestBrownie = new URL("../../assets/source-images/Deserts/Chocolate Brownie with Ice Cream.jpg", import.meta.url).href;
+const pinterestBonelessFish = new URL("../../assets/source-images/Fish/Boneless Fish.jpg", import.meta.url).href;
+const pinterestFish = new URL("../../assets/source-images/Fish/Grill Fish.jpg", import.meta.url).href;
+const pinterestTawaFish = new URL("../../assets/source-images/Fish/Tawa Taka Tuck Fish.jpg", import.meta.url).href;
+const pinterestFries = new URL("../../assets/source-images/Fries/fries.png", import.meta.url).href;
+const pinterestPasta = new URL("../../assets/source-images/pasta/Chicken House Special Pasta.png", import.meta.url).href;
+const pinterestPizza = new URL("../../assets/source-images/pizza/Chicken Tikka.jpg", import.meta.url).href;
+const pinterestRice = new URL("../../assets/source-images/Rice & Biryani/Special Chicken Biryani.png", import.meta.url).href;
+const pinterestSalad = new URL("../../assets/source-images/Raita & Salad/Fresh Salad.jpg", import.meta.url).href;
+const pinterestChickenCornSoup = new URL("../../assets/source-images/Soups/Chicken Corn Soup.jpg", import.meta.url).href;
+const pinterestSpecialSoup = new URL("../../assets/source-images/Soups/Chicken Special Soup.jpg", import.meta.url).href;
+const pinterestHotSourSoup = new URL("../../assets/source-images/Soups/Hot & Sour Soup.jpg", import.meta.url).href;
 
-const socialCards = [
-  { title: "Family Golden Hour", category: "Customer Moments", image: "https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=900&q=80", likes: "3.4K" },
-  { title: "Karahi Detail Shot", category: "Food Aesthetics", image: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=900&q=80", likes: "2.8K" },
-  { title: "Kitchen Reel Preview", category: "Reels Preview", image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=80", likes: "5.1K" },
-  { title: "Chef Flame Toss", category: "Trendy Kitchen", image: "https://images.unsplash.com/photo-1525755662778-989d0524087e?auto=format&fit=crop&w=900&q=80", likes: "6.2K" },
-  { title: "Friends Night Mood", category: "Customer Moments", image: "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=900&q=80", likes: "3.9K" },
-  { title: "Burger Story Capture", category: "Food Aesthetics", image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=900&q=80", likes: "2.5K" },
-  { title: "Serving Rush Clip", category: "Reels Preview", image: "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=900&q=80", likes: "4.2K" },
-  { title: "Smoke and Heat", category: "Trendy Kitchen", image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=80", likes: "4.7K" },
+const heroOrbitImages = [
+  {
+    title: "Front House",
+    image: cafeFront,
+    className: "left-[0%] top-[11.5rem] h-24 w-28 -rotate-[16deg] lg:left-[-1%] lg:top-[14.25rem] lg:h-40 lg:w-60 xl:left-[0%] xl:top-[14.5rem] xl:h-44 xl:w-72",
+    mobileClassName: "-rotate-[8deg]",
+  },
+  {
+    title: "Indoor Sitting",
+    image: cafeIndoorSitting,
+    className: "left-[17%] top-[5.8rem] h-24 w-28 -rotate-[8deg] lg:left-[15%] lg:top-[5.2rem] lg:h-40 lg:w-56 xl:left-[16%] xl:top-[5rem] xl:h-44 xl:w-64",
+    mobileClassName: "-rotate-[3deg]",
+  },
+  {
+    title: "Festival Garden",
+    image: cafePlayFestival,
+    className: "left-[31%] top-[0.45rem] h-28 w-36 -rotate-[2deg] lg:left-[31.5%] lg:top-[0.15rem] lg:h-44 lg:w-64 xl:left-[32%] xl:h-48 xl:w-72",
+    mobileClassName: "-rotate-[2deg]",
+  },
+  {
+    title: "Fresh Counter",
+    image: cafeSaladBarPeople,
+    className: "right-[31%] top-[0.45rem] h-28 w-36 rotate-[2deg] lg:right-[31.5%] lg:top-[0.15rem] lg:h-44 lg:w-64 xl:right-[32%] xl:h-48 xl:w-72",
+    mobileClassName: "rotate-[4deg]",
+  },
+  {
+    title: "Kitchen Craft",
+    image: cafeWorkingKitchen,
+    className: "right-[17%] top-[5.8rem] h-24 w-28 rotate-[8deg] lg:right-[15%] lg:top-[5.2rem] lg:h-40 lg:w-56 xl:right-[16%] xl:top-[5rem] xl:h-44 xl:w-64",
+    mobileClassName: "rotate-[4deg]",
+  },
+  {
+    title: "BBQ Section",
+    image: cafeBbqSection,
+    className: "right-[0%] top-[11.5rem] h-24 w-28 rotate-[16deg] lg:right-[-1%] lg:top-[14.25rem] lg:h-40 lg:w-60 xl:right-[0%] xl:top-[14.5rem] xl:h-44 xl:w-72",
+    mobileClassName: "rotate-[7deg]",
+  },
 ];
 
-const mediaSections = [
-  {
-    eyebrow: "Section 05",
-    title: "Dine-In Area",
-    text: "Seating mood, table styling, and the comfort that makes families and groups want to stay longer.",
-    image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1400&q=80",
-    icon: Users,
-  },
-  {
-    eyebrow: "Section 06",
-    title: "Staff & Service",
-    text: "Smiling service faces, polished uniforms, and a warmer house presence that builds trust fast.",
-    image: "https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=1400&q=80",
-    icon: Sparkles,
-  },
-  {
-    eyebrow: "Section 07",
-    title: "Behind the Scenes",
-    text: "Fire, prep, hygiene, fresh ingredients, and kitchen confidence shown in a more transparent way.",
-    image: "https://images.unsplash.com/photo-1525755662778-989d0524087e?auto=format&fit=crop&w=1400&q=80",
-    icon: ShieldCheck,
-  },
-  {
-    eyebrow: "Section 08",
-    title: "Family Zones",
-    text: "Peaceful seating corners and larger-table arrangements that feel safer and more comfortable for families.",
-    image: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=1400&q=80",
-    icon: Users,
-  },
-  {
-    eyebrow: "Section 09",
-    title: "Arrival & Greetings",
-    text: "The entry impression, guest reception, and welcome energy that shapes the entire visit.",
-    image: "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1400&q=80",
-    icon: PartyPopper,
-  },
-  {
-    eyebrow: "Section 10",
-    title: "Location Visuals",
-    text: "Frontage, roadside feel, and easy-to-spot positioning that helps first-time visitors trust the route.",
-    image: "https://images.unsplash.com/photo-1481833761820-0509d3217039?auto=format&fit=crop&w=1400&q=80",
-    icon: MapPin,
-  },
+const heroFeatureItems = [
+  { label: "Real Moments", icon: Camera },
+  { label: "Real Flavors", icon: Flame },
+  { label: "Real Hospitality", icon: Heart },
 ];
 
-const eventCards = [
-  { title: "Birthday Celebrations", text: "Cake moments, decor, and glowing table scenes.", image: "https://images.unsplash.com/photo-1464349153735-7db50ed83c84?auto=format&fit=crop&w=1400&q=80" },
-  { title: "Corporate Meetups", text: "Clean layouts and polished hospitality for professional evenings.", image: "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1400&q=80" },
-  { title: "Family Functions", text: "Warm hosting for larger gatherings, stage moments, and celebration nights.", image: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1400&q=80" },
+const spaceCards = [
+  { title: "Front View", image: cafeSideposeFront },
+  { title: "Cozy Lounge", image: cafeEntranceSitting },
+  { title: "Salad Bar", image: cafeSaladBar2 },
+  { title: "Lawn Seating", image: cafeSittingLawn },
+  { title: "Live Kitchen", image: cafeCookingArea },
+  { title: "Easy Parking", image: cafeParking },
+  { title: "Table Style", image: cafeCrockery },
+  { title: "Brand Wall", image: cafeChickBranding },
+  { title: "Quick Delivery", image: cafeDeliveryBikes },
 ];
 
-const signatureCombos = [
-  { title: "BBQ Signature Table", text: "Smoke-heavy service moments with shareable plates and dramatic arrival.", image: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1400&q=80" },
-  { title: "Family Karahi Setup", text: "Desi comfort with table-sharing energy and full meal storytelling.", image: "https://images.unsplash.com/photo-1529006557810-274b9b2fc783?auto=format&fit=crop&w=1400&q=80" },
-  { title: "Premium Pizza Corner", text: "Crisp, bright, photo-ready combos designed for younger audiences and social sharing.", image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1400&q=80" },
+const foodStoryCards = [
+  { title: "Chicken Tikka Pizza", image: pinterestPizza },
+  { title: "Bar-B-Q Feast", image: pinterestBarBQPlatter },
+  { title: "Makhni Karahi", image: pinterestKarahi },
+  { title: "House Special Pasta", image: pinterestPasta },
+  { title: "Garden Fresh Salad", image: pinterestSalad },
+  { title: "Golden Fries", image: pinterestFries },
+  { title: "Arabic Broast", image: pinterestBroast },
+  { title: "Charcoal Chicken Tikka", image: pinterestChickenTikka },
+  { title: "Winter Grill Fish", image: pinterestFish },
+  { title: "Tawa Taka Tuck Fish", image: pinterestTawaFish },
+  { title: "Boneless Fish Bites", image: pinterestBonelessFish },
+  { title: "Hot & Sour Soup", image: pinterestHotSourSoup },
+  { title: "Chicken Corn Soup", image: pinterestChickenCornSoup },
+  { title: "Chicken Special Soup", image: pinterestSpecialSoup },
+  { title: "Special Chicken Biryani", image: pinterestRice },
+  { title: "Grilled Burger", image: pinterestBurger },
+  { title: "Black Pepper Sizzle", image: pinterestBlackPepper },
+  { title: "Brownie Ice Cream", image: pinterestBrownie },
 ];
 
-const seasonalCards = [
-  { title: "Winter Warmers", text: "Soup steam, hot platters, and richer comfort visuals.", image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1400&q=80" },
-  { title: "Summer Coolers", text: "Fresh drinks, bright salads, and lighter service moods.", image: "https://images.unsplash.com/photo-1497534446932-c925b458314e?auto=format&fit=crop&w=1400&q=80" },
-  { title: "Ramadan Iftar Energy", text: "Warm lights, date service, and fuller family tables.", image: "https://images.unsplash.com/photo-1517244683847-7456b63c5969?auto=format&fit=crop&w=1400&q=80" },
+const memoryPhotos = [
+  { title: "Birthday", image: cafeBirthdaySequence, rotate: "-rotate-[7deg]" },
+  { title: "Gathering", image: cafeGetTogether, rotate: "rotate-[4deg]" },
+  { title: "Farewell", image: cafeClassFarewell, rotate: "-rotate-[2deg]" },
+  { title: "Family Time", image: cafeEatingInCafe, rotate: "rotate-[6deg]" },
+  { title: "Play Time", image: cafeKidsEnjoying, rotate: "-rotate-[4deg]" },
+  { title: "Table Setup", image: cafeCrockerySetting, rotate: "rotate-[7deg]" },
 ];
 
-const filters = ["All", "Customer Moments", "Food Aesthetics", "Reels Preview", "Trendy Kitchen"];
+const experienceCards = [
+  { title: "Chef Craft", image: cafeChefOne, icon: ChefHat },
+  { title: "Hot Counter", image: cafeChefTwo, icon: Flame },
+  { title: "Plated With Care", image: cafeChefThree, icon: Heart },
+  { title: "Kitchen Rhythm", image: cafeWorkingKitchen, icon: Users },
+  { title: "Fresh Prep Station", image: cafeCookingArea, icon: UtensilsCrossed },
+  { title: "BBQ Fire Station", image: cafeBbqSection, icon: Flame },
+];
 
-const galleryVideo = "/bg-video.mp4";
-const eventVideo =
-  "https://cdn.coverr.co/videos/coverr-chef-plating-up-a-dish-1563896751574?download=1080p";
+const galleryVideo = cafeGalleryVideo;
+const eventVideo = cafeLiveKitchenVideo;
 
-const sectionHeader = (eyebrow: string, title: string, text: string) => (
-  <div className="max-w-3xl">
-    <p className="text-xs font-bold uppercase tracking-[0.35em] text-orange-400">{eyebrow}</p>
-    <h2 className="mt-4 font-display text-4xl font-bold md:text-5xl">{title}</h2>
-    <p className="mt-4 text-lg leading-8 text-white/62">{text}</p>
-  </div>
+const sectionHeader = (title: string, text: string) => (
+  <motion.div
+    initial={{ opacity: 0, y: 22 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: "-90px" }}
+    className="max-w-3xl"
+  >
+    <h2 className="font-display text-4xl font-bold leading-tight md:text-5xl">{title}</h2>
+    <p className="mt-4 text-base leading-8 text-white/64 md:text-lg">{text}</p>
+  </motion.div>
 );
 
-const GalleryPage = () => {
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
-  const [socialFilter, setSocialFilter] = useState("All");
+const CurveMotionGallerySection = () => (
+  <section className="premium-curve-gallery relative isolate min-h-screen overflow-hidden bg-[#040201] px-4 pb-20 pt-36 text-[#fff6df] sm:px-6 sm:pt-40 lg:px-8">
+    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_17%,rgba(244,189,98,0.3),transparent_26%),radial-gradient(circle_at_78%_30%,rgba(234,151,48,0.18),transparent_30%),radial-gradient(circle_at_16%_76%,rgba(127,18,21,0.22),transparent_30%),linear-gradient(180deg,#050201_0%,#0d0503_42%,#150804_74%,#070302_100%)]" />
+    <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(244,189,98,0.06)_0_1px,transparent_1px_42px)] opacity-40" />
+    <div className="pointer-events-none absolute inset-0 opacity-[0.18] mix-blend-screen">
+      <div className="gallery-smoke gallery-smoke-one" />
+      <div className="gallery-smoke gallery-smoke-two" />
+      <div className="gallery-smoke gallery-smoke-three" />
+    </div>
+    <motion.div
+      aria-hidden="true"
+      animate={{ opacity: [0.18, 0.38, 0.18], x: [0, 24, 0] }}
+      transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
+      className="pointer-events-none absolute right-0 top-20 h-px w-2/3 bg-gradient-to-r from-transparent via-amber-300/80 to-transparent shadow-[0_0_34px_rgba(245,185,76,0.65)]"
+    />
 
-  useEffect(() => {
-    fetch("/api/menu")
-      .then((res) => res.json())
-      .then((data) => setMenuItems(Array.isArray(data) ? data : []))
-      .catch(() => setMenuItems([]));
-  }, []);
+    <div className="relative mx-auto flex min-h-[calc(100vh-9rem)] max-w-[110rem] items-center justify-center">
+      <div className="relative w-full">
+        <div className="-mx-4 mb-12 flex snap-x gap-4 overflow-x-auto px-4 pb-5 md:hidden">
+          {heroOrbitImages.map((item, index) => (
+            <motion.div
+              key={item.title}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.06, duration: 0.5 }}
+              className={`h-40 w-60 shrink-0 snap-center overflow-hidden rounded-[1.35rem] border border-[#f4bd62]/35 bg-black/30 shadow-[0_18px_50px_rgba(0,0,0,0.42),0_0_24px_rgba(244,189,98,0.16)] ${item.mobileClassName}`}
+            >
+              <img src={item.image} alt={item.title} className="h-full w-full object-cover" referrerPolicy="no-referrer" />
+            </motion.div>
+          ))}
+        </div>
 
-  const filteredCards = useMemo(
-    () => socialCards.filter((card) => socialFilter === "All" || card.category === socialFilter),
-    [socialFilter],
-  );
+        <motion.svg
+          aria-hidden="true"
+          viewBox="0 0 1000 390"
+          initial={{ opacity: 0, pathLength: 0.35 }}
+          animate={{ opacity: 1, pathLength: 1 }}
+          transition={{ duration: 1.1, ease: "easeOut" }}
+          className="pointer-events-none absolute left-1/2 top-0 hidden h-[25rem] w-[92rem] max-w-[100vw] -translate-x-1/2 md:block"
+        >
+          <defs>
+            <linearGradient id="galleryHeroArc" x1="0" x2="1" y1="0" y2="0">
+              <stop offset="0%" stopColor="#f4bd62" stopOpacity="0" />
+              <stop offset="20%" stopColor="#f4bd62" stopOpacity="0.55" />
+              <stop offset="50%" stopColor="#ffe3a3" stopOpacity="0.9" />
+              <stop offset="80%" stopColor="#f4bd62" stopOpacity="0.55" />
+              <stop offset="100%" stopColor="#f4bd62" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <path d="M54 354 C180 44 820 44 946 354" fill="none" stroke="#f4bd62" strokeWidth="34" strokeLinecap="round" opacity="0.07" />
+          <motion.path
+            d="M54 354 C180 44 820 44 946 354"
+            fill="none"
+            stroke="url(#galleryHeroArc)"
+            strokeWidth="3"
+            strokeLinecap="round"
+            filter="drop-shadow(0 0 16px rgba(244,189,98,0.6))"
+          />
+          <path d="M110 382 C250 118 750 118 890 382" fill="none" stroke="#f4bd62" strokeWidth="1.5" strokeLinecap="round" opacity="0.28" />
+        </motion.svg>
 
-  const hotMenuItems = useMemo(
-    () =>
-      menuItems
-        .filter((item) => item.image)
-        .slice(0, 8)
-        .map((item, index) => ({
-          id: item.id ?? index,
-          name: item.name ?? "Chicken House Special",
-          category: item.category ?? "House Favorite",
-          image: item.image ?? "",
-          price: Number(item.startingPrice ?? item.variants?.[0]?.price ?? 0),
-        })),
-    [menuItems],
-  );
+        <div className="pointer-events-none absolute inset-x-0 top-0 hidden h-[26rem] md:block">
+          {heroOrbitImages.map((item, index) => (
+            <div
+              key={item.title}
+              className={`pointer-events-auto absolute ${item.className}`}
+            >
+              <motion.div
+                initial={{ opacity: 0, y: 24, scale: 0.92 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ delay: index * 0.08, duration: 0.64, ease: "easeOut" }}
+                whileHover={{ y: -10, scale: 1.035 }}
+                className="h-full w-full overflow-hidden rounded-[1.35rem] border border-[#f4bd62]/45 bg-black/30 shadow-[0_24px_80px_rgba(0,0,0,0.48),0_0_38px_rgba(244,189,98,0.22)] backdrop-blur"
+              >
+                <img src={item.image} alt={item.title} className="h-full w-full object-cover" referrerPolicy="no-referrer" />
+              </motion.div>
+            </div>
+          ))}
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 26 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.74, ease: "easeOut" }}
+          className="relative z-10 mx-auto flex max-w-3xl flex-col items-center text-center md:pt-[21rem] lg:pt-[22rem]"
+        >
+          <div className="inline-flex items-center gap-4">
+            <span className="text-xs font-black uppercase tracking-[0.38em] text-[#f4bd62]">Our Gallery</span>
+            <span className="h-px w-16 bg-gradient-to-r from-transparent via-[#f4bd62] to-transparent sm:w-24" />
+            <Sparkles size={15} className="text-[#f4bd62]" />
+          </div>
+
+          <h1 className="mt-7 font-display text-5xl font-black leading-[0.92] tracking-normal text-white sm:text-7xl xl:text-8xl">
+            <span className="block">
+              A <span className="text-[#e5b85f]">Virtual</span>
+            </span>
+            <span className="block">Look Inside</span>
+          </h1>
+
+          <div className="mt-7 flex items-center gap-3 text-[#d8a82f]">
+            <span className="h-px w-20 bg-gradient-to-r from-transparent to-[#d8a82f]" />
+            <Sparkles size={18} />
+            <span className="h-px w-20 bg-gradient-to-l from-transparent to-[#d8a82f]" />
+          </div>
+
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            {heroFeatureItems.map(({ label, icon: Icon }) => (
+              <span
+                key={label}
+                className="inline-flex items-center gap-2 rounded-full border border-amber-200/15 bg-white/[0.06] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-white/70 backdrop-blur"
+              >
+                <Icon size={14} className="text-[#f4bd62]" />
+                {label}
+              </span>
+            ))}
+          </div>
+
+          <div className="mt-9 flex flex-wrap justify-center gap-4">
+            <a
+              href="#gallery-grid"
+              className="group inline-flex items-center gap-3 rounded-full border border-[#f4bd62]/85 bg-[#f4bd62] px-7 py-4 font-bold text-[#120805] shadow-[0_0_34px_rgba(245,158,11,0.22)] transition hover:-translate-y-1 hover:bg-[#ffd98a]"
+            >
+              Explore Gallery
+              <ChevronRight size={18} className="transition group-hover:translate-x-1" />
+            </a>
+            <Link
+              to="/booking"
+              className="inline-flex items-center gap-3 rounded-full border border-[#f4bd62]/45 bg-black/25 px-7 py-4 font-bold text-[#ffd98a] shadow-[0_0_28px_rgba(245,158,11,0.12)] backdrop-blur-md transition hover:-translate-y-1 hover:border-[#f4bd62] hover:bg-white/10 hover:text-white"
+            >
+              <CalendarDays size={18} />
+              Book a Table
+            </Link>
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  </section>
+);
+
+const RealCafeShowcase = () => {
+  const featureCards = [
+    {
+      title: "Where Every Corner Feels Like Home.",
+      image: cafeEatingInCafe,
+      className: "md:col-span-2 lg:col-span-6 lg:row-span-2",
+    },
+    {
+      title: "Table Setting",
+      image: cafeCrockerySetting,
+      className: "lg:col-span-3",
+    },
+    {
+      title: "Birthday Lights",
+      image: cafeBirthdaySequence,
+      className: "lg:col-span-3",
+    },
+    {
+      title: "Group Gathering",
+      image: cafeGetTogether,
+      className: "lg:col-span-3",
+    },
+    {
+      title: "Class Celebration",
+      image: cafeClassFarewell,
+      className: "lg:col-span-3",
+    },
+  ];
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[#0f0705] text-white">
-      <section className="relative flex min-h-[92vh] items-center overflow-hidden pt-20">
-        <div className="absolute inset-0 z-0">
+    <section className="relative overflow-hidden border-y border-[#d8a82f]/10 bg-[linear-gradient(180deg,#080302_0%,#100604_54%,#0b0403_100%)] px-4 py-20 sm:px-6 lg:px-8">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_14%_18%,rgba(245,158,11,0.16),transparent_28%),radial-gradient(circle_at_86%_74%,rgba(127,18,21,0.18),transparent_30%)]" />
+      <div className="relative mx-auto max-w-[94rem]">
+        <div className="mb-10 flex flex-col items-center text-center">
           <motion.div
-            initial={{ scale: 1.15, opacity: 0 }}
-            animate={{ scale: 1, opacity: 0.42 }}
-            transition={{ duration: 1.6 }}
-            className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=1800&q=80')] bg-cover bg-center"
-          />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,7,5,0.45),rgba(15,7,5,0.88),rgba(15,7,5,1))]" />
+            initial={{ opacity: 0, y: 22 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-90px" }}
+          >
+            <div className="inline-flex items-center justify-center gap-3 text-sm font-black uppercase tracking-[0.18em] text-amber-300 sm:text-base">
+              <Camera size={17} />
+              Visual Story
+            </div>
+            <h2 className="mt-5 font-display text-4xl font-black leading-tight text-white sm:text-5xl">
+              Where Every Corner <span className="text-[#d8a82f]">Feels Like Home.</span>
+            </h2>
+          </motion.div>
         </div>
 
-        <div className="relative z-10 mx-auto max-w-7xl px-6 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-md">
-            <Sparkles className="h-4 w-4 text-orange-500" />
-            <span className="text-xs font-bold uppercase tracking-[0.3em]">Chicken House Gallery</span>
-          </div>
-          <h1 className="mt-8 font-display text-6xl font-black leading-[0.9] md:text-8xl">
-            VISUALS THAT FEEL
-            <span className="block bg-gradient-to-r from-orange-400 to-red-600 bg-clip-text text-transparent">
-              FULL OF LIFE.
-            </span>
-          </h1>
-          <p className="mx-auto mt-8 max-w-3xl text-lg leading-8 text-white/62">
-            This gallery now moves beyond a simple image page. It tells the full Chicken House story through dine-in ambiance, food visuals, kitchen motion, events, family comfort, location, and premium restaurant atmosphere.
-          </p>
+        <div className="grid auto-rows-[15rem] grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-12 lg:auto-rows-[12.5rem]">
+          {featureCards.map((card, index) => (
+            <motion.article
+              key={card.title}
+              initial={{ opacity: 0, y: 28 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              whileHover={{ y: -8, scale: 1.01 }}
+              transition={{ delay: index * 0.05 }}
+              viewport={{ once: true, margin: "-90px" }}
+              className={`group relative overflow-hidden rounded-lg border border-[#d8a82f]/28 bg-white/5 shadow-[0_24px_90px_rgba(0,0,0,0.36),0_0_22px_rgba(216,168,47,0.1)] ${card.className}`}
+            >
+              <img src={card.image} alt={card.title} className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/82 via-black/16 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
+                <h3 className="font-display text-2xl font-bold text-white sm:text-3xl">{card.title}</h3>
+              </div>
+            </motion.article>
+          ))}
         </div>
-      </section>
+      </div>
+    </section>
+  );
+};
 
-      <section className="border-y border-white/6 py-5">
+const GalleryPage = () => {
+  return (
+    <div className="min-h-screen overflow-hidden bg-[#0b0403] text-white">
+      <CurveMotionGallerySection />
+
+      <section className="border-y border-[#d8a82f]/10 bg-[#060302] py-4">
         <motion.div
           animate={{ x: ["0%", "-50%"] }}
           transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
-          className="flex min-w-max gap-12 whitespace-nowrap text-xs font-bold uppercase tracking-[0.45em] text-white/25"
+          className="flex min-w-max gap-12 whitespace-nowrap text-xs font-bold uppercase tracking-[0.42em] text-[#d8a82f]/36"
         >
           {Array.from({ length: 12 }).map((_, index) => (
-            <span key={index}>Live Kitchen • Food Aesthetics • Family Moments • Event Nights • Signature Dishes</span>
+            <span key={index}>Live Kitchen / Food Aesthetics / Family Moments / Event Nights / Signature Dishes</span>
           ))}
         </motion.div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-24">
-        {sectionHeader("Section 01", "Instagram Grid Style", "A modern social-style grid keeps the brand active and gives the gallery a more current, trendy visual rhythm.")}
-        <div className="mt-12 flex flex-wrap gap-2">
-          {filters.map((filter) => (
-            <button
-              key={filter}
-              onClick={() => setSocialFilter(filter)}
-              className={`relative rounded-full px-6 py-3 text-sm font-bold transition ${
-                socialFilter === filter ? "text-white" : "text-white/50 hover:text-white"
-              }`}
-            >
-              {socialFilter === filter && (
-                <motion.div layoutId="gallery-filter" className="absolute inset-0 -z-10 rounded-full bg-orange-600" />
-              )}
-              {filter}
-            </button>
-          ))}
-        </div>
-        <motion.div layout className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <AnimatePresence mode="popLayout">
-            {filteredCards.map((card) => (
-              <motion.div
+      <RealCafeShowcase />
+
+      <section id="gallery-grid" className="relative overflow-hidden bg-[linear-gradient(180deg,#0b0403_0%,#130805_100%)] px-4 py-24 sm:px-6 lg:px-8">
+        <div className="pointer-events-none absolute left-[-10rem] top-16 h-80 w-80 rounded-full border border-[#d8a82f]/12" />
+        <div className="pointer-events-none absolute inset-x-0 top-1/2 h-px bg-gradient-to-r from-transparent via-[#d8a82f]/25 to-transparent" />
+        <div className="relative mx-auto max-w-[92rem]">
+          <div className="flex flex-col items-center text-center">
+            <div className="inline-flex items-center justify-center gap-3 text-sm font-black uppercase tracking-[0.18em] text-[#d8a82f] sm:text-base">
+              <Home size={16} />
+              Explore Our Spaces
+            </div>
+            <h2 className="mt-5 font-display text-4xl font-bold leading-tight sm:text-5xl">Explore Our Spaces</h2>
+          </div>
+
+          <div className="gallery-scrollbar mt-12 flex snap-x gap-5 overflow-x-auto pb-8">
+            {spaceCards.map((card, index) => (
+              <motion.article
                 key={card.title}
-                layout
-                initial={{ opacity: 0, scale: 0.92 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.92 }}
+                initial={{ opacity: 0, y: 22 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 whileHover={{ y: -10 }}
-                className="group relative aspect-[4/5] overflow-hidden rounded-[2rem] border border-white/10 bg-white/5"
+                transition={{ delay: index * 0.05 }}
+                viewport={{ once: true, margin: "-80px" }}
+                className="group relative h-72 w-[18rem] shrink-0 snap-center overflow-hidden rounded-lg border border-[#d8a82f]/30 bg-white/5 shadow-[0_24px_70px_rgba(0,0,0,0.34)] sm:w-[21rem]"
               >
                 <img src={card.image} alt={card.title} className="h-full w-full object-cover transition duration-700 group-hover:scale-110" referrerPolicy="no-referrer" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-85" />
-                <div className="absolute bottom-0 p-6">
-                  <div className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.24em] text-white/65">
-                    <Instagram size={13} className="text-orange-400" />
-                    {card.category}
-                  </div>
-                  <h3 className="text-xl font-bold">{card.title}</h3>
-                  <div className="mt-2 flex items-center gap-2 text-xs font-bold">
-                    <Heart size={12} className="fill-red-500 text-red-500" />
-                    {card.likes}
-                  </div>
-                </div>
-              </motion.div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/88 via-black/12 to-transparent" />
+                <h3 className="absolute inset-x-0 bottom-0 p-5 text-center font-display text-2xl font-bold text-white">{card.title}</h3>
+              </motion.article>
             ))}
-          </AnimatePresence>
-        </motion.div>
+          </div>
+        </div>
       </section>
 
-      <section className="bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0))] py-24">
-        <div className="mx-auto grid max-w-7xl items-center gap-14 px-6 lg:grid-cols-[1.02fr_0.98fr]">
-          <div className="relative overflow-hidden rounded-[3rem] border border-white/10 bg-white/5">
-            <video autoPlay muted loop playsInline controls className="h-[32rem] w-full object-cover">
-              <source src={galleryVideo} type="video/mp4" />
-            </video>
-            <div className="absolute left-6 top-6 rounded-full bg-black/35 px-4 py-2 text-xs font-bold uppercase tracking-[0.24em] text-white/75 backdrop-blur-md">
+      <section className="relative overflow-hidden border-y border-[#d8a82f]/10 bg-[radial-gradient(circle_at_50%_50%,rgba(216,168,47,0.12),transparent_34%),linear-gradient(180deg,#100604_0%,#080302_100%)] px-4 py-24 sm:px-6 lg:px-8">
+        <div className="relative mx-auto max-w-[92rem]">
+          <div className="flex flex-col items-center text-center">
+            <div className="inline-flex items-center justify-center gap-3 text-sm font-black uppercase tracking-[0.18em] text-[#d8a82f] sm:text-base">
+              <UtensilsCrossed size={16} />
+              House Favorites
+            </div>
+            <h2 className="mt-5 font-display text-4xl font-bold leading-tight sm:text-5xl">Made Fresh. Served with Love.</h2>
+          </div>
+
+          <div className="gallery-scrollbar mt-14 flex snap-x items-end gap-5 overflow-x-auto pb-9">
+            {foodStoryCards.map((item, index) => (
+              <motion.article
+                key={item.title}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                whileHover={{ y: -12, rotate: index % 2 === 0 ? -1.2 : 1.2 }}
+                transition={{ delay: index * 0.05 }}
+                viewport={{ once: true, margin: "-90px" }}
+                className="group relative h-64 w-56 shrink-0 snap-center overflow-hidden rounded-lg border border-[#d8a82f]/30 bg-black/28 shadow-[0_24px_70px_rgba(0,0,0,0.34)] transition-[width,height,transform] duration-500 hover:h-80 hover:w-64 sm:h-72 sm:w-60 sm:hover:h-96 sm:hover:w-72"
+              >
+                <img src={item.image} alt={item.title} className="h-full w-full object-cover transition duration-700 group-hover:scale-110" referrerPolicy="no-referrer" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/88 via-black/10 to-transparent" />
+                <h3 className="absolute inset-x-0 bottom-0 p-5 text-center font-display text-xl font-bold text-white">{item.title}</h3>
+              </motion.article>
+            ))}
+          </div>
+
+          <div className="mt-2 text-center">
+            <Link to="/menu" className="inline-flex items-center gap-3 rounded-full border border-[#d8a82f]/55 bg-black/28 px-7 py-3 font-bold text-[#ffd98a] transition hover:-translate-y-1 hover:bg-[#d8a82f] hover:text-[#120805]">
+              View Full Menu
+              <ChevronRight size={17} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="relative overflow-hidden bg-[linear-gradient(180deg,#0b0403_0%,#140805_100%)] py-24">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#d8a82f]/30 to-transparent" />
+        <div className="mx-auto grid max-w-[92rem] items-center gap-12 px-4 sm:px-6 lg:grid-cols-[1.08fr_0.92fr] lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, x: -28 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            className="relative overflow-hidden rounded-[4rem_1.2rem_4rem_1.2rem] border border-[#d8a82f]/28 bg-black/35 shadow-[0_30px_90px_rgba(0,0,0,0.42)]"
+          >
+            <div className="relative h-[24rem] overflow-hidden bg-black sm:h-[32rem]">
+              <video autoPlay muted loop playsInline controls className="h-full w-full object-cover">
+                <source src={galleryVideo} type="video/mp4" />
+              </video>
+            </div>
+            <div className="absolute left-6 top-6 rounded-full border border-[#d8a82f]/30 bg-black/42 px-4 py-2 text-xs font-bold uppercase tracking-[0.24em] text-[#ffd98a] backdrop-blur-md">
               Video Gallery
             </div>
-          </div>
+          </motion.div>
           <div>
-            {sectionHeader("Section 02", "Video Gallery", "Video blocks make the gallery feel immersive. They show motion, sound imagination, and the rhythm of a busy house much better than photos alone.")}
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-6 py-24">
-        {sectionHeader("Section 03", "Hot Selling Food Gallery", "Backend-fed food images keep the page alive and make the menu feel visually available, not hidden behind a text list.")}
-        <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-          {hotMenuItems.map((item) => (
-            <div key={String(item.id)} className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/5">
-              <img src={item.image} alt={item.name} className="h-64 w-full object-cover" referrerPolicy="no-referrer" />
-              <div className="p-5">
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-orange-300">{item.category}</p>
-                <h3 className="mt-2 text-xl font-bold">{item.name}</h3>
-                <div className="mt-3 flex items-center gap-2 text-sm text-white/70">
-                  <Flame size={14} className="text-orange-400" />
-                  Rs. {item.price.toLocaleString()}
-                </div>
-              </div>
+            {sectionHeader("A Walk Through Chicken House", "Entrance, seating, garden mood, and the warm movement of the real place in one cinematic pass.")}
+            <div className="mt-8 grid grid-cols-3 gap-3">
+              {[cafeEntrance, cafeSittingLawn, cafePlayFestival].map((image, index) => (
+                <motion.div
+                  key={image}
+                  initial={{ opacity: 0, y: 18 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.06 }}
+                  viewport={{ once: true, margin: "-90px" }}
+                  className="aspect-square overflow-hidden rounded-lg border border-[#d8a82f]/22 bg-white/5"
+                >
+                  <img src={image} alt="" className="h-full w-full object-cover" />
+                </motion.div>
+              ))}
             </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="bg-[linear-gradient(180deg,#130906_0%,#0f0705_100%)] py-24">
-        <div className="mx-auto max-w-7xl px-6">
-          {sectionHeader("Section 04", "Event Highlights", "Functions, celebrations, and hosting ability should appear directly inside the gallery so the restaurant feels capable and memorable.")}
-          <div className="mt-12 grid gap-7 lg:grid-cols-3">
-            {eventCards.map((card) => (
-              <div key={card.title} className="overflow-hidden rounded-[2.2rem] border border-white/10 bg-white/5">
-                <img src={card.image} alt={card.title} className="h-72 w-full object-cover" referrerPolicy="no-referrer" />
-                <div className="p-6">
-                  <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-orange-600/15 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.24em] text-orange-300">
-                    <CalendarDays size={12} />
-                    Hosted Event
-                  </div>
-                  <h3 className="text-2xl font-bold">{card.title}</h3>
-                  <p className="mt-3 text-sm leading-7 text-white/62">{card.text}</p>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-24">
-        {sectionHeader("Section 11", "Signature Combos & Platter Visuals", "The gallery should also show how meals come together on tables, not just as isolated dishes.")}
-        <div className="mt-12 grid gap-7 lg:grid-cols-3">
-          {signatureCombos.map((card) => (
-            <div key={card.title} className="overflow-hidden rounded-[2.2rem] border border-white/10 bg-white/5">
-              <img src={card.image} alt={card.title} className="h-72 w-full object-cover" referrerPolicy="no-referrer" />
-              <div className="p-6">
-                <h3 className="text-2xl font-bold">{card.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-white/62">{card.text}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="bg-[linear-gradient(180deg,#120805_0%,#0f0705_100%)] py-24">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="grid gap-8 lg:grid-cols-2">
-            {mediaSections.map((section) => (
-              <div key={section.title} className="group overflow-hidden rounded-[2.2rem] border border-white/10 bg-white/5">
-                <div className="grid md:grid-cols-[1fr_0.95fr]">
-                  <div className="p-8">
-                    <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-600/15 text-orange-300">
-                      <section.icon size={18} />
-                    </div>
-                    <p className="mt-5 text-xs font-bold uppercase tracking-[0.28em] text-orange-300">{section.eyebrow}</p>
-                    <h3 className="mt-4 text-3xl font-bold">{section.title}</h3>
-                    <p className="mt-4 text-sm leading-8 text-white/64">{section.text}</p>
-                  </div>
-                  <div className="overflow-hidden">
-                    <img src={section.image} alt={section.title} className="h-full w-full object-cover transition duration-700 group-hover:scale-110" referrerPolicy="no-referrer" />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto grid max-w-7xl items-center gap-14 px-6 py-24 lg:grid-cols-[1.02fr_0.98fr]">
-        <div>
-          {sectionHeader("Section 12", "Kids Play Area", "If the restaurant supports family stays, a child-friendly angle adds a practical reason for parents to choose it with confidence.")}
-        </div>
-        <div className="overflow-hidden rounded-[3rem] border border-white/10 bg-white/5">
-          <img src="https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=1400&q=80" alt="Kids play area" className="h-[30rem] w-full object-cover" referrerPolicy="no-referrer" />
-        </div>
-      </section>
-
-      <section className="bg-[linear-gradient(180deg,#130906_0%,#0f0705_100%)] py-24">
-        <div className="mx-auto grid max-w-7xl items-center gap-14 px-6 lg:grid-cols-[0.98fr_1.02fr]">
-          <div className="overflow-hidden rounded-[3rem] border border-white/10 bg-white/5">
-            <video autoPlay muted loop playsInline controls className="h-[30rem] w-full object-cover">
-              <source src={eventVideo} type="video/mp4" />
-            </video>
-          </div>
+      <section className="relative overflow-hidden bg-[linear-gradient(180deg,#140805_0%,#0b0403_100%)] px-4 py-24 sm:px-6 lg:px-8">
+        <div className="mx-auto grid max-w-[92rem] items-center gap-12 lg:grid-cols-[0.9fr_1.1fr]">
           <div>
-            {sectionHeader("Section 13", "Functions in Motion", "A second video block keeps the page moving and makes the gallery feel cinematic rather than static.")}
+            {sectionHeader("Kids Play Area", "A family-friendly corner that makes longer dinners easier, calmer, and more memorable.")}
           </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-6 py-24">
-        {sectionHeader("Section 14", "Seasonal Showcase", "Gallery sections can also tell seasonal mood stories through warmer or cooler menu moments.")}
-        <div className="mt-12 grid gap-7 lg:grid-cols-3">
-          {seasonalCards.map((card) => (
-            <div key={card.title} className="overflow-hidden rounded-[2.2rem] border border-white/10 bg-white/5">
-              <img src={card.image} alt={card.title} className="h-72 w-full object-cover" referrerPolicy="no-referrer" />
-              <div className="p-6">
-                <h3 className="text-2xl font-bold">{card.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-white/62">{card.text}</p>
-              </div>
+          <motion.div
+            initial={{ opacity: 0, x: 28 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-90px" }}
+            className="relative grid gap-4 md:grid-cols-[0.65fr_0.35fr]"
+          >
+            <div className="relative min-h-[24rem] overflow-hidden rounded-[1.2rem_4rem_1.2rem_4rem] border border-[#d8a82f]/28 bg-white/5 shadow-[0_30px_90px_rgba(0,0,0,0.36)]">
+              <img src={cafeKidsEnjoying} alt="Kids enjoying Chicken House play area" className="h-full w-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/72 via-transparent to-transparent" />
+              <h3 className="absolute bottom-6 left-6 font-display text-3xl font-bold">Family Comfort</h3>
             </div>
-          ))}
+            <div className="grid gap-4">
+              {[cafePlayZoom, cafeSittingPlayArea].map((image, index) => (
+                <div key={image} className={`overflow-hidden border border-[#d8a82f]/22 bg-white/5 ${index === 0 ? "rounded-[3rem_1rem_1rem_1rem]" : "rounded-[1rem_1rem_3rem_1rem]"}`}>
+                  <img src={image} alt="" className="h-48 w-full object-cover md:h-full" />
+                </div>
+              ))}
+            </div>
+          </motion.div>
         </div>
       </section>
 
-      <section className="bg-[linear-gradient(180deg,#120805_0%,#0f0705_100%)] py-24">
-        <div className="mx-auto max-w-7xl px-6">
-          {sectionHeader("Section 15", "Guest Reels Ribbon", "A lighter visual strip gives the page a more social, active, and happening rhythm between bigger sections.")}
-          <div className="mt-12 grid gap-5 md:grid-cols-3 xl:grid-cols-6">
-            {socialCards.slice(0, 6).map((card) => (
-              <div key={card.title} className="overflow-hidden rounded-[1.8rem] border border-white/10 bg-white/5">
-                <img src={card.image} alt={card.title} className="h-52 w-full object-cover" referrerPolicy="no-referrer" />
-                <div className="p-4">
-                  <p className="text-sm font-bold">{card.title}</p>
-                </div>
-              </div>
+      <section className="relative overflow-hidden border-y border-[#d8a82f]/10 bg-[linear-gradient(180deg,#080302_0%,#120704_100%)] px-4 py-24 sm:px-6 lg:px-8">
+        <div className="pointer-events-none absolute inset-x-6 top-1/2 hidden h-px bg-gradient-to-r from-transparent via-[#d8a82f]/55 to-transparent md:block" />
+        <div className="relative mx-auto max-w-[92rem]">
+          <div className="flex flex-col items-center text-center">
+            <div className="inline-flex items-center justify-center gap-3 text-sm font-black uppercase tracking-[0.18em] text-[#d8a82f] sm:text-base">
+              <Camera size={16} />
+              Photo String
+            </div>
+            <h2 className="mt-5 font-display text-4xl font-bold leading-tight sm:text-5xl">Moments That Stay With You</h2>
+          </div>
+          <div className="mt-14 grid gap-7 sm:grid-cols-2 lg:grid-cols-6">
+            {memoryPhotos.map((photo, index) => (
+              <motion.article
+                key={photo.title}
+                initial={{ opacity: 0, y: 28 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                whileHover={{ y: -12, rotate: 0 }}
+                transition={{ delay: index * 0.04 }}
+                viewport={{ once: true, margin: "-90px" }}
+                className={`relative bg-[#fff8ea] p-3 pb-8 text-[#120805] shadow-[0_24px_70px_rgba(0,0,0,0.35)] ${photo.rotate}`}
+              >
+                <span className="absolute -top-4 left-1/2 h-7 w-5 -translate-x-1/2 rounded-sm border border-[#d8a82f]/25 bg-[#caa45c] shadow-lg" />
+                <img src={photo.image} alt={photo.title} className="h-44 w-full object-cover" referrerPolicy="no-referrer" />
+                <h3 className="mt-3 text-center font-display text-lg font-bold">{photo.title}</h3>
+              </motion.article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-7xl items-center gap-14 px-6 py-24 lg:grid-cols-[1fr_1fr]">
-        <div>
-          {sectionHeader("Section 16", "Function Spotlight Wall", "A final hosting section can reinforce that Chicken House is not only for daily meals but also for memorable occasions.")}
-        </div>
-        <div className="overflow-hidden rounded-[3rem] border border-white/10 bg-white/5">
-          <img src="https://images.unsplash.com/photo-1511795409834-432f7b1728d2?auto=format&fit=crop&w=1400&q=80" alt="Function spotlight" className="h-[30rem] w-full object-cover" referrerPolicy="no-referrer" />
+      <section className="relative overflow-hidden bg-[linear-gradient(180deg,#120704_0%,#0b0403_100%)] py-24">
+        <div className="absolute right-[-8rem] top-24 hidden h-80 w-80 rounded-full border border-[#d8a82f]/10 lg:block" />
+        <div className="mx-auto grid max-w-[92rem] items-center gap-12 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
+          <div>
+            {sectionHeader("Live Kitchen in Motion", "A quick look at the kitchen rhythm, fresh handling, and the movement behind a prepared meal.")}
+            <div className="mt-8 flex flex-wrap gap-3">
+              {["Fresh Prep", "Hot Grill", "Daily Service"].map((label) => (
+                <span key={label} className="rounded-full border border-[#d8a82f]/24 bg-white/[0.04] px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-[#ffd98a]">
+                  {label}
+                </span>
+              ))}
+            </div>
+          </div>
+          <motion.div
+            initial={{ opacity: 0, x: 28 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-90px" }}
+            className="overflow-hidden rounded-[5rem_1.2rem_5rem_1.2rem] border border-[#d8a82f]/28 bg-white/5 shadow-[0_30px_90px_rgba(0,0,0,0.4)]"
+          >
+            <div className="relative h-[24rem] overflow-hidden bg-black sm:h-[31rem]">
+              <video autoPlay muted loop playsInline controls className="h-full w-full object-cover">
+                <source src={eventVideo} type="video/mp4" />
+              </video>
+            </div>
+          </motion.div>
         </div>
       </section>
 
-      <section className="pb-32 pt-8 text-center">
-        <div className="mx-auto max-w-5xl px-6">
-          <p className="text-xs font-bold uppercase tracking-[0.35em] text-orange-400">Section 17</p>
-          <h2 className="mt-4 text-5xl font-black md:text-7xl">
-            MAKE THE GALLERY FEEL
-            <span className="block text-orange-500">LIKE A REAL PLACE.</span>
-          </h2>
-          <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-white/60">
-            A strong gallery should not feel like random photos. It should show atmosphere, food, service, family comfort, events, motion, and the reasons a customer wants to visit in person.
-          </p>
-          <div className="mt-10 flex flex-wrap justify-center gap-4">
-            <Link to="/menu" className="inline-flex items-center gap-2 rounded-full bg-white px-10 py-5 text-lg font-black text-black transition hover:bg-orange-600 hover:text-white">
-              Explore Menu
-              <UtensilsCrossed size={18} />
-            </Link>
-            <Link to="/booking" className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-10 py-5 text-lg font-black text-white transition hover:border-orange-500/40 hover:bg-white/10">
-              Book A Table
-              <ChevronRight size={18} />
-            </Link>
+      <section className="relative overflow-hidden bg-[linear-gradient(180deg,#0b0403_0%,#130805_100%)] px-4 py-24 sm:px-6 lg:px-8">
+        <div className="relative mx-auto max-w-[92rem]">
+          <div className="flex flex-col items-center text-center">
+            <div className="inline-flex items-center justify-center gap-3 text-sm font-black uppercase tracking-[0.18em] text-[#d8a82f] sm:text-base">
+              <Sparkles size={16} />
+              Experience Chicken House
+            </div>
+            <h2 className="mt-5 font-display text-4xl font-bold leading-tight sm:text-5xl">Experience Chicken House</h2>
+          </div>
+          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+            {experienceCards.map((card, index) => {
+              const Icon = card.icon;
+              return (
+                <motion.article
+                  key={card.title}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  whileHover={{ y: -10 }}
+                  transition={{ delay: index * 0.04 }}
+                  viewport={{ once: true, margin: "-90px" }}
+                  className="group relative h-72 overflow-hidden rounded-lg border border-[#d8a82f]/28 bg-white/5 shadow-[0_24px_70px_rgba(0,0,0,0.32)]"
+                >
+                  <img src={card.image} alt={card.title} className="h-full w-full object-cover transition duration-700 group-hover:scale-110" referrerPolicy="no-referrer" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/92 via-black/18 to-transparent" />
+                  <div className="absolute left-4 top-4 flex h-10 w-10 items-center justify-center rounded-full border border-[#d8a82f]/35 bg-black/34 text-[#ffd98a] backdrop-blur">
+                    <Icon size={17} />
+                  </div>
+                  <h3 className="absolute bottom-0 p-5 font-display text-2xl font-bold text-white">{card.title}</h3>
+                </motion.article>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="relative overflow-hidden px-4 pb-32 pt-12 text-center sm:px-6 lg:px-8">
+        <div className="absolute inset-x-0 top-12 mx-auto h-48 max-w-5xl rounded-[50%] border border-[#d8a82f]/14" />
+        <div className="relative mx-auto grid max-w-[92rem] overflow-hidden rounded-lg border border-[#d8a82f]/24 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(216,168,47,0.08),rgba(255,255,255,0.02))] shadow-[0_30px_90px_rgba(0,0,0,0.36)] lg:grid-cols-[0.85fr_1.15fr]">
+          <div className="min-h-[20rem] overflow-hidden">
+            <img src={cafeEntrance} alt="Chicken House entrance" className="h-full w-full object-cover" />
+          </div>
+          <div className="flex flex-col items-center justify-center px-6 py-12 lg:items-start lg:text-left">
+            <motion.h2
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-90px" }}
+              className="font-display text-4xl font-black leading-tight md:text-6xl"
+            >
+              MAKE THE GALLERY FEEL
+              <span className="block text-[#d8a82f]">LIKE A REAL PLACE.</span>
+            </motion.h2>
+            <p className="mt-5 max-w-2xl text-base leading-8 text-white/62">
+              Visit us, dine with us, and create your own memories at Chicken House.
+            </p>
+            <div className="mt-8 flex flex-wrap justify-center gap-4 lg:justify-start">
+              <Link to="/menu" className="inline-flex items-center gap-2 rounded-full bg-[#d8a82f] px-8 py-4 font-black text-[#120805] transition hover:-translate-y-1 hover:bg-white">
+                Explore Menu
+                <UtensilsCrossed size={18} />
+              </Link>
+              <Link to="/booking" className="inline-flex items-center gap-2 rounded-full border border-[#d8a82f]/35 bg-black/25 px-8 py-4 font-black text-white transition hover:-translate-y-1 hover:bg-white/10">
+                Book A Table
+                <ChevronRight size={18} />
+              </Link>
+            </div>
           </div>
         </div>
       </section>

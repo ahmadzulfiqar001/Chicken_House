@@ -156,3 +156,209 @@
   border-radius: 999px;
   border: 2px solid rgba(244, 229, 202, 0.9);
 }
+
+.gallery-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(216, 168, 47, 0.72) rgba(255, 255, 255, 0.06);
+}
+
+.gallery-scrollbar::-webkit-scrollbar {
+  height: 10px;
+}
+
+.gallery-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+}
+
+.gallery-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, rgba(216, 168, 47, 0.96), rgba(255, 221, 139, 0.88));
+  border-radius: 999px;
+  border: 2px solid rgba(8, 3, 2, 0.96);
+}
+
+.premium-curve-gallery {
+  --curve-path: path("M52 268 C166 96 388 86 594 124 C805 163 878 263 814 352 C730 471 476 477 302 428 C168 390 137 485 290 538 C461 595 698 557 835 440");
+}
+
+.curve-stage-wrap {
+  perspective: 1200px;
+}
+
+.curve-stage {
+  position: relative;
+  height: min(46vw, 43rem);
+  min-height: 37rem;
+  transform-style: preserve-3d;
+}
+
+.curve-guide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 0 18px rgba(245, 158, 11, 0.45));
+}
+
+.curve-card {
+  position: absolute;
+  left: calc(var(--x) * 1%);
+  top: calc(var(--y) * 1%);
+  width: clamp(8.8rem, 14vw, 13.5rem);
+  aspect-ratio: 0.78;
+  overflow: hidden;
+  border-radius: 1.05rem;
+  border: 1px solid rgba(255, 204, 117, 0.72);
+  background: rgba(10, 5, 2, 0.78);
+  box-shadow:
+    0 22px 70px rgba(0, 0, 0, 0.46),
+    0 0 28px rgba(245, 158, 11, 0.2),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  transform: rotate(var(--r));
+  animation: curveCardGlow 5.8s ease-in-out infinite;
+  animation-delay: calc(var(--i) * -0.55s);
+  opacity: 0.72;
+  will-change: transform, opacity, filter;
+}
+
+.curve-stage:hover .curve-card {
+  animation-duration: 8s;
+}
+
+.curve-card-small {
+  width: clamp(7.5rem, 11vw, 10.6rem);
+}
+
+.curve-card-medium {
+  width: clamp(8.6rem, 13vw, 12.6rem);
+}
+
+.curve-card-large {
+  width: clamp(10.2rem, 16vw, 15.3rem);
+}
+
+.curve-card img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  filter: saturate(1.12) contrast(1.08);
+  transition: transform 0.7s ease, filter 0.7s ease;
+}
+
+.curve-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.24), transparent 26%),
+    radial-gradient(circle at 50% 0%, rgba(255, 214, 132, 0.24), transparent 42%);
+  opacity: 0.32;
+  pointer-events: none;
+}
+
+.curve-card:hover {
+  z-index: 20;
+  border-color: rgba(255, 225, 153, 0.98);
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.55),
+    0 0 42px rgba(245, 180, 72, 0.46);
+}
+
+.curve-card:hover img {
+  transform: scale(1.08);
+  filter: saturate(1.22) contrast(1.12) brightness(1.04);
+}
+
+.gallery-smoke {
+  position: absolute;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 233, 191, 0.18), transparent 62%);
+  filter: blur(18px);
+  animation: gallerySmokeDrift 12s ease-in-out infinite;
+}
+
+.gallery-smoke-one {
+  right: 6%;
+  top: 10%;
+  height: 18rem;
+  width: 28rem;
+}
+
+.gallery-smoke-two {
+  right: 25%;
+  bottom: 7%;
+  height: 16rem;
+  width: 24rem;
+  animation-delay: -4s;
+}
+
+.gallery-smoke-three {
+  left: 16%;
+  bottom: 18%;
+  height: 12rem;
+  width: 20rem;
+  animation-delay: -8s;
+}
+
+@keyframes curveCardGlow {
+  0%, 100% {
+    opacity: 0.58;
+    transform: rotate(var(--r)) translateY(0) scale(0.98);
+    filter: brightness(0.62) saturate(0.9);
+  }
+  42% {
+    opacity: 1;
+    transform: rotate(var(--r)) translateY(-6px) scale(1.025);
+    filter: brightness(1.08) saturate(1.12);
+  }
+}
+
+@keyframes gallerySmokeDrift {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translate3d(-28px, -18px, 0) scale(1.14);
+    opacity: 0.62;
+  }
+}
+
+@media (max-width: 1023px) {
+  .curve-stage {
+    height: 38rem;
+    min-height: 38rem;
+    transform: scale(0.9);
+    transform-origin: center top;
+  }
+}
+
+@media (max-width: 640px) {
+  .premium-curve-gallery {
+    --curve-path: path("M38 245 C110 124 276 103 430 145 C586 188 640 262 580 330 C514 406 326 408 194 374 C96 349 76 438 196 486 C336 542 520 506 630 410");
+  }
+
+  .curve-stage {
+    height: 34rem;
+    min-height: 34rem;
+    transform: none;
+  }
+
+  .curve-card {
+    width: clamp(7.2rem, 34vw, 9.4rem);
+    border-radius: 0.9rem;
+  }
+
+  .curve-card-large,
+  .curve-card-medium,
+  .curve-card-small {
+    width: clamp(6.7rem, 31vw, 8.7rem);
+  }
+
+  .curve-guide {
+    transform: scale(0.72);
+    transform-origin: left center;
+  }
+}

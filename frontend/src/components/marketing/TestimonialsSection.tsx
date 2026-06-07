@@ -8,53 +8,52 @@ const initialTestimonials = [
     role: "Regular Guest",
     text: "Chicken House feels like our regular family spot. The food is fresh, the taste is simple and rich, and the staff always treats us well.",
     rating: 5,
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80"
   },
   {
     name: "Bilal Akhtar",
     role: "Winter Fish Lover",
     text: "Every winter we buy fish from Chicken House because the taste and freshness are always reliable. It has become a family habit for us.",
     rating: 5,
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80"
   },
   {
     name: "Hassan Javed",
     role: "Family Host",
     text: "Whenever we have to host guests, Chicken House is the first name that comes to mind. We trust their food, service, and timing.",
     rating: 5,
-    image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=200&q=80"
   },
   {
     name: "Usman Tariq",
     role: "Local Customer",
     text: "Their BBQ and karahi both have a homelike comfort. It is the kind of place where everyone can find something they enjoy.",
     rating: 5,
-    image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=200&q=80"
   },
   {
     name: "Farhan Malik",
     role: "GT Road Traveler",
     text: "I stopped here on GT Road and the food was fresh, hot, and served quickly. Now I recommend it to friends who pass through Renala Khurd.",
     rating: 5,
-    image: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=200&q=80"
   },
   {
     name: "Danish Ali",
     role: "Weekend Visitor",
     text: "The atmosphere is comfortable for families, and the taste feels consistent every time. That is why we keep coming back.",
     rating: 5,
-    image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=200&q=80"
   }
 ];
 
-const avatarImages = initialTestimonials.map((item) => item.image);
+const getInitials = (name: string) =>
+  name
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
-const mapReview = (review, index) => ({
+const mapReview = (review) => ({
   name: review.customerName,
   role: review.source === "website" ? "Verified Guest" : (review.source || "Guest Review"),
   text: review.comment,
   rating: review.rating || 5,
-  image: avatarImages[index % avatarImages.length]
 });
 
 const TestimonialsSection = () => {
@@ -129,7 +128,7 @@ const TestimonialsSection = () => {
         return;
       }
 
-      const newTestimonial = mapReview(data, 0);
+      const newTestimonial = mapReview(data);
       setTestimonials((items) => [newTestimonial, ...items]);
       setDirection(-1);
       setCurrentIndex(0);
@@ -221,12 +220,9 @@ const TestimonialsSection = () => {
                 </p>
 
                 <div className="flex items-center gap-5 pt-8 border-t border-white/10">
-                  <img
-                    src={testimonials[currentIndex].image}
-                    alt={testimonials[currentIndex].name}
-                    className="w-18 h-18 rounded-[1.4rem] object-cover transition-all duration-500 shadow-xl"
-                    referrerPolicy="no-referrer"
-                  />
+                  <div className="flex h-[4.5rem] w-[4.5rem] shrink-0 items-center justify-center rounded-[1.4rem] bg-accent text-xl font-bold text-dark shadow-xl">
+                    {getInitials(testimonials[currentIndex].name)}
+                  </div>
                   <div>
                     <h4 className="text-white font-bold text-2xl mb-1">{testimonials[currentIndex].name}</h4>
                     <p className="text-accent font-mono text-[10px] uppercase tracking-[0.3em]">{testimonials[currentIndex].role}</p>

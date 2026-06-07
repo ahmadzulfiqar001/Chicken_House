@@ -18,7 +18,6 @@ import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 import {
   bookingHeroImage,
-  bookingInspirationLinks,
   bookingStatuses,
   bookingStatusStyles,
   bookingTimeSlots,
@@ -140,6 +139,11 @@ const BookingPage = () => {
     setStep((current) => Math.max(1, current - 1));
   };
 
+  const handleSummaryStepChange = (targetStep: number) => {
+    setError("");
+    setStep(targetStep);
+  };
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     const validationError = validateStep(4);
@@ -210,16 +214,17 @@ const BookingPage = () => {
 
   const summaryRows = useMemo(
     () => [
-      { label: "Event", value: formData.eventType ? getEventTypeLabel(formData.eventType) : "Select event" },
-      { label: "Venue", value: formData.zone ? getZoneLabel(formData.zone) : "Select zone" },
-      { label: "Guests", value: formData.guests || "Add guests" },
-      { label: "Package", value: formData.package ? getPackageLabel(formData.package) : "Select package" },
+      { label: "Event", value: formData.eventType ? getEventTypeLabel(formData.eventType) : "Select event", step: 1 },
+      { label: "Venue", value: formData.zone ? getZoneLabel(formData.zone) : "Select zone", step: 2 },
+      { label: "Guests", value: formData.guests || "Add guests", step: 2 },
+      { label: "Package", value: formData.package ? getPackageLabel(formData.package) : "Select package", step: 3 },
       {
         label: "Schedule",
         value:
           formData.date && formData.time
             ? `${formData.date} • ${formatBookingTime(formData.time)}`
             : "Choose date & time",
+        step: 4,
       },
     ],
     [formData.date, formData.eventType, formData.guests, formData.package, formData.time, formData.zone],
@@ -789,10 +794,15 @@ const BookingPage = () => {
                 <h3 className="text-2xl font-bold text-dark">Booking Summary</h3>
                 <div className="mt-6 space-y-4">
                   {summaryRows.map((row) => (
-                    <div key={row.label} className="flex items-start justify-between gap-4 rounded-2xl bg-surface p-4">
+                    <button
+                      key={row.label}
+                      type="button"
+                      onClick={() => handleSummaryStepChange(row.step)}
+                      className="flex w-full items-start justify-between gap-4 rounded-2xl bg-surface p-4 text-left transition hover:bg-surface-strong focus:outline-none focus:ring-2 focus:ring-primary/25"
+                    >
                       <span className="text-sm font-bold uppercase tracking-widest text-muted">{row.label}</span>
                       <span className="max-w-[65%] text-right font-bold text-dark">{row.value}</span>
-                    </div>
+                    </button>
                   ))}
                 </div>
 
@@ -807,18 +817,6 @@ const BookingPage = () => {
                 </div>
               </div>
 
-              <div className="rounded-[3rem] border border-gray-50 bg-white p-8 shadow-2xl shadow-dark/5">
-                <h3 className="text-2xl font-bold text-dark">Visual Direction</h3>
-                <div className="mt-6 space-y-3 text-sm text-muted">
-                  <p>Wedding banquet reference: <a className="text-primary hover:underline" href={bookingInspirationLinks.wedding} target="_blank" rel="noreferrer">Pixabay banquet table</a></p>
-                  <p>Garden event reference: <a className="text-primary hover:underline" href={bookingInspirationLinks.garden} target="_blank" rel="noreferrer">Pinterest garden lunches</a></p>
-                  <p>Rooftop reference: <a className="text-primary hover:underline" href={bookingInspirationLinks.rooftop} target="_blank" rel="noreferrer">Pinterest rooftop dinner</a></p>
-                  <p>Birthday reference: <a className="text-primary hover:underline" href={bookingInspirationLinks.birthday} target="_blank" rel="noreferrer">Pinterest birthday dinner</a></p>
-                </div>
-                <div className="mt-6 rounded-[2rem] bg-surface p-5 text-sm text-muted">
-                  Smooth transitions are intentionally limited to card and step changes so the booking flow stays fast and non-buffering.
-                </div>
-              </div>
             </div>
           </aside>
         </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { Menu, X, ShoppingCart, Home, Utensils, Calendar, Image, Briefcase, Phone, Shield, Info } from "lucide-react";
+import { Menu, X, ShoppingCart, Home, Utensils, Calendar, Image, Phone, Shield, Info } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../context/AuthContext";
 
@@ -37,9 +37,7 @@ const Navbar = () => {
     { name: "Menu", icon: <Utensils size={18} />, href: "/menu" },
     { name: "About", icon: <Info size={18} />, href: "/about" },
     { name: "Gallery", icon: <Image size={18} />, href: "/gallery" },
-    { name: "Services", icon: <Briefcase size={18} />, href: "/services" },
     { name: "Booking", icon: <Calendar size={18} />, href: "/booking" },
-    { name: "Careers", icon: <Briefcase size={18} />, href: "/careers" },
     { name: "Contact", icon: <Phone size={18} />, href: "/contact" },
   ];
 
@@ -80,24 +78,24 @@ const Navbar = () => {
                   className="h-12 w-12 object-cover"
                 />
               </div>
-              <span className="hidden font-anton text-2xl uppercase tracking-tighter text-white sm:block">
+              <span className="hidden font-anton text-[1.7rem] uppercase tracking-tighter text-white drop-shadow-[0_0_7px_rgba(255,214,132,0.24)] sm:block lg:text-3xl">
                 Chicken House
               </span>
             </motion.div>
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden lg:flex items-center gap-12">
+          <div className="hidden lg:flex items-center gap-9 xl:gap-11">
             {navLinks.map((link) => {
               const isActive = location.pathname === link.href;
               return (
                 <Link
                   key={link.name}
                   to={link.href}
-                  className={`font-mono text-[10px] uppercase tracking-[0.28em] transition-all duration-500 relative group px-4 py-2 rounded-full ${
+                  className={`font-mono text-[11px] font-bold uppercase tracking-[0.24em] transition-all duration-500 relative group px-4 py-2 rounded-full ${
                     isActive 
                       ? "text-dark bg-accent shadow-[0_12px_30px_rgba(255,171,73,0.35)]" 
-                      : "text-white/75 hover:text-white hover:bg-white/10"
+                      : "text-white/88 hover:text-white hover:bg-white/12"
                   }`}
                 >
                   {link.name}
@@ -182,7 +180,7 @@ const Navbar = () => {
                 <Link
                   key={link.name}
                   to={link.href}
-                  className="flex items-center gap-6 text-white/60 hover:text-accent font-anton text-4xl uppercase tracking-tighter transition-all"
+                  className="flex items-center gap-6 text-white/78 hover:text-accent font-anton text-4xl uppercase tracking-tighter transition-all"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <span className="text-accent font-mono text-xs">{link.icon}</span>

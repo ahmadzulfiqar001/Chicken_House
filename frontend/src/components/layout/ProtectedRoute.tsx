@@ -3,7 +3,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useAuth, UserRole } from "../../context/AuthContext";
 
 // Staff/backoffice roles — ye log /admin pe jaate hain
-const BACKOFFICE_ROLES: UserRole[] = ["admin", "manager", "rider", "staff"];
+const BACKOFFICE_ROLES: UserRole[] = ["admin", "manager", "hr", "rider", "staff"];
 
 const ProtectedRoute = ({
   children,

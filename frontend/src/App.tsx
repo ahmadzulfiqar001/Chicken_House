@@ -21,10 +21,8 @@ import CartPage from "./pages/Cart";
 import CheckoutPage from "./pages/Checkout";
 import ProfilePage from "./pages/Profile";
 import GalleryPage from "./pages/Gallery";
-import ServicesPage from "./pages/Services";
 import ContactPage from "./pages/Contact";
 import AboutPage from "./pages/About";
-import CareerPage from "./pages/Career";
 import PrivacyPolicyPage from "./pages/PrivacyPolicy";
 import TermsPage from "./pages/Terms";
 import CookiesPage from "./pages/Cookies";
@@ -45,7 +43,6 @@ import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/layout/ProtectedRoute";
 import { ToastProvider } from "./components/layout/ToastProvider";
-import CookieConsent from "./components/layout/CookieConsent";
 
 const Home = () => (
   <motion.div
@@ -83,10 +80,6 @@ const RouteMetaFallback = () => {
     return <PageMeta title="Gallery | Chicken House" description="Browse Chicken House food, ambiance, and restaurant visuals." />;
   }
 
-  if (location.pathname === "/services") {
-    return <PageMeta title="Services | Chicken House" description="Explore Chicken House dining, delivery, event, and restaurant services." />;
-  }
-
   return null;
 };
 
@@ -100,7 +93,6 @@ const PublicLayout = () => (
     <Footer />
     <WhatsAppBot />
     <WhatsAppButton />
-    <CookieConsent />
   </>
 );
 
@@ -119,9 +111,7 @@ function App() {
                   <Route path="/booking" element={<BookingPage />} />
                   <Route path="/track" element={<OrderTrackingPage />} />
                   <Route path="/gallery" element={<GalleryPage />} />
-                  <Route path="/services" element={<ServicesPage />} />
                   <Route path="/contact" element={<ContactPage />} />
-                  <Route path="/careers" element={<CareerPage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/signup" element={<SignupPage />} />
                   <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -131,7 +121,6 @@ function App() {
                   <Route path="/privacy" element={<PrivacyPolicyPage />} />
                   <Route path="/terms" element={<TermsPage />} />
                   <Route path="/cookies" element={<CookiesPage />} />
-                  {/* Customer Dashboard — sirf "user" role ke liye (wallet, orders, wishlist) */}
                   <Route
                     path="/profile"
                     element={
@@ -142,8 +131,6 @@ function App() {
                   />
                   <Route path="*" element={<NotFoundPage />} />
                 </Route>
-
-                {/* Backoffice Dashboard — admin, manager, hr, staff, rider ke liye */}
                 <Route
                   path="/admin"
                   element={

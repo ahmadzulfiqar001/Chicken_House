@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X } from "lucide-react";
+import { siteConfig } from "../../lib/site";
+
+const cafeInteriorImage = new URL("../../../assets/source-images/Cafe Images/indor sitting.png", import.meta.url).href;
+const cafeKitchenImage = new URL("../../../assets/source-images/Cafe Images/bbq section.png", import.meta.url).href;
 
 const WelcomeSection = () => {
   const [isVideoOpen, setIsVideoOpen] = useState(false);
@@ -57,10 +61,9 @@ const WelcomeSection = () => {
             {/* Main Large Image */}
             <div className="relative z-10 w-full max-w-[500px] aspect-[3/4] rounded-[4rem] overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] group">
               <img 
-                src="https://images.unsplash.com/photo-1598103442097-8b74394b95c6?auto=format&fit=crop&w=1200&q=80" 
+                src={cafeInteriorImage} 
                 alt="Chicken House Interior" 
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
-                referrerPolicy="no-referrer"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-dark/40 to-transparent" />
               
@@ -87,10 +90,9 @@ const WelcomeSection = () => {
               className="absolute -bottom-12 -right-12 w-72 h-72 rounded-[3rem] overflow-hidden border-8 border-white shadow-2xl z-20 hidden md:block"
             >
               <img 
-                src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80" 
-                alt="Chicken House Food" 
+                src={cafeKitchenImage} 
+                alt="Chicken House BBQ section" 
                 className="w-full h-full object-cover"
-                referrerPolicy="no-referrer"
               />
             </motion.div>
             
@@ -140,7 +142,7 @@ const WelcomeSection = () => {
               >
                 <X size={20} />
               </button>
-              <video src="/bg-video.mp4" controls autoPlay playsInline className="h-full w-full bg-black" />
+              <video src={siteConfig.heroVideo} controls autoPlay playsInline className="h-full w-full bg-black" />
             </motion.div>
           </motion.div>
         )}

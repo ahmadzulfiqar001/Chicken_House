@@ -2,6 +2,11 @@ import { motion } from "motion/react";
 import { Star, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+const chickenBurgerImage = new URL("../../../assets/source-images/Burger/Chicken Grilled Burger.png", import.meta.url).href;
+const chickenWingsImage = new URL("../../../assets/source-images/Nuggets and wings/Hot Wings Deal + Drink.png", import.meta.url).href;
+const periPeriChickenImage = new URL("../../../assets/source-images/BBQ/Chicken Piece (Leg).jpg", import.meta.url).href;
+const chickenTikkaImage = new URL("../../../assets/source-images/BBQ/Chicken Tikka.jpg", import.meta.url).href;
+
 const BestSellersSection = () => {
   const navigate = useNavigate();
   const bestSellers = [
@@ -9,7 +14,7 @@ const BestSellersSection = () => {
       id: "BS-001",
       name: "Zinger Burger",
       price: "Rs. 450",
-      image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80",
+      image: chickenBurgerImage,
       rating: 4.8,
       reviews: 1240
     },
@@ -17,7 +22,7 @@ const BestSellersSection = () => {
       id: "BS-002",
       name: "Chicken Wings (12pc)",
       price: "Rs. 850",
-      image: "https://images.unsplash.com/photo-1567620832903-9fc6debc209f?auto=format&fit=crop&w=800&q=80",
+      image: chickenWingsImage,
       rating: 4.9,
       reviews: 850
     },
@@ -25,7 +30,7 @@ const BestSellersSection = () => {
       id: "BS-003",
       name: "Peri Peri Chicken",
       price: "Rs. 1,200",
-      image: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=800&q=80",
+      image: periPeriChickenImage,
       rating: 4.7,
       reviews: 450
     },
@@ -33,7 +38,7 @@ const BestSellersSection = () => {
       id: "BS-004",
       name: "Chicken Tikka",
       price: "Rs. 350",
-      image: "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?auto=format&fit=crop&w=800&q=80",
+      image: chickenTikkaImage,
       rating: 4.9,
       reviews: 2100
     }

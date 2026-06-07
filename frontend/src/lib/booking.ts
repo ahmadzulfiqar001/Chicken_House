@@ -7,6 +7,16 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+const cafeWeddingSetup = new URL("../../assets/source-images/Cafe Images/crockery setting.png", import.meta.url).href;
+const cafeEngagementSetup = new URL("../../assets/source-images/Cafe Images/get to gether.png", import.meta.url).href;
+const cafeBirthdaySetup = new URL("../../assets/source-images/Cafe Images/birthday sequence.png", import.meta.url).href;
+const cafeCorporateSetup = new URL("../../assets/source-images/Cafe Images/class 10 farewull.png", import.meta.url).href;
+const cafeFamilyDining = new URL("../../assets/source-images/Cafe Images/eating in cafe.png", import.meta.url).href;
+const cafeOutdoorZone = new URL("../../assets/source-images/Cafe Images/sitting lawn.png", import.meta.url).href;
+const cafeIndoorZone = new URL("../../assets/source-images/Cafe Images/indor sitting.png", import.meta.url).href;
+const cafePlayAreaZone = new URL("../../assets/source-images/Cafe Images/sitting with play area.png", import.meta.url).href;
+const cafeBookingHero = new URL("../../assets/source-images/Cafe Images/crockery.png", import.meta.url).href;
+
 export type BookingStatus = "Pending" | "Confirmed" | "Completed" | "Cancelled";
 
 export const eventTypes: Array<{
@@ -23,8 +33,7 @@ export const eventTypes: Array<{
     icon: Heart,
     color: "bg-red-500/10 text-red-500",
     summary: "Signature family functions with banquet-style service.",
-    image:
-      "https://cdn.pixabay.com/photo/2019/01/03/09/35/table-3911237_1280.jpg",
+    image: cafeWeddingSetup,
   },
   {
     id: "engagement",
@@ -32,8 +41,7 @@ export const eventTypes: Array<{
     icon: Sparkles,
     color: "bg-pink-500/10 text-pink-500",
     summary: "Elegant setups for intimate and formal ceremonies.",
-    image:
-      "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1600&auto=format&fit=crop",
+    image: cafeEngagementSetup,
   },
   {
     id: "birthday",
@@ -41,8 +49,7 @@ export const eventTypes: Array<{
     icon: PartyPopper,
     color: "bg-yellow-500/10 text-yellow-500",
     summary: "Celebration-friendly tables, platters, and custom notes.",
-    image:
-      "https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?q=80&w=1600&auto=format&fit=crop",
+    image: cafeBirthdaySetup,
   },
   {
     id: "corporate",
@@ -50,8 +57,7 @@ export const eventTypes: Array<{
     icon: Users,
     color: "bg-blue-500/10 text-blue-500",
     summary: "Team dinners, business lunches, and hosted meetings.",
-    image:
-      "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=1600&auto=format&fit=crop",
+    image: cafeCorporateSetup,
   },
   {
     id: "other",
@@ -59,8 +65,7 @@ export const eventTypes: Array<{
     icon: Calendar,
     color: "bg-primary/10 text-primary",
     summary: "Flexible arrangements for custom gatherings and requests.",
-    image:
-      "https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=1600&auto=format&fit=crop",
+    image: cafeFamilyDining,
   },
 ];
 
@@ -76,24 +81,21 @@ export const zones: Array<{
     name: "Outdoor Garden",
     capacity: 200,
     description: "Open-air family seating with fresh ambience and group flexibility.",
-    image:
-      "https://images.unsplash.com/photo-1552566626-52f8b828add9?q=80&w=1600&auto=format&fit=crop",
+    image: cafeOutdoorZone,
   },
   {
     id: "indoor",
     name: "Grand Hall",
     capacity: 150,
     description: "Air-conditioned banquet-style hall for elegant event hosting.",
-    image:
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1600&auto=format&fit=crop",
+    image: cafeIndoorZone,
   },
   {
     id: "rooftop",
-    name: "Rooftop Terrace",
+    name: "Family Play Area",
     capacity: 100,
-    description: "Scenic elevated setup for evening dinners and celebrations.",
-    image:
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=1600&auto=format&fit=crop",
+    description: "Family seating beside the play area for relaxed evening dinners and celebrations.",
+    image: cafePlayAreaZone,
   },
 ];
 
@@ -187,13 +189,4 @@ export const formatBookingTime = (value: string) => {
   return `${displayHour}:${String(minute).padStart(2, "0")} ${meridiem}`;
 };
 
-export const bookingHeroImage =
-  "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1800&auto=format&fit=crop";
-
-export const bookingInspirationLinks = {
-  wedding: "https://pixabay.com/photos/table-wedding-banquet-chair-hall-4736377/",
-  banquet: "https://pixabay.com/photos/banquet-hall-wedding-dinner-5120991/",
-  garden: "https://in.pinterest.com/parthaksarathi/garden-lunches/",
-  rooftop: "https://www.pinterest.com/pin/rustic-rooftop-dinner-set-up-goals--1477812373348144/",
-  birthday: "https://www.pinterest.com/ideas/birthday-dinner-at-restaurant/903835240193/",
-};
+export const bookingHeroImage = cafeBookingHero;

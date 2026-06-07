@@ -2,6 +2,10 @@ import { motion } from "motion/react";
 import { Star, ArrowRight, ChevronRight } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
+const chickenKarahiImage = new URL("../../../assets/source-images/Continental/Chicken Makhni Karahi.jpg", import.meta.url).href;
+const bbqPlatterImage = new URL("../../../assets/source-images/bbq platter/Bar-B-Q Platter.jpg", import.meta.url).href;
+const chickenPulaoImage = new URL("../../../assets/source-images/Rice & Biryani/Chicken Jungli Pulao.jpg", import.meta.url).href;
+
 const SpecialtiesSection = () => {
   const navigate = useNavigate();
   const specialties = [
@@ -11,7 +15,7 @@ const SpecialtiesSection = () => {
       type: "Traditional",
       description: "Slow-cooked in a traditional iron wok with fresh tomatoes and our secret spice blend.",
       price: "1,450",
-      image: "https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=800&q=80",
+      image: chickenKarahiImage,
       tag: "Chef's Special",
       specs: { heat: "Medium", time: "25m", serves: "2-3" }
     },
@@ -21,7 +25,7 @@ const SpecialtiesSection = () => {
       type: "Signature",
       description: "A grand assortment of Seekh Kabab, Malai Boti, and Chicken Tikka, served with fresh mint chutney.",
       price: "2,800",
-      image: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
+      image: bbqPlatterImage,
       tag: "Best Seller",
       specs: { heat: "Mild", time: "35m", serves: "4-5" }
     },
@@ -31,7 +35,7 @@ const SpecialtiesSection = () => {
       type: "Premium",
       description: "Fragrant Basmati rice cooked with succulent chicken pieces and aromatic spices.",
       price: "950",
-      image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?auto=format&fit=crop&w=800&q=80",
+      image: chickenPulaoImage,
       tag: "Must Try",
       specs: { heat: "Mild", time: "20m", serves: "1-2" }
     }

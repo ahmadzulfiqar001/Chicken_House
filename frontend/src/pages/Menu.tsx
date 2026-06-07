@@ -69,29 +69,36 @@ const GROUPED_SNACK_CARD_NAMES = new Set([
 const SIDEBAR_CATEGORY_BUTTON_HEIGHT = 44;
 const SIDEBAR_CATEGORY_BUTTON_GAP = 8;
 
+const fallbackKarahiImage = new URL("../../assets/source-images/Continental/Chicken Makhni Karahi.jpg", import.meta.url).href;
+const fallbackBiryaniImage = new URL("../../assets/source-images/Rice & Biryani/Special Chicken Biryani.png", import.meta.url).href;
+const fallbackPakistaniImage = new URL("../../assets/source-images/Pakistani Specials/Dum Murgh Masala.jpg", import.meta.url).href;
+const fallbackPastaImage = new URL("../../assets/source-images/pasta/Chicken House Special Pasta.png", import.meta.url).href;
+const fallbackPizzaImage = new URL("../../assets/source-images/pizza/Bar-B-Q Pizza.jpg", import.meta.url).href;
+const fallbackBurgerImage = new URL("../../assets/source-images/Burger/Chicken Grilled Burger.png", import.meta.url).href;
+const fallbackFriedRiceImage = new URL("../../assets/source-images/Rice & Biryani/Chicken Fried Rice.jpg", import.meta.url).href;
+const fallbackChowmeinImage = new URL("../../assets/source-images/bbq platter/Chicken Chowmein.jpg", import.meta.url).href;
+const fallbackBbqImage = new URL("../../assets/source-images/BBQ/Chicken Tikka.jpg", import.meta.url).href;
+const fallbackSaladImage = new URL("../../assets/source-images/Raita & Salad/Fresh Salad.jpg", import.meta.url).href;
+
 const fallbackImageFor = (item: Pick<MenuItem, "name" | "category" | "subcategory">) => {
   const value = `${item.name} ${item.category} ${item.subcategory}`.toLowerCase();
 
-  if (value.includes("karahi")) return "https://cdn.pixabay.com/photo/2022/06/10/05/20/chicken-karahi-7253714_1280.jpg";
-  if (value.includes("biryani")) return "https://cdn.pixabay.com/photo/2022/07/01/07/13/chicken-biryani-7292658_1280.jpg";
-  if (value.includes("nihari")) return "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=1600&auto=format&fit=crop";
-  if (value.includes("haleem")) return "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?q=80&w=1600&auto=format&fit=crop";
-  if (value.includes("sajji")) return "https://images.unsplash.com/photo-1527477396000-e27163b481c2?q=80&w=1600&auto=format&fit=crop";
-  if (value.includes("lasagna")) return "https://images.unsplash.com/photo-1619894991209-9f9694be045a?q=80&w=1600&auto=format&fit=crop";
-  if (value.includes("risotto")) return "https://images.unsplash.com/photo-1633964913295-ceb43826bd84?q=80&w=1600&auto=format&fit=crop";
-  if (value.includes("pizza")) return "https://cdn.pixabay.com/photo/2017/12/09/08/18/pizza-3007395_1280.jpg";
-  if (value.includes("burger")) return "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=1600&auto=format&fit=crop";
+  if (value.includes("karahi")) return fallbackKarahiImage;
+  if (value.includes("biryani")) return fallbackBiryaniImage;
+  if (value.includes("nihari")) return fallbackPakistaniImage;
+  if (value.includes("haleem")) return fallbackPakistaniImage;
+  if (value.includes("sajji")) return fallbackPakistaniImage;
+  if (value.includes("lasagna")) return fallbackPastaImage;
+  if (value.includes("risotto")) return fallbackPastaImage;
+  if (value.includes("pizza")) return fallbackPizzaImage;
+  if (value.includes("burger")) return fallbackBurgerImage;
   if (value.includes("pasta") || value.includes("spaghetti") || value.includes("macaroni")) {
-    return "https://cdn.pixabay.com/photo/2024/02/15/09/30/pasta-8574430_1280.jpg";
+    return fallbackPastaImage;
   }
-  if (value.includes("fried rice")) return "https://images.unsplash.com/photo-1603133872878-684f208fb84b?q=80&w=1600&auto=format&fit=crop";
-  if (value.includes("chowmein") || value.includes("noodles")) return "https://cdn.pixabay.com/photo/2018/05/07/14/00/chicken-chowmein-3380834_1280.jpg";
-  if (value.includes("bbq") || value.includes("tikka") || value.includes("kebab")) return "https://cdn.pixabay.com/photo/2016/10/25/13/42/kebab-1768422_1280.jpg";
-  if (value.includes("salad")) return "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=1600&auto=format&fit=crop";
-  if (value.includes("coffee") || value.includes("tea") || value.includes("hot chocolate")) return "https://cdn.pixabay.com/photo/2020/08/08/04/37/coffee-5471023_1280.jpg";
-  if (value.includes("lemonade") || value.includes("juice") || value.includes("margarita") || value.includes("drink")) {
-    return "https://cdn.pixabay.com/photo/2017/05/19/20/32/lemonade-2328925_1280.jpg";
-  }
+  if (value.includes("fried rice")) return fallbackFriedRiceImage;
+  if (value.includes("chowmein") || value.includes("noodles")) return fallbackChowmeinImage;
+  if (value.includes("bbq") || value.includes("tikka") || value.includes("kebab")) return fallbackBbqImage;
+  if (value.includes("salad")) return fallbackSaladImage;
 
   return siteConfig.imageFallback;
 };
@@ -248,7 +255,7 @@ const MenuImage = ({ item, className }: { item: MenuItem; className?: string }) 
             return;
           }
 
-          setSrc("/restaurant-placeholder.svg");
+          setSrc(siteConfig.imageFallback);
           setLoaded(true);
         }}
       />

@@ -132,21 +132,21 @@ const ContactPage = () => {
   };
 
   return (
-    <div className="min-h-screen overflow-hidden bg-paper pt-28">
+    <div className="min-h-screen overflow-x-hidden bg-paper pt-28">
       <PageMeta
         title="Contact | Chicken House"
         description="Contact Chicken House in Renala Khurd for bookings, delivery support, location guidance, and restaurant inquiries."
       />
 
-      <section className="relative pb-14">
+      <section className="relative pb-14 pt-4 sm:pt-8">
         <div className="absolute inset-x-0 top-0 h-[25rem] bg-[radial-gradient(circle_at_top_right,rgba(255,170,73,0.18),transparent_38%),radial-gradient(circle_at_top_left,rgba(210,74,21,0.12),transparent_30%)]" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid items-center gap-10 lg:grid-cols-[1.02fr_0.98fr]">
-            <div className="space-y-7">
+          <div className="grid items-center gap-10 lg:grid-cols-2 xl:gap-14">
+            <div className="min-w-0 space-y-7">
               <motion.span
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="inline-flex rounded-full border border-primary/10 bg-primary/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.32em] text-primary"
+                className="inline-flex max-w-full rounded-full border border-primary/10 bg-primary/5 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.24em] text-primary sm:text-xs sm:tracking-[0.32em]"
               >
                 Contact Chicken House
               </motion.span>
@@ -154,7 +154,7 @@ const ContactPage = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.06 }}
-                className="max-w-3xl text-5xl font-display font-bold leading-tight text-dark md:text-6xl"
+                className="max-w-2xl text-4xl font-display font-bold leading-tight text-dark sm:text-5xl lg:text-[3.55rem]"
               >
                 Clear restaurant contact, fast help channels, and a location customers can reach without confusion.
               </motion.h1>
@@ -198,16 +198,16 @@ const ContactPage = () => {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5 }}
-              className="relative"
+              className="relative mx-auto w-full max-w-xl lg:max-w-none"
             >
-              <div className="overflow-hidden rounded-[3rem] border border-gray-100 bg-white shadow-[0_32px_90px_rgba(27,18,14,0.12)]">
+              <div className="aspect-[4/3] overflow-hidden rounded-[2rem] border border-gray-100 bg-white shadow-[0_32px_90px_rgba(27,18,14,0.12)] sm:rounded-[3rem]">
                 <img
                   src={siteConfig.contactHeroImage}
-                  alt="Chicken House contact and location support illustration"
+                  alt="Chicken House GT Road location"
                   className="h-full w-full object-cover"
                 />
               </div>
-              <div className="absolute -bottom-7 left-6 max-w-xs rounded-[2rem] border border-white/70 bg-white/95 p-5 shadow-2xl shadow-dark/10 backdrop-blur-xl">
+              <div className="mt-4 max-w-xs rounded-[2rem] border border-white/70 bg-white/95 p-5 shadow-2xl shadow-dark/10 backdrop-blur-xl sm:absolute sm:-bottom-7 sm:left-6 sm:mt-0">
                 <p className="text-xs font-bold uppercase tracking-[0.28em] text-primary">Landmark Reference</p>
                 <p className="mt-3 text-sm leading-7 text-dark">
                   Near Mitchell&apos;s Fair Price Shop on GT Road, with quick directions available through Google Maps

@@ -2,6 +2,12 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
 import { Star, ShoppingCart } from "lucide-react";
+import { siteConfig } from "../../lib/site";
+
+const chickenKarahiImage = new URL("../../../assets/source-images/Continental/Chicken Makhni Karahi.jpg", import.meta.url).href;
+const bbqPlatterImage = new URL("../../../assets/source-images/bbq platter/Bar-B-Q Platter.jpg", import.meta.url).href;
+const bbqPizzaImage = new URL("../../../assets/source-images/pizza/Bar-B-Q Pizza.jpg", import.meta.url).href;
+const friesImage = new URL("../../../assets/source-images/Fries/fries.png", import.meta.url).href;
 
 type PreviewDish = {
   id: string;
@@ -20,7 +26,7 @@ const fallbackPreview: PreviewDish[] = [
     name: "Chicken Karahi",
     price: 1200,
     rating: 4.9,
-    image: "https://cdn.pixabay.com/photo/2022/06/10/05/20/chicken-karahi-7253714_1280.jpg",
+    image: chickenKarahiImage,
     category: "Desi (Pakistani)",
     recommended: true,
     startingPrice: 600,
@@ -30,7 +36,7 @@ const fallbackPreview: PreviewDish[] = [
     name: "Mixed BBQ Platter",
     price: 1000,
     rating: 4.8,
-    image: "https://images.unsplash.com/photo-1529006557810-274b9b2fc783?q=80&w=1200&auto=format&fit=crop",
+    image: bbqPlatterImage,
     category: "BBQ",
     recommended: true,
     startingPrice: 700,
@@ -40,20 +46,20 @@ const fallbackPreview: PreviewDish[] = [
     name: "BBQ Chicken Pizza",
     price: 900,
     rating: 4.8,
-    image: "https://cdn.pixabay.com/photo/2017/12/09/08/18/pizza-3007395_1280.jpg",
+    image: bbqPizzaImage,
     category: "Pizza",
     recommended: true,
     startingPrice: 600,
   },
   {
     id: "preview-4",
-    name: "Mint Margarita",
-    price: 200,
+    name: "Golden Fries",
+    price: 250,
     rating: 4.9,
-    image: "https://cdn.pixabay.com/photo/2017/05/19/20/32/lemonade-2328925_1280.jpg",
-    category: "Drinks",
+    image: friesImage,
+    category: "Fries",
     recommended: true,
-    startingPrice: 200,
+    startingPrice: 250,
   },
 ];
 
@@ -134,7 +140,7 @@ const MenuPreview = () => {
                   className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                   referrerPolicy="no-referrer"
                   onError={(event) => {
-                    event.currentTarget.src = "/restaurant-placeholder.svg";
+                    event.currentTarget.src = siteConfig.imageFallback;
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-dark/60 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />

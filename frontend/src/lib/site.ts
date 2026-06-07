@@ -1,5 +1,11 @@
 import { Mail, MapPinned, MessageCircle, Phone } from "lucide-react";
 
+const cafeBrandingImage = new URL("../../assets/source-images/Cafe Images/chick branding.png", import.meta.url).href;
+const cafeFrontImage = new URL("../../assets/source-images/Cafe Images/front.png", import.meta.url).href;
+const cafeIndoorImage = new URL("../../assets/source-images/Cafe Images/indor sitting.png", import.meta.url).href;
+const cafeLocationImage = new URL("../../assets/source-images/Cafe Images/location 1.jpg", import.meta.url).href;
+const cafeLiveKitchenVideo = new URL("../../assets/source-images/Cafe Images/live kitchen.mp4", import.meta.url).href;
+
 export const siteConfig = {
   brandName: "Chicken House",
   tagline: "A Symbol of Quality & Freshness",
@@ -45,10 +51,11 @@ export const siteConfig = {
       note: "Include your order ID in the transaction",
     },
   ],
-  imageFallback: "/restaurant-placeholder.svg",
-  aboutHeroImage: "/about-hero.svg",
-  aboutAmbienceImage: "/about-ambience.svg",
-  contactHeroImage: "/contact-hero.svg",
+  imageFallback: cafeBrandingImage,
+  aboutHeroImage: cafeFrontImage,
+  aboutAmbienceImage: cafeIndoorImage,
+  contactHeroImage: cafeLocationImage,
+  heroVideo: cafeLiveKitchenVideo,
   storyPillars: [
     {
       title: "Built for Everyday Dining",
