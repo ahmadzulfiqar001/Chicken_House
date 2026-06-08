@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useRealtime } from "../../lib/realtime";
+import { printReceipt } from "../../lib/receiptPrint";
 import {
   CheckCircle2,
   Clock3,
@@ -111,7 +112,7 @@ const buildItemsSummary = (details: OrderDetail[] | undefined, fallback: string)
 
 const formatCurrency = (value: number) => `Rs. ${Number(value ?? 0).toLocaleString()}`;
 
-const OrderManagement = () => {
+const OrderManagement = ({ focusOrderId }: { focusOrderId?: string } = {}) => {
   const { showToast } = useToast();
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -160,6 +161,18 @@ const OrderManagement = () => {
   useRealtime("orders", () => {
     void fetchOrders();
   });
+
+  useEffect(() => {
+    if (!focusOrderId) return;
+
+    setStatusFilter("All");
+    setSearchQuery(focusOrderId);
+
+    const targetOrder = orders.find((order) => order.id === focusOrderId);
+    if (targetOrder) {
+      setSelectedOrder(targetOrder);
+    }
+  }, [focusOrderId, orders]);
 
   useEffect(() => {
     const loadStaff = async () => {
@@ -443,6 +456,37 @@ const OrderManagement = () => {
       setError(message);
       showToast({ tone: "error", title: "Payment update failed", description: message });
     }
+  };
+
+  const printOrderReceipt = (order: OrderRecord) => {
+    const deliveryFee = Number(order.deliveryFee ?? 0);
+    const subtotal = order.subtotal ?? Math.max(0, order.total - deliveryFee);
+
+    printReceipt({
+      id: order.id,
+      customer: order.customer,
+      customerEmail: order.customerEmail,
+      customerPhone: order.customerPhone,
+      deliveryAddress: order.deliveryAddress,
+      type: order.type,
+      paymentMethod: order.paymentMethod,
+      paymentStatus: order.paymentStatus,
+      paymentReference: order.paymentReference,
+      time: order.time,
+      subtotal,
+      deliveryFee,
+      total: order.total,
+      notes: order.notes,
+      items: order.details?.length
+        ? order.details
+        : [
+            {
+              name: order.items,
+              quantity: 1,
+              price: subtotal,
+            },
+          ],
+    });
   };
 
   const deleteOrder = async (id: string) => {
@@ -846,7 +890,7 @@ const OrderManagement = () => {
                       Edit Order
                     </button>
                     <button
-                      onClick={() => window.print()}
+                      onClick={() => printOrderReceipt(selectedOrder)}
                       className="inline-flex items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-4 font-bold text-dark"
                     >
                       Print

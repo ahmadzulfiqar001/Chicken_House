@@ -30,7 +30,7 @@ const emptyOpening = {
   requirements: "",
 };
 
-const CareersModule = () => {
+const CareersModule = ({ focusApplicationId }: { focusApplicationId?: string } = {}) => {
   const [tab, setTab] = useState("applications");
 
   const [applications, setApplications] = useState([]);
@@ -69,6 +69,14 @@ const CareersModule = () => {
   useEffect(() => {
     void fetchAll();
   }, []);
+
+  useEffect(() => {
+    if (!focusApplicationId) return;
+
+    setTab("applications");
+    setStatusFilter("All");
+    setSearch(focusApplicationId);
+  }, [focusApplicationId]);
 
   const decide = async (application, status) => {
     const note = window.prompt(
@@ -154,7 +162,7 @@ const CareersModule = () => {
     return applications.filter((app) => {
       if (statusFilter !== "All" && app.status !== statusFilter) return false;
       if (!q) return true;
-      return `${app.name} ${app.email} ${app.jobTitle}`.toLowerCase().includes(q);
+      return `${app.id} ${app.name} ${app.email} ${app.jobTitle}`.toLowerCase().includes(q);
     });
   }, [applications, search, statusFilter]);
 

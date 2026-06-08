@@ -191,7 +191,7 @@ const PanelSkeleton = () => (
   </div>
 );
 
-const InventoryManagement = () => {
+const InventoryManagement = ({ focusItemId }: { focusItemId?: string } = {}) => {
   const { showToast } = useToast();
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [vendors, setVendors] = useState<VendorRecord[]>([]);
@@ -280,10 +280,20 @@ const InventoryManagement = () => {
     void loadData(reportWindow);
   });
 
+  useEffect(() => {
+    if (!focusItemId) return;
+
+    const targetItem = inventory.find((item) => String(item.id) === focusItemId);
+    setInventorySearch(targetItem?.name ?? focusItemId);
+  }, [focusItemId, inventory]);
+
   const filteredInventory = useMemo(
     () =>
       inventory.filter((item) =>
-        [item.name, item.category, item.supplier ?? ""].join(" ").toLowerCase().includes(inventorySearch.toLowerCase()),
+        [item.id, item.name, item.category, item.supplier ?? ""]
+          .join(" ")
+          .toLowerCase()
+          .includes(inventorySearch.toLowerCase()),
       ),
     [inventory, inventorySearch],
   );

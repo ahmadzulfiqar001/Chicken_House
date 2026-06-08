@@ -29,7 +29,7 @@ const priorityStyles = {
   Low: "bg-blue-500/10 text-blue-500",
 };
 
-const SupportModule = () => {
+const SupportModule = ({ focusTicketId }: { focusTicketId?: string } = {}) => {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -62,6 +62,17 @@ const SupportModule = () => {
   useRealtime("contactMessages", () => {
     fetchTickets();
   });
+
+  useEffect(() => {
+    if (!focusTicketId) return;
+
+    setSearchQuery(focusTicketId);
+
+    const targetTicket = tickets.find((ticket) => String(ticket.id) === focusTicketId);
+    if (targetTicket) {
+      setSelected(targetTicket);
+    }
+  }, [focusTicketId, tickets]);
 
   const filteredTickets = useMemo(() => {
     const lowered = searchQuery.toLowerCase();

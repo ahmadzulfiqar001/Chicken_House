@@ -33,7 +33,7 @@ import DemandForecasting from "../components/admin/DemandForecasting";
 import RiderModule from "../components/admin/RiderModule";
 import SupportModule from "../components/admin/SupportModule";
 import SecurityModule from "../components/admin/SecurityModule";
-import NotificationModule from "../components/admin/NotificationModule";
+import NotificationModule, { type NotificationTarget } from "../components/admin/NotificationModule";
 import CareersModule from "../components/admin/CareersModule";
 import MenuManagement from "../components/admin/MenuManagement";
 import HRManagement from "../components/admin/HRManagement";
@@ -113,6 +113,7 @@ const PANEL_META: Record<UserRole, { title: string; authority: string }> = {
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState<DashboardTabId>("dashboard");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [notificationTarget, setNotificationTarget] = useState<(NotificationTarget & { nonce: number }) | null>(null);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const currentRole = user?.role ?? "admin";
@@ -242,6 +243,19 @@ const AdminDashboard = () => {
       icon: <Package size={32} className="mb-4" />,
     };
   }, [lowStockCount]);
+
+  const openNotificationTarget = (target: NotificationTarget) => {
+    const targetTab = target.tab as DashboardTabId;
+
+    if (!sidebarLinks.some((link) => link.id === targetTab)) {
+      setActiveTab("notifications");
+      return;
+    }
+
+    setNotificationTarget({ ...target, nonce: Date.now() });
+    setActiveTab(targetTab);
+    setIsSidebarOpen(false);
+  };
 
   // Role-based shells — after all hooks (Rules of Hooks).
   if (staffWorkspaceRoles.includes(currentRole)) {
@@ -510,7 +524,9 @@ const AdminDashboard = () => {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
               >
-                <InventoryManagement />
+                <InventoryManagement
+                  focusItemId={notificationTarget?.tab === "inventory" ? notificationTarget.id : undefined}
+                />
               </motion.div>
             )}
 
@@ -540,7 +556,9 @@ const AdminDashboard = () => {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
               >
-                <OrderManagement />
+                <OrderManagement
+                  focusOrderId={notificationTarget?.tab === "orders" ? notificationTarget.id : undefined}
+                />
               </motion.div>
             )}
 
@@ -550,7 +568,9 @@ const AdminDashboard = () => {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
               >
-                <BookingManagement />
+                <BookingManagement
+                  focusBookingId={notificationTarget?.tab === "bookings" ? notificationTarget.id : undefined}
+                />
               </motion.div>
             )}
 
@@ -650,7 +670,9 @@ const AdminDashboard = () => {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
               >
-                <SupportModule />
+                <SupportModule
+                  focusTicketId={notificationTarget?.tab === "support" ? notificationTarget.id : undefined}
+                />
               </motion.div>
             )}
 
@@ -670,7 +692,7 @@ const AdminDashboard = () => {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
               >
-                <NotificationModule />
+                <NotificationModule onOpenRelated={openNotificationTarget} />
               </motion.div>
             )}
 
@@ -680,7 +702,9 @@ const AdminDashboard = () => {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
               >
-                <CareersModule />
+                <CareersModule
+                  focusApplicationId={notificationTarget?.tab === "careers" ? notificationTarget.id : undefined}
+                />
               </motion.div>
             )}
 

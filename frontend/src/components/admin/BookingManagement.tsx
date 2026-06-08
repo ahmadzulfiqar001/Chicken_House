@@ -46,7 +46,7 @@ type BookingRecord = {
   createdAt?: string;
 };
 
-const BookingManagement = () => {
+const BookingManagement = ({ focusBookingId }: { focusBookingId?: string } = {}) => {
   const [bookings, setBookings] = useState<BookingRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -85,6 +85,19 @@ const BookingManagement = () => {
   useRealtime("bookings", () => {
     void fetchBookings();
   });
+
+  useEffect(() => {
+    if (!focusBookingId) return;
+
+    setStatusFilter("All");
+    setViewMode("list");
+    setSearchQuery(focusBookingId);
+
+    const targetBooking = bookings.find((booking) => booking.id === focusBookingId);
+    if (targetBooking) {
+      setSelectedBooking(targetBooking);
+    }
+  }, [bookings, focusBookingId]);
 
   const filteredBookings = useMemo(
     () =>

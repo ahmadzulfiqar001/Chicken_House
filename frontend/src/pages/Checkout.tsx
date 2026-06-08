@@ -25,6 +25,7 @@ import {
   supportedDeliveryCities,
   validateCheckoutDetails,
 } from "../lib/orderPricing";
+import { printReceipt } from "../lib/receiptPrint";
 import { siteConfig } from "../lib/site";
 
 type CustomerProfileResponse = {
@@ -46,6 +47,7 @@ type CheckoutConfirmation = {
   city: string;
   notes: string;
   paymentMethod: string;
+  paymentReference?: string;
   type: "Delivery" | "Takeaway";
   subtotal: number;
   deliveryFee: number;
@@ -222,6 +224,7 @@ const CheckoutPage = () => {
         city: formData.city,
         notes: formData.notes,
         paymentMethod: formData.paymentMethod,
+        paymentReference: formData.paymentReference,
         type: formData.type,
         subtotal,
         deliveryFee,
@@ -249,6 +252,35 @@ const CheckoutPage = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const printConfirmationReceipt = () => {
+    if (!confirmation) {
+      return;
+    }
+
+    printReceipt({
+      id: confirmation.id,
+      customer: confirmation.name,
+      customerEmail: confirmation.email,
+      customerPhone: confirmation.phone,
+      deliveryAddress: confirmation.address,
+      city: confirmation.city,
+      type: confirmation.type,
+      paymentMethod: confirmation.paymentMethod,
+      paymentReference: confirmation.paymentReference,
+      subtotal: confirmation.subtotal,
+      deliveryFee: confirmation.deliveryFee,
+      total: confirmation.total,
+      notes: confirmation.notes,
+      items: confirmation.items.map((item) => ({
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        variantLabel: item.variantLabel,
+        customizations: item.customizations,
+      })),
+    });
   };
 
   if (!cartItems.length && !confirmation) {
@@ -358,7 +390,7 @@ const CheckoutPage = () => {
                   </Link>
                   <button
                     type="button"
-                    onClick={() => window.print()}
+                    onClick={printConfirmationReceipt}
                     className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-8 py-4 font-bold text-dark"
                   >
                     Print Invoice

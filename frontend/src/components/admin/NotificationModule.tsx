@@ -58,7 +58,40 @@ const formatTime = (value) => {
   return date.toLocaleString("en-PK");
 };
 
-const NotificationModule = () => {
+export type NotificationTarget = {
+  tab: string;
+  source: string;
+  id?: string;
+  search?: string;
+};
+
+const getNotificationTarget = (notif): NotificationTarget | null => {
+  const source = String(notif.metadata?.source ?? "");
+
+  if (source === "orders") {
+    return { tab: "orders", source, id: String(notif.metadata?.orderId ?? ""), search: String(notif.metadata?.orderId ?? "") };
+  }
+
+  if (source === "bookings") {
+    return { tab: "bookings", source, id: String(notif.metadata?.bookingId ?? ""), search: String(notif.metadata?.bookingId ?? "") };
+  }
+
+  if (source === "contact") {
+    return { tab: "support", source, id: String(notif.metadata?.messageId ?? ""), search: String(notif.metadata?.messageId ?? "") };
+  }
+
+  if (source === "inventory") {
+    return { tab: "inventory", source, id: String(notif.metadata?.itemId ?? ""), search: String(notif.metadata?.itemId ?? "") };
+  }
+
+  if (source === "careers") {
+    return { tab: "careers", source, id: String(notif.metadata?.applicationId ?? ""), search: String(notif.metadata?.applicationId ?? "") };
+  }
+
+  return null;
+};
+
+const NotificationModule = ({ onOpenRelated }: { onOpenRelated?: (target: NotificationTarget) => void }) => {
   const { showToast } = useToast();
   const [notifications, setNotifications] = useState([]);
   const [metrics, setMetrics] = useState(null);
@@ -68,6 +101,7 @@ const NotificationModule = () => {
   const [search, setSearch] = useState("");
   const [form, setForm] = useState(emptyForm);
   const [sending, setSending] = useState(false);
+  const [reviewBusyId, setReviewBusyId] = useState("");
 
   const loadNotifications = async () => {
     try {
@@ -94,8 +128,8 @@ const NotificationModule = () => {
     void loadNotifications();
   }, []);
 
-  // Live updates: refetch whenever a notification is created / sent / deleted.
-  useRealtime("notifications", () => {
+  // Live updates: manual notifications and system-alert sources both refresh this list.
+  useRealtime(["notifications", "orders", "bookings", "inventory", "contactMessages"], () => {
     void loadNotifications();
   });
 
@@ -218,6 +252,42 @@ const NotificationModule = () => {
     }
   };
 
+  const moderateReview = async (notif, status: "Approved" | "Rejected") => {
+    const reviewId = String(notif.metadata?.reviewId ?? "");
+    if (!reviewId) return;
+
+    setReviewBusyId(reviewId);
+
+    try {
+      const res = await fetch(`/api/reviews/${reviewId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(data.message ?? "Review could not be updated.");
+      }
+
+      await loadNotifications();
+      showToast({
+        tone: "success",
+        title: "Review settled",
+        description: `Review ${status.toLowerCase()}. The alert has been cleared.`,
+      });
+    } catch (reviewError) {
+      console.error(reviewError);
+      showToast({
+        tone: "error",
+        title: "Review action failed",
+        description: reviewError instanceof Error ? reviewError.message : "Review could not be updated.",
+      });
+    } finally {
+      setReviewBusyId("");
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-8 animate-pulse">
@@ -318,11 +388,26 @@ const NotificationModule = () => {
             {filteredNotifications.map((notif) => {
               const isSystemAlert = Boolean(notif.system || notif.metadata?.system);
               const sourceLabel = notif.metadata?.source ? sourceLabels[notif.metadata.source] ?? notif.metadata.source : "";
+              const target = getNotificationTarget(notif);
+              const reviewId = String(notif.metadata?.reviewId ?? "");
+              const isReviewAlert = notif.metadata?.source === "reviews" && Boolean(reviewId);
 
               return (
                 <div
                   key={notif.id}
-                  className="flex items-start gap-6 p-6 rounded-3xl bg-surface hover:bg-surface-strong transition-all group"
+                  onClick={target && onOpenRelated ? () => onOpenRelated(target) : undefined}
+                  onKeyDown={(event) => {
+                    if (!target || !onOpenRelated) return;
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      onOpenRelated(target);
+                    }
+                  }}
+                  role={target && onOpenRelated ? "button" : undefined}
+                  tabIndex={target && onOpenRelated ? 0 : undefined}
+                  className={`flex items-start gap-6 p-6 rounded-3xl bg-surface hover:bg-surface-strong transition-all group ${
+                    target && onOpenRelated ? "cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/25" : ""
+                  }`}
                 >
                   <div
                     className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
@@ -389,9 +474,38 @@ const NotificationModule = () => {
                           Delete
                         </button>
                       </div>
+                    ) : isReviewAlert ? (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          disabled={reviewBusyId === reviewId}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            void moderateReview(notif, "Approved");
+                          }}
+                          className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-bold text-dark transition hover:bg-green-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          <CheckCircle size={14} />
+                          Approve
+                        </button>
+                        <button
+                          type="button"
+                          disabled={reviewBusyId === reviewId}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            void moderateReview(notif, "Rejected");
+                          }}
+                          className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-bold text-dark transition hover:bg-red-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          <AlertCircle size={14} />
+                          Reject
+                        </button>
+                      </div>
                     ) : (
                       <p className="mt-4 text-xs font-medium text-muted">
-                        Auto alert from live restaurant data. Handle it from its related module.
+                        {target && onOpenRelated
+                          ? `Click to open ${sourceLabel || "the related module"}. This alert clears once the issue is resolved there.`
+                          : "Auto alert from live restaurant data. Handle it from its related module."}
                       </p>
                     )}
                   </div>

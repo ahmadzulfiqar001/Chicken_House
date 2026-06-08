@@ -401,6 +401,20 @@ const MenuPage = () => {
     return next;
   }, [deferredSearchQuery, menuItems, sortBy, statusFilter]);
 
+  const searchSuggestions = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
+    if (!query) return [];
+
+    return menuItems
+      .filter((item) =>
+        [item.name, item.category, item.subcategory, item.description].some((value) =>
+          value.toLowerCase().includes(query),
+        ),
+      )
+      .slice(0, 6);
+  }, [menuItems, searchQuery]);
+
   const categorySections = useMemo(() => {
     const sectionMap = new Map<string, MenuItem[]>();
 
@@ -704,12 +718,50 @@ const MenuPage = () => {
           </aside>
 
           <main className="min-w-0 space-y-12 xl:border-l xl:border-[#efe0c7] xl:pl-10">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="inline-flex items-center gap-3 rounded-full bg-white px-4 py-3 text-sm font-bold text-dark shadow-lg shadow-dark/5">
               <span className="inline-flex h-9 min-w-9 items-center justify-center rounded-full bg-surface px-3 text-primary">
                 {filteredItems.length}
               </span>
               dishes visible
+            </div>
+
+            <div className="relative w-full lg:max-w-2xl">
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-muted" size={20} />
+              <input
+                type="search"
+                placeholder="Search food item..."
+                value={searchQuery}
+                onChange={(event) =>
+                  startTransition(() => {
+                    setSearchQuery(event.target.value);
+                  })
+                }
+                className="w-full rounded-[1.8rem] border border-[#eadcc8] bg-white px-14 py-4 text-[15px] font-semibold text-dark shadow-xl shadow-dark/5 outline-none transition-all placeholder:text-muted focus:border-primary focus:ring-4 focus:ring-primary/10"
+              />
+
+              {searchSuggestions.length ? (
+                <div className="absolute inset-x-0 top-[calc(100%+0.7rem)] z-30 overflow-hidden rounded-[1.8rem] border border-[#eadcc8] bg-white shadow-2xl shadow-dark/12">
+                  {searchSuggestions.map((item) => (
+                    <button
+                      key={`search-${item.id}`}
+                      type="button"
+                      onClick={() => setSelectedItem(item)}
+                      className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-all hover:bg-surface"
+                    >
+                      <span className="min-w-0">
+                        <span className="block truncate font-bold text-dark">{item.name}</span>
+                        <span className="mt-1 block truncate text-xs font-bold uppercase tracking-[0.16em] text-muted">
+                          {item.category} / {item.subcategory}
+                        </span>
+                      </span>
+                      <span className="flex-shrink-0 rounded-full bg-primary px-4 py-2 text-xs font-bold text-white">
+                        Rs. {item.startingPrice}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
             </div>
 
             <button
