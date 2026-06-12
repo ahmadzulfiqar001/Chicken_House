@@ -1,17 +1,49 @@
 import express from "express";
 import { getRequestAuthUser, requireAuth } from "../auth/auth.service";
-import { loadAll } from "../../core/store";
+import { findOne, insertDoc, loadAll, updateDoc } from "../../core/store";
 
 const router = express.Router();
 
 router.use(requireAuth);
 
-router.get("/overview", async (req, res) => {
+const ensureOperationsAccess = (req: express.Request, res: express.Response) => {
   const authUser = getRequestAuthUser(req);
 
   if (!authUser || !["admin", "manager"].includes(authUser.role)) {
-    return res.status(403).json({ message: "Operations overview is available for admin and manager roles only." });
+    res.status(403).json({ message: "Operations access is available for admin and manager roles only." });
+    return null;
   }
+
+  return authUser;
+};
+
+const addActivityLog = async ({
+  staffId,
+  staffName,
+  role,
+  action,
+  detail,
+}: {
+  staffId?: number;
+  staffName?: string;
+  role: string;
+  action: string;
+  detail: string;
+}) => {
+  await insertDoc("activityLogs", {
+    id: `ACT-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    staffId: staffId ?? 0,
+    staffName: staffName ?? "",
+    role,
+    action,
+    detail,
+    createdAt: new Date().toISOString(),
+  });
+};
+
+router.get("/overview", async (req, res) => {
+  const authUser = ensureOperationsAccess(req, res);
+  if (!authUser) return;
 
   const [staff, attendanceAll, leavesAll, requestsAll, ordersAll, inventoryAll, customersAll, activityAll] =
     await Promise.all([
@@ -133,6 +165,89 @@ router.get("/overview", async (req, res) => {
     orderPulse,
     activityFeed,
   });
+});
+
+router.patch("/leaves/:id/status", async (req, res) => {
+  const authUser = ensureOperationsAccess(req, res);
+  if (!authUser) return;
+
+  const status = String(req.body?.status ?? "").trim();
+  const rejectionReason = String(req.body?.rejectionReason ?? req.body?.reason ?? "").trim();
+
+  if (status !== "Approved" && status !== "Rejected") {
+    return res.status(400).json({ message: "Leave status must be Approved or Rejected." });
+  }
+
+  const leave = await findOne("leaveRequests", { id: req.params.id });
+
+  if (!leave) {
+    return res.status(404).json({ message: "Leave request not found." });
+  }
+
+  const wasApproved = leave.status === "Approved";
+  const now = new Date().toISOString();
+  const patch = {
+    status,
+    approvedBy: authUser.name || authUser.email,
+    approvedAt: status === "Approved" ? now : "",
+    rejectionReason: status === "Rejected" ? rejectionReason : "",
+  };
+
+  await updateDoc("leaveRequests", { id: req.params.id }, patch);
+
+  if (status === "Approved" && !wasApproved) {
+    const staffId = Number(leave.staffId);
+    const staff = await findOne("staff", { id: staffId });
+
+    if (staff) {
+      const nextBalance = Math.max(0, Number(staff.leaveBalance ?? 20) - Number(leave.days ?? 0));
+      await updateDoc("staff", { id: staffId }, { leaveBalance: nextBalance });
+    }
+  }
+
+  await addActivityLog({
+    staffId: Number(leave.staffId ?? 0),
+    staffName: String(leave.staffName ?? ""),
+    role: authUser.role,
+    action: `Leave ${status.toLowerCase()}`,
+    detail: `${authUser.name} ${status.toLowerCase()} leave ${leave.id} for ${leave.staffName}.`,
+  });
+
+  return res.json({ ...leave, ...patch });
+});
+
+router.patch("/requests/:id/status", async (req, res) => {
+  const authUser = ensureOperationsAccess(req, res);
+  if (!authUser) return;
+
+  const status = String(req.body?.status ?? "").trim();
+  const allowedStatuses = ["Approved", "Rejected", "Resolved"];
+
+  if (!allowedStatuses.includes(status)) {
+    return res.status(400).json({ message: "Request status must be Approved, Rejected, or Resolved." });
+  }
+
+  const request = await findOne("staffRequests", { id: req.params.id });
+
+  if (!request) {
+    return res.status(404).json({ message: "Staff request not found." });
+  }
+
+  const patch = {
+    status,
+    resolvedAt: new Date().toISOString(),
+  };
+
+  await updateDoc("staffRequests", { id: req.params.id }, patch);
+  await addActivityLog({
+    staffId: Number(request.staffId ?? 0),
+    staffName: String(request.staffName ?? ""),
+    role: authUser.role,
+    action: `Request ${status.toLowerCase()}`,
+    detail: `${authUser.name} ${status.toLowerCase()} request ${request.id} from ${request.staffName}.`,
+  });
+
+  return res.json({ ...request, ...patch });
 });
 
 export default router;

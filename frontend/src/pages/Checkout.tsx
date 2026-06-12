@@ -7,7 +7,6 @@ import {
   CreditCard,
   MapPin,
   Phone,
-  Printer,
   ReceiptText,
   ShoppingBag,
   Store,
@@ -25,7 +24,6 @@ import {
   supportedDeliveryCities,
   validateCheckoutDetails,
 } from "../lib/orderPricing";
-import { printReceipt } from "../lib/receiptPrint";
 import { siteConfig } from "../lib/site";
 
 type CustomerProfileResponse = {
@@ -254,35 +252,6 @@ const CheckoutPage = () => {
     }
   };
 
-  const printConfirmationReceipt = () => {
-    if (!confirmation) {
-      return;
-    }
-
-    printReceipt({
-      id: confirmation.id,
-      customer: confirmation.name,
-      customerEmail: confirmation.email,
-      customerPhone: confirmation.phone,
-      deliveryAddress: confirmation.address,
-      city: confirmation.city,
-      type: confirmation.type,
-      paymentMethod: confirmation.paymentMethod,
-      paymentReference: confirmation.paymentReference,
-      subtotal: confirmation.subtotal,
-      deliveryFee: confirmation.deliveryFee,
-      total: confirmation.total,
-      notes: confirmation.notes,
-      items: confirmation.items.map((item) => ({
-        name: item.name,
-        quantity: item.quantity,
-        price: item.price,
-        variantLabel: item.variantLabel,
-        customizations: item.customizations,
-      })),
-    });
-  };
-
   if (!cartItems.length && !confirmation) {
     return (
       <div className="min-h-screen bg-paper pt-32">
@@ -388,14 +357,6 @@ const CheckoutPage = () => {
                   >
                     Track This Order
                   </Link>
-                  <button
-                    type="button"
-                    onClick={printConfirmationReceipt}
-                    className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-8 py-4 font-bold text-dark"
-                  >
-                    Print Invoice
-                    <Printer size={18} />
-                  </button>
                   <Link
                     to="/menu"
                     className="rounded-full border border-gray-200 bg-white px-8 py-4 font-bold text-dark"

@@ -3,6 +3,7 @@ import {
   AlertTriangle,
   BarChart3,
   Bell,
+  Check,
   ClipboardList,
   Clock3,
   Layers3,
@@ -14,6 +15,7 @@ import {
   TrendingUp,
   UserCog,
   Users,
+  X,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -120,6 +122,7 @@ type OverviewPayload = {
 };
 
 type ManagerTab = "overview" | "team" | "requests" | "orders" | "inventory" | "activity";
+type DecisionStatus = "Approved" | "Rejected";
 
 const ManagerWorkspace = () => {
   const { user, logout } = useAuth();
@@ -130,6 +133,7 @@ const ManagerWorkspace = () => {
   const [overview, setOverview] = useState<OverviewPayload | null>(null);
   const [pendingPayments, setPendingPayments] = useState<Array<Record<string, any>>>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [decisionBusyKey, setDecisionBusyKey] = useState("");
 
   const tabs = useMemo(
     () => [
@@ -193,6 +197,58 @@ const ManagerWorkspace = () => {
     } catch (paymentError) {
       console.error(paymentError);
       setError(paymentError instanceof Error ? paymentError.message : "Payment update failed.");
+    }
+  };
+
+  const decideStaffRequest = async (requestId: string, status: DecisionStatus) => {
+    const busyKey = `request:${requestId}`;
+    setDecisionBusyKey(busyKey);
+    setError("");
+
+    try {
+      const response = await fetch(`/api/operations/requests/${requestId}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(String(data.message ?? "Request update failed."));
+      }
+
+      await loadOverview();
+    } catch (decisionError) {
+      console.error(decisionError);
+      setError(decisionError instanceof Error ? decisionError.message : "Request update failed.");
+    } finally {
+      setDecisionBusyKey("");
+    }
+  };
+
+  const decideLeaveRequest = async (leaveId: string, status: DecisionStatus) => {
+    const busyKey = `leave:${leaveId}`;
+    setDecisionBusyKey(busyKey);
+    setError("");
+
+    try {
+      const response = await fetch(`/api/operations/leaves/${leaveId}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(String(data.message ?? "Leave update failed."));
+      }
+
+      await loadOverview();
+    } catch (decisionError) {
+      console.error(decisionError);
+      setError(decisionError instanceof Error ? decisionError.message : "Leave update failed.");
+    } finally {
+      setDecisionBusyKey("");
     }
   };
 
@@ -504,26 +560,88 @@ const ManagerWorkspace = () => {
             <div className="rounded-[2.5rem] border border-gray-100 bg-white p-8 shadow-xl shadow-dark/5">
               <h2 className="text-xl font-bold text-dark">Pending Requests</h2>
               <div className="mt-6 space-y-4">
-                {overview.pendingRequests.map((request) => (
-                  <div key={request.id} className="rounded-[1.6rem] border border-gray-100 px-5 py-4">
-                    <p className="font-bold text-dark">{request.subject}</p>
-                    <p className="mt-1 text-sm text-muted">{request.staffName} | {request.category}</p>
-                    <p className="mt-3 text-sm text-muted">{request.message}</p>
+                {overview.pendingRequests.length ? (
+                  overview.pendingRequests.map((request) => {
+                    const busyKey = `request:${request.id}`;
+                    const isBusy = decisionBusyKey === busyKey;
+
+                    return (
+                      <div key={request.id} className="rounded-[1.6rem] border border-gray-100 px-5 py-4">
+                        <p className="font-bold text-dark">{request.subject}</p>
+                        <p className="mt-1 text-sm text-muted">{request.staffName} | {request.category}</p>
+                        <p className="mt-3 text-sm text-muted">{request.message}</p>
+                        <div className="mt-5 flex flex-wrap gap-3">
+                          <button
+                            type="button"
+                            disabled={isBusy}
+                            onClick={() => void decideStaffRequest(request.id, "Approved")}
+                            className="inline-flex items-center gap-2 rounded-xl bg-green-500 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            <Check size={16} />
+                            Approve
+                          </button>
+                          <button
+                            type="button"
+                            disabled={isBusy}
+                            onClick={() => void decideStaffRequest(request.id, "Rejected")}
+                            className="inline-flex items-center gap-2 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-bold text-red-500 transition hover:bg-red-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            <X size={16} />
+                            Reject
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="rounded-[1.6rem] border border-dashed border-gray-200 px-5 py-8 text-center text-sm font-medium text-muted">
+                    No pending staff requests.
                   </div>
-                ))}
+                )}
               </div>
             </div>
 
             <div className="rounded-[2.5rem] border border-gray-100 bg-white p-8 shadow-xl shadow-dark/5">
               <h2 className="text-xl font-bold text-dark">Pending Leaves</h2>
               <div className="mt-6 space-y-4">
-                {overview.pendingLeaves.map((leave) => (
-                  <div key={leave.id} className="rounded-[1.6rem] border border-gray-100 px-5 py-4">
-                    <p className="font-bold text-dark">{leave.staffName}</p>
-                    <p className="mt-1 text-sm text-muted">{leave.leaveType} | {leave.startDate} to {leave.endDate}</p>
-                    <p className="mt-3 text-sm text-muted">{leave.reason}</p>
+                {overview.pendingLeaves.length ? (
+                  overview.pendingLeaves.map((leave) => {
+                    const busyKey = `leave:${leave.id}`;
+                    const isBusy = decisionBusyKey === busyKey;
+
+                    return (
+                      <div key={leave.id} className="rounded-[1.6rem] border border-gray-100 px-5 py-4">
+                        <p className="font-bold text-dark">{leave.staffName}</p>
+                        <p className="mt-1 text-sm text-muted">{leave.leaveType} | {leave.startDate} to {leave.endDate}</p>
+                        <p className="mt-3 text-sm text-muted">{leave.reason}</p>
+                        <div className="mt-5 flex flex-wrap gap-3">
+                          <button
+                            type="button"
+                            disabled={isBusy}
+                            onClick={() => void decideLeaveRequest(leave.id, "Approved")}
+                            className="inline-flex items-center gap-2 rounded-xl bg-green-500 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            <Check size={16} />
+                            Approve
+                          </button>
+                          <button
+                            type="button"
+                            disabled={isBusy}
+                            onClick={() => void decideLeaveRequest(leave.id, "Rejected")}
+                            className="inline-flex items-center gap-2 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-bold text-red-500 transition hover:bg-red-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            <X size={16} />
+                            Reject
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="rounded-[1.6rem] border border-dashed border-gray-200 px-5 py-8 text-center text-sm font-medium text-muted">
+                    No pending leave requests.
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>

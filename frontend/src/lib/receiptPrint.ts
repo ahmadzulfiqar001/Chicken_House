@@ -158,7 +158,7 @@ const buildReceiptCopy = (order: ReceiptPrintOrder, copyLabel: string) => {
       ${order.notes ? `<div class="notes"><strong>Notes:</strong> ${escapeHtml(order.notes)}</div>` : ""}
 
       <p class="thanks">Thank you for ordering from ${escapeHtml(siteConfig.brandName)}</p>
-      <p class="developer">Developed by Team Titan</p>
+      <p class="developer">Developed by Team Code Titans</p>
     </section>
   `;
 };
@@ -171,11 +171,18 @@ const buildReceiptDocument = (order: ReceiptPrintOrder) => `
       <title>${escapeHtml(order.id)} Receipt</title>
       <style>
         @page {
-          margin: 4mm;
+          size: 80mm 297mm;
+          margin: 3mm 4mm;
         }
 
         * {
           box-sizing: border-box;
+        }
+
+        html,
+        body {
+          width: 72mm;
+          min-width: 72mm;
         }
 
         body {
@@ -190,7 +197,7 @@ const buildReceiptDocument = (order: ReceiptPrintOrder) => `
         .receipt-copy {
           width: 72mm;
           max-width: 100%;
-          margin: 0 auto 8mm;
+          margin: 0 0 8mm;
           padding: 0 0 8mm;
           border-bottom: 1px dashed #777777;
           break-inside: avoid;
@@ -300,8 +307,11 @@ const buildReceiptDocument = (order: ReceiptPrintOrder) => `
         }
 
         @media print {
+          html,
           body {
             width: 72mm;
+            min-width: 72mm;
+            margin: 0;
           }
         }
       </style>
