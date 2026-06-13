@@ -8,6 +8,7 @@ frontend/dist/
 
 # Test / coverage
 coverage/
+.chrome-headless/
 
 # Vite
 .vite/
