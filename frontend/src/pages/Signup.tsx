@@ -218,8 +218,10 @@ const SignupPage = () => {
           </div>
         </div>
 
-        <div className="hidden bg-dark p-10 text-white lg:flex lg:flex-col lg:justify-between">
-          <Link to="/" className="flex items-center gap-4">
+        <div className="relative hidden overflow-hidden bg-dark p-10 text-white lg:flex lg:flex-col lg:justify-between">
+          <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(140deg,rgba(216,168,47,0.14),transparent_36%),linear-gradient(180deg,transparent,rgba(127,18,21,0.16))]" />
+
+          <Link to="/" className="relative z-10 flex items-center gap-4">
             <img
               src="/logo.jpg"
               alt="Chicken House"
@@ -233,7 +235,17 @@ const SignupPage = () => {
             </div>
           </Link>
 
-          <div>
+          <div className="relative z-10 flex flex-1 items-center justify-center py-10">
+            <div className="w-full max-w-xs rounded-2xl border border-accent/35 bg-white/[0.07] p-3 shadow-[0_26px_70px_rgba(0,0,0,0.34)]">
+              <img
+                src="/logo.jpg"
+                alt="Chicken House logo"
+                className="aspect-[4/3] w-full rounded-xl object-cover"
+              />
+            </div>
+          </div>
+
+          <div className="relative z-10">
             <p className="text-xs font-bold uppercase tracking-[0.28em] text-white/45">
               Chicken House
             </p>

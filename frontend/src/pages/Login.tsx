@@ -93,10 +93,6 @@ const LoginPage = () => {
         <div className="relative hidden overflow-hidden bg-dark p-10 text-white lg:flex lg:min-h-[34rem] lg:flex-col">
           <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(140deg,rgba(216,168,47,0.16),transparent_34%),linear-gradient(22deg,rgba(255,255,255,0.08),transparent_48%),linear-gradient(180deg,transparent,rgba(127,18,21,0.16))]" />
           <div aria-hidden="true" className="absolute right-0 top-0 h-full w-20 bg-gradient-to-b from-accent/10 via-white/5 to-transparent" />
-          <div aria-hidden="true" className="absolute bottom-20 left-10 font-anton text-[8rem] uppercase leading-none text-white/[0.035]">
-            CH
-          </div>
-
           <Link to="/" className="relative z-10 flex items-center gap-4">
             <img
               src="/logo.jpg"
@@ -113,9 +109,15 @@ const LoginPage = () => {
 
           <div className="relative z-10 flex flex-1 flex-col justify-center py-10">
             <div className="max-w-sm">
-              <div className="flex items-end gap-4 border-y border-white/10 py-6">
-                <span className="font-anton text-7xl leading-none text-accent">CH</span>
-                <div className="pb-2">
+              <div className="flex items-center gap-5 border-y border-white/10 py-6">
+                <div className="flex h-24 w-32 shrink-0 items-center justify-center rounded-2xl border border-accent/35 bg-white/[0.07] p-2 shadow-[0_18px_45px_rgba(0,0,0,0.32)]">
+                  <img
+                    src="/logo.jpg"
+                    alt="Chicken House logo"
+                    className="h-full w-full rounded-xl object-cover"
+                  />
+                </div>
+                <div>
                   <p className="text-xs font-bold uppercase tracking-[0.28em] text-orange-300">
                     A Symbol Of
                   </p>
