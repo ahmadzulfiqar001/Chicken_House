@@ -12,6 +12,12 @@ type LoginLocationState = {
 
 const BACKOFFICE_ROLES: UserRole[] = ["admin", "manager", "hr", "rider", "staff"];
 
+const portalHighlights = [
+  { icon: CheckCircle2, label: "Orders", detail: "Live queue" },
+  { icon: Lock, label: "Access", detail: "Role based" },
+  { icon: Mail, label: "Support", detail: "Inbox ready" },
+];
+
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -70,19 +76,34 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[linear-gradient(135deg,#120b07_0%,#3b160d_42%,#fff7e7_42%,#fffdf8_100%)] px-4 py-10">
+    <div className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-paper px-4 py-10">
       <PageMeta
         title="Login | Chicken House"
         description="Sign in to Chicken House."
       />
 
+      <div
+        aria-hidden="true"
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(135deg, #fff7ec 0 48%, rgba(181, 101, 29, 0.7) 48% 100%)",
+        }}
+      />
+
       <motion.section
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
-        className="grid w-full max-w-5xl overflow-hidden rounded-lg border border-black/10 bg-white shadow-[0_28px_90px_rgba(20,10,6,0.24)] lg:grid-cols-[0.92fr_1.08fr]"
+        className="relative z-10 grid w-full max-w-5xl overflow-hidden rounded-lg border border-black/10 bg-white shadow-[0_28px_90px_rgba(20,10,6,0.24)] lg:grid-cols-[0.92fr_1.08fr]"
       >
-        <div className="hidden bg-dark p-10 text-white lg:flex lg:flex-col lg:justify-between">
-          <Link to="/" className="flex items-center gap-4">
+        <div className="relative hidden overflow-hidden bg-dark p-10 text-white lg:flex lg:min-h-[34rem] lg:flex-col">
+          <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(140deg,rgba(216,168,47,0.16),transparent_34%),linear-gradient(22deg,rgba(255,255,255,0.08),transparent_48%),linear-gradient(180deg,transparent,rgba(127,18,21,0.16))]" />
+          <div aria-hidden="true" className="absolute right-0 top-0 h-full w-20 bg-gradient-to-b from-accent/10 via-white/5 to-transparent" />
+          <div aria-hidden="true" className="absolute bottom-20 left-10 font-anton text-[8rem] uppercase leading-none text-white/[0.035]">
+            CH
+          </div>
+
+          <Link to="/" className="relative z-10 flex items-center gap-4">
             <img
               src="/logo.jpg"
               alt="Chicken House"
@@ -96,7 +117,27 @@ const LoginPage = () => {
             </div>
           </Link>
 
-          <div>
+          <div className="relative z-10 my-8 rounded-2xl border border-white/10 bg-white/[0.06] p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
+            <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-accent">Portal Flow</p>
+            <div className="mt-5 grid grid-cols-3 gap-3">
+              {portalHighlights.map((item) => {
+                const HighlightIcon = item.icon;
+
+                return (
+                  <div key={item.label} className="rounded-xl border border-white/10 bg-black/18 p-3">
+                    <HighlightIcon size={18} className="text-accent" />
+                    <p className="mt-3 font-anton text-lg uppercase tracking-tight">{item.label}</p>
+                    <p className="mt-1 text-[11px] leading-4 text-white/52">{item.detail}</p>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="mt-5 text-sm leading-7 text-white/62">
+              Orders, bookings, staff work, and customer messages stay ready inside one protected workspace.
+            </p>
+          </div>
+
+          <div className="relative z-10 mt-auto">
             <p className="text-xs font-bold uppercase tracking-[0.28em] text-white/45">
               Authorized access
             </p>

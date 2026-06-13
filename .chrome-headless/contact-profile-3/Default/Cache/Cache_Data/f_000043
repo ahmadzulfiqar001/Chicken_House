@@ -1,0 +1,1446 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/admin/ManagerWorkspace.tsx");import __vite__cjsImport0_react_jsxDevRuntime from "/@fs/C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=f15cf18c"; const Fragment = __vite__cjsImport0_react_jsxDevRuntime["Fragment"]; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+import __vite__cjsImport1_react from "/@fs/C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/node_modules/.vite/deps/react.js?v=f15cf18c"; const useEffect = __vite__cjsImport1_react["useEffect"]; const useMemo = __vite__cjsImport1_react["useMemo"]; const useState = __vite__cjsImport1_react["useState"];
+import {
+  AlertTriangle,
+  BarChart3,
+  Bell,
+  Check,
+  ClipboardList,
+  Clock3,
+  Layers3,
+  LogOut,
+  Menu,
+  Package,
+  RefreshCw,
+  ShieldCheck,
+  TrendingUp,
+  Users,
+  X
+} from "/@fs/C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/node_modules/.vite/deps/lucide-react.js?v=f15cf18c";
+import { useNavigate } from "/@fs/C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/node_modules/.vite/deps/react-router-dom.js?v=f15cf18c";
+import { useAuth } from "/src/context/AuthContext.tsx";
+import { useRealtime } from "/src/lib/realtime.ts";
+const ManagerWorkspace = () => {
+  _s();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("overview");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [overview, setOverview] = useState(null);
+  const [pendingPayments, setPendingPayments] = useState([]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [decisionBusyKey, setDecisionBusyKey] = useState("");
+  const tabs = useMemo(
+    () => [
+      { id: "overview", label: "Overview", icon: /* @__PURE__ */ jsxDEV(BarChart3, { size: 18 }, void 0, false, {
+        fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+        lineNumber: 140,
+        columnNumber: 57
+      }, this) },
+      { id: "team", label: "Team Progress", icon: /* @__PURE__ */ jsxDEV(Users, { size: 18 }, void 0, false, {
+        fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+        lineNumber: 141,
+        columnNumber: 58
+      }, this) },
+      { id: "requests", label: "Requests", icon: /* @__PURE__ */ jsxDEV(ClipboardList, { size: 18 }, void 0, false, {
+        fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+        lineNumber: 142,
+        columnNumber: 57
+      }, this) },
+      { id: "orders", label: "Orders Pulse", icon: /* @__PURE__ */ jsxDEV(Layers3, { size: 18 }, void 0, false, {
+        fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+        lineNumber: 143,
+        columnNumber: 59
+      }, this) },
+      { id: "inventory", label: "Inventory Alerts", icon: /* @__PURE__ */ jsxDEV(Package, { size: 18 }, void 0, false, {
+        fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+        lineNumber: 144,
+        columnNumber: 66
+      }, this) },
+      { id: "activity", label: "Activity Feed", icon: /* @__PURE__ */ jsxDEV(Bell, { size: 18 }, void 0, false, {
+        fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+        lineNumber: 145,
+        columnNumber: 62
+      }, this) }
+    ],
+    []
+  );
+  const loadOverview = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const response = await fetch("/api/operations/overview");
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(String(data.message ?? "Overview could not be loaded."));
+      }
+      setOverview(data);
+    } catch (loadError) {
+      console.error(loadError);
+      setError(loadError instanceof Error ? loadError.message : "Overview could not be loaded.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const loadPendingPayments = async () => {
+    try {
+      const response = await fetch("/api/orders");
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        setPendingPayments(
+          data.filter((order) => order.paymentStatus === "Pending Verification")
+        );
+      }
+    } catch (loadError) {
+      console.error(loadError);
+    }
+  };
+  const handlePayment = async (orderId, action) => {
+    try {
+      const response = await fetch(`/api/orders/${orderId}/payment`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action })
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(String(data.message ?? "Payment update failed."));
+      }
+      await Promise.all([loadPendingPayments(), loadOverview()]);
+    } catch (paymentError) {
+      console.error(paymentError);
+      setError(paymentError instanceof Error ? paymentError.message : "Payment update failed.");
+    }
+  };
+  const decideStaffRequest = async (requestId, status) => {
+    const busyKey = `request:${requestId}`;
+    setDecisionBusyKey(busyKey);
+    setError("");
+    try {
+      const response = await fetch(`/api/operations/requests/${requestId}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(String(data.message ?? "Request update failed."));
+      }
+      await loadOverview();
+    } catch (decisionError) {
+      console.error(decisionError);
+      setError(decisionError instanceof Error ? decisionError.message : "Request update failed.");
+    } finally {
+      setDecisionBusyKey("");
+    }
+  };
+  const decideLeaveRequest = async (leaveId, status) => {
+    const busyKey = `leave:${leaveId}`;
+    setDecisionBusyKey(busyKey);
+    setError("");
+    try {
+      const response = await fetch(`/api/operations/leaves/${leaveId}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(String(data.message ?? "Leave update failed."));
+      }
+      await loadOverview();
+    } catch (decisionError) {
+      console.error(decisionError);
+      setError(decisionError instanceof Error ? decisionError.message : "Leave update failed.");
+    } finally {
+      setDecisionBusyKey("");
+    }
+  };
+  useEffect(() => {
+    void loadOverview();
+    void loadPendingPayments();
+  }, []);
+  useRealtime("orders", () => {
+    void loadOverview();
+    void loadPendingPayments();
+  });
+  if (loading && !overview) {
+    return /* @__PURE__ */ jsxDEV("div", { className: "min-h-screen bg-surface pt-40 text-center text-muted", children: "Loading manager workspace..." }, void 0, false, {
+      fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+      lineNumber: 267,
+      columnNumber: 12
+    }, this);
+  }
+  if (!overview) {
+    return /* @__PURE__ */ jsxDEV("div", { className: "flex min-h-screen flex-col items-center justify-center gap-5 bg-surface px-4 text-center", children: [
+      /* @__PURE__ */ jsxDEV("p", { className: "max-w-md text-muted", children: error || "Unable to open manager workspace." }, void 0, false, {
+        fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+        lineNumber: 273,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { className: "flex flex-wrap justify-center gap-3", children: [
+        /* @__PURE__ */ jsxDEV(
+          "button",
+          {
+            type: "button",
+            onClick: () => void loadOverview(),
+            className: "rounded-full bg-primary px-6 py-3 font-bold text-white transition hover:bg-primary-strong",
+            children: "Retry"
+          },
+          void 0,
+          false,
+          {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 275,
+            columnNumber: 11
+          },
+          this
+        ),
+        /* @__PURE__ */ jsxDEV(
+          "button",
+          {
+            type: "button",
+            onClick: () => {
+              void logout();
+              navigate("/login");
+            },
+            className: "rounded-full border border-gray-200 px-6 py-3 font-bold text-dark transition hover:bg-white",
+            children: "Logout"
+          },
+          void 0,
+          false,
+          {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 282,
+            columnNumber: 11
+          },
+          this
+        )
+      ] }, void 0, true, {
+        fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+        lineNumber: 274,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+      lineNumber: 272,
+      columnNumber: 7
+    }, this);
+  }
+  return /* @__PURE__ */ jsxDEV("div", { className: "min-h-screen bg-surface flex", children: [
+    sidebarOpen && /* @__PURE__ */ jsxDEV("div", { className: "fixed inset-0 z-40 bg-black/50 md:hidden", onClick: () => setSidebarOpen(false), "aria-hidden": "true" }, void 0, false, {
+      fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+      lineNumber: 300,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV(
+      "aside",
+      {
+        className: `fixed inset-y-0 left-0 z-50 flex w-[19rem] flex-col overflow-y-auto border-r border-white/10 bg-dark px-5 py-6 text-white shadow-2xl transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`,
+        children: [
+          /* @__PURE__ */ jsxDEV("div", { className: "flex items-center gap-3", children: [
+            /* @__PURE__ */ jsxDEV("img", { src: "/logo.jpg", alt: "Chicken House", className: "h-12 w-12 rounded-2xl border border-white/10 object-cover" }, void 0, false, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 309,
+              columnNumber: 11
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { children: [
+              /* @__PURE__ */ jsxDEV("p", { className: "text-lg font-display font-bold", children: "Manager Panel" }, void 0, false, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 311,
+                columnNumber: 13
+              }, this),
+              /* @__PURE__ */ jsxDEV("p", { className: "text-xs uppercase tracking-[0.24em] text-white/45", children: "Operations Oversight" }, void 0, false, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 312,
+                columnNumber: 13
+              }, this)
+            ] }, void 0, true, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 310,
+              columnNumber: 11
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 308,
+            columnNumber: 9
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { className: "mt-8 rounded-[1.8rem] border border-white/10 bg-white/5 p-4", children: [
+            /* @__PURE__ */ jsxDEV("p", { className: "text-sm font-bold", children: user?.name ?? "Manager" }, void 0, false, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 317,
+              columnNumber: 11
+            }, this),
+            /* @__PURE__ */ jsxDEV("p", { className: "mt-1 text-xs text-white/60", children: "Daily progress, queue health, and team watch" }, void 0, false, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 318,
+              columnNumber: 11
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { className: "mt-4 grid grid-cols-2 gap-3 text-center", children: [
+              /* @__PURE__ */ jsxDEV("div", { className: "rounded-2xl bg-white/6 px-3 py-3", children: [
+                /* @__PURE__ */ jsxDEV("p", { className: "text-xs uppercase tracking-[0.2em] text-white/40", children: "Present" }, void 0, false, {
+                  fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                  lineNumber: 321,
+                  columnNumber: 15
+                }, this),
+                /* @__PURE__ */ jsxDEV("p", { className: "mt-2 text-lg font-bold", children: overview.stats.presentToday }, void 0, false, {
+                  fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                  lineNumber: 322,
+                  columnNumber: 15
+                }, this)
+              ] }, void 0, true, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 320,
+                columnNumber: 13
+              }, this),
+              /* @__PURE__ */ jsxDEV("div", { className: "rounded-2xl bg-white/6 px-3 py-3", children: [
+                /* @__PURE__ */ jsxDEV("p", { className: "text-xs uppercase tracking-[0.2em] text-white/40", children: "Requests" }, void 0, false, {
+                  fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                  lineNumber: 325,
+                  columnNumber: 15
+                }, this),
+                /* @__PURE__ */ jsxDEV("p", { className: "mt-2 text-lg font-bold", children: overview.stats.pendingRequests }, void 0, false, {
+                  fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                  lineNumber: 326,
+                  columnNumber: 15
+                }, this)
+              ] }, void 0, true, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 324,
+                columnNumber: 13
+              }, this)
+            ] }, void 0, true, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 319,
+              columnNumber: 11
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 316,
+            columnNumber: 9
+          }, this),
+          /* @__PURE__ */ jsxDEV("nav", { className: "mt-8 space-y-2", children: tabs.map(
+            (tab) => /* @__PURE__ */ jsxDEV(
+              "button",
+              {
+                type: "button",
+                onClick: () => {
+                  setActiveTab(tab.id);
+                  setSidebarOpen(false);
+                },
+                className: `flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition-all ${activeTab === tab.id ? "bg-primary text-white shadow-lg shadow-primary/20" : "text-white/65 hover:bg-white/8 hover:text-white"}`,
+                children: [
+                  tab.icon,
+                  /* @__PURE__ */ jsxDEV("span", { className: "text-sm font-bold", children: tab.label }, void 0, false, {
+                    fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                    lineNumber: 347,
+                    columnNumber: 15
+                  }, this)
+                ]
+              },
+              tab.id,
+              true,
+              {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 333,
+                columnNumber: 11
+              },
+              this
+            )
+          ) }, void 0, false, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 331,
+            columnNumber: 9
+          }, this),
+          /* @__PURE__ */ jsxDEV(
+            "button",
+            {
+              type: "button",
+              onClick: () => {
+                void logout();
+                navigate("/login");
+              },
+              className: "mt-8 flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-white/65 transition-all hover:bg-red-500/10 hover:text-red-300",
+              children: [
+                /* @__PURE__ */ jsxDEV(LogOut, { size: 18 }, void 0, false, {
+                  fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                  lineNumber: 360,
+                  columnNumber: 11
+                }, this),
+                /* @__PURE__ */ jsxDEV("span", { className: "text-sm font-bold", children: "Logout" }, void 0, false, {
+                  fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                  lineNumber: 361,
+                  columnNumber: 11
+                }, this)
+              ]
+            },
+            void 0,
+            true,
+            {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 352,
+              columnNumber: 9
+            },
+            this
+          )
+        ]
+      },
+      void 0,
+      true,
+      {
+        fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+        lineNumber: 303,
+        columnNumber: 7
+      },
+      this
+    ),
+    /* @__PURE__ */ jsxDEV("main", { className: "ml-0 md:ml-[19rem] flex-1 p-4 md:p-8", children: [
+      /* @__PURE__ */ jsxDEV("header", { className: "sticky top-0 z-20 mb-8 rounded-[2rem] border border-gray-100 bg-white/85 px-6 py-5 shadow-lg shadow-dark/5 backdrop-blur-md", children: [
+        /* @__PURE__ */ jsxDEV("div", { className: "flex flex-wrap items-center justify-between gap-4", children: [
+          /* @__PURE__ */ jsxDEV("div", { className: "flex items-center gap-3", children: [
+            /* @__PURE__ */ jsxDEV(
+              "button",
+              {
+                type: "button",
+                onClick: () => setSidebarOpen(true),
+                className: "md:hidden rounded-lg p-2 text-muted hover:bg-gray-100",
+                "aria-label": "Open menu",
+                children: /* @__PURE__ */ jsxDEV(Menu, { size: 22 }, void 0, false, {
+                  fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                  lineNumber: 375,
+                  columnNumber: 17
+                }, this)
+              },
+              void 0,
+              false,
+              {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 369,
+                columnNumber: 15
+              },
+              this
+            ),
+            /* @__PURE__ */ jsxDEV("div", { children: [
+              /* @__PURE__ */ jsxDEV("p", { className: "text-xs font-bold uppercase tracking-[0.24em] text-muted", children: "Manager Operations Desk" }, void 0, false, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 378,
+                columnNumber: 17
+              }, this),
+              /* @__PURE__ */ jsxDEV("h1", { className: "mt-2 text-2xl sm:text-3xl font-display font-bold text-dark", children: tabs.find((tab) => tab.id === activeTab)?.label }, void 0, false, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 379,
+                columnNumber: 17
+              }, this)
+            ] }, void 0, true, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 377,
+              columnNumber: 15
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 368,
+            columnNumber: 13
+          }, this),
+          /* @__PURE__ */ jsxDEV(
+            "button",
+            {
+              type: "button",
+              onClick: () => void loadOverview(),
+              className: "inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold text-white",
+              children: [
+                /* @__PURE__ */ jsxDEV(RefreshCw, { size: 16, className: loading ? "animate-spin" : "" }, void 0, false, {
+                  fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                  lineNumber: 389,
+                  columnNumber: 15
+                }, this),
+                "Refresh"
+              ]
+            },
+            void 0,
+            true,
+            {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 384,
+              columnNumber: 13
+            },
+            this
+          )
+        ] }, void 0, true, {
+          fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+          lineNumber: 367,
+          columnNumber: 11
+        }, this),
+        error ? /* @__PURE__ */ jsxDEV("div", { className: "mt-4 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-medium text-red-700", children: error }, void 0, false, {
+          fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+          lineNumber: 394,
+          columnNumber: 11
+        }, this) : null
+      ] }, void 0, true, {
+        fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+        lineNumber: 366,
+        columnNumber: 9
+      }, this),
+      pendingPayments.length > 0 && /* @__PURE__ */ jsxDEV("div", { className: "mb-8 rounded-[2.5rem] border border-amber-200 bg-amber-50/70 p-8 shadow-xl shadow-dark/5", children: [
+        /* @__PURE__ */ jsxDEV("div", { className: "flex items-center gap-3", children: [
+          /* @__PURE__ */ jsxDEV(ShieldCheck, { className: "text-amber-600" }, void 0, false, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 403,
+            columnNumber: 15
+          }, this),
+          /* @__PURE__ */ jsxDEV("h2", { className: "text-xl font-bold text-dark", children: [
+            "Payments to verify ",
+            /* @__PURE__ */ jsxDEV("span", { className: "text-amber-600", children: [
+              "(",
+              pendingPayments.length,
+              ")"
+            ] }, void 0, true, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 405,
+              columnNumber: 36
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 404,
+            columnNumber: 15
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+          lineNumber: 402,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV("p", { className: "mt-1 text-sm text-muted", children: "Confirm the bank transfer was received, then verify or reject. The customer is updated live." }, void 0, false, {
+          fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+          lineNumber: 408,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "mt-6 space-y-3", children: pendingPayments.map(
+          (order) => /* @__PURE__ */ jsxDEV(
+            "div",
+            {
+              className: "flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-amber-100 bg-white px-5 py-4",
+              children: [
+                /* @__PURE__ */ jsxDEV("div", { children: [
+                  /* @__PURE__ */ jsxDEV("p", { className: "font-bold text-dark", children: [
+                    String(order.id),
+                    " · ",
+                    String(order.customer ?? "")
+                  ] }, void 0, true, {
+                    fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                    lineNumber: 418,
+                    columnNumber: 21
+                  }, this),
+                  /* @__PURE__ */ jsxDEV("p", { className: "text-sm text-muted", children: [
+                    "Rs. ",
+                    Number(order.total ?? 0).toLocaleString(),
+                    " · ",
+                    String(order.paymentMethod ?? "Bank Transfer"),
+                    order.paymentReference ? /* @__PURE__ */ jsxDEV(Fragment, { children: [
+                      " ",
+                      "· Ref: ",
+                      /* @__PURE__ */ jsxDEV("span", { className: "font-mono font-bold text-dark", children: String(order.paymentReference) }, void 0, false, {
+                        fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                        lineNumber: 425,
+                        columnNumber: 39
+                      }, this)
+                    ] }, void 0, true, {
+                      fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                      lineNumber: 424,
+                      columnNumber: 19
+                    }, this) : null
+                  ] }, void 0, true, {
+                    fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                    lineNumber: 421,
+                    columnNumber: 21
+                  }, this)
+                ] }, void 0, true, {
+                  fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                  lineNumber: 417,
+                  columnNumber: 19
+                }, this),
+                /* @__PURE__ */ jsxDEV("div", { className: "flex gap-3", children: [
+                  /* @__PURE__ */ jsxDEV(
+                    "button",
+                    {
+                      type: "button",
+                      onClick: () => void handlePayment(String(order.id), "verify"),
+                      className: "rounded-xl bg-green-500 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-green-600",
+                      children: "Verify"
+                    },
+                    void 0,
+                    false,
+                    {
+                      fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                      lineNumber: 431,
+                      columnNumber: 21
+                    },
+                    this
+                  ),
+                  /* @__PURE__ */ jsxDEV(
+                    "button",
+                    {
+                      type: "button",
+                      onClick: () => void handlePayment(String(order.id), "reject"),
+                      className: "rounded-xl bg-red-50 px-5 py-2.5 text-sm font-bold text-red-500 transition hover:bg-red-500 hover:text-white",
+                      children: "Reject"
+                    },
+                    void 0,
+                    false,
+                    {
+                      fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                      lineNumber: 438,
+                      columnNumber: 21
+                    },
+                    this
+                  )
+                ] }, void 0, true, {
+                  fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                  lineNumber: 430,
+                  columnNumber: 19
+                }, this)
+              ]
+            },
+            String(order.id),
+            true,
+            {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 413,
+              columnNumber: 13
+            },
+            this
+          )
+        ) }, void 0, false, {
+          fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+          lineNumber: 411,
+          columnNumber: 13
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+        lineNumber: 401,
+        columnNumber: 9
+      }, this),
+      activeTab === "overview" ? /* @__PURE__ */ jsxDEV("div", { className: "space-y-8", children: [
+        /* @__PURE__ */ jsxDEV("div", { className: "grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-5", children: [
+          { label: "Total Staff", value: overview.stats.totalStaff, icon: /* @__PURE__ */ jsxDEV(Users, { size: 20 }, void 0, false, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 456,
+            columnNumber: 77
+          }, this), tone: "text-primary bg-primary/10" },
+          { label: "Present Today", value: overview.stats.presentToday, icon: /* @__PURE__ */ jsxDEV(ShieldCheck, { size: 20 }, void 0, false, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 457,
+            columnNumber: 81
+          }, this), tone: "text-green-600 bg-green-500/10" },
+          { label: "Pending Requests", value: overview.stats.pendingRequests, icon: /* @__PURE__ */ jsxDEV(ClipboardList, { size: 20 }, void 0, false, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 458,
+            columnNumber: 87
+          }, this), tone: "text-amber-600 bg-amber-500/10" },
+          { label: "Active Orders", value: overview.stats.activeOrders, icon: /* @__PURE__ */ jsxDEV(Layers3, { size: 20 }, void 0, false, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 459,
+            columnNumber: 81
+          }, this), tone: "text-blue-600 bg-blue-500/10" },
+          { label: "Revenue Today", value: `Rs. ${overview.stats.todayRevenue.toLocaleString()}`, icon: /* @__PURE__ */ jsxDEV(TrendingUp, { size: 20 }, void 0, false, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 460,
+            columnNumber: 107
+          }, this), tone: "text-purple-600 bg-purple-500/10" }
+        ].map(
+          (card) => /* @__PURE__ */ jsxDEV("div", { className: "rounded-[2rem] border border-gray-100 bg-white p-6 shadow-xl shadow-dark/5", children: [
+            /* @__PURE__ */ jsxDEV("div", { className: `mb-4 flex h-11 w-11 items-center justify-center rounded-2xl ${card.tone}`, children: card.icon }, void 0, false, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 463,
+              columnNumber: 19
+            }, this),
+            /* @__PURE__ */ jsxDEV("p", { className: "text-xs font-bold uppercase tracking-[0.24em] text-muted", children: card.label }, void 0, false, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 464,
+              columnNumber: 19
+            }, this),
+            /* @__PURE__ */ jsxDEV("p", { className: "mt-2 text-2xl font-display font-bold text-dark", children: card.value }, void 0, false, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 465,
+              columnNumber: 19
+            }, this)
+          ] }, card.label, true, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 462,
+            columnNumber: 13
+          }, this)
+        ) }, void 0, false, {
+          fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+          lineNumber: 454,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "grid gap-8 xl:grid-cols-[1.15fr_0.85fr]", children: [
+          /* @__PURE__ */ jsxDEV("div", { className: "rounded-[2.5rem] border border-gray-100 bg-white p-8 shadow-xl shadow-dark/5", children: [
+            /* @__PURE__ */ jsxDEV("div", { className: "flex items-center justify-between", children: [
+              /* @__PURE__ */ jsxDEV("h2", { className: "text-xl font-bold text-dark", children: "Top Performers" }, void 0, false, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 473,
+                columnNumber: 19
+              }, this),
+              /* @__PURE__ */ jsxDEV("span", { className: "rounded-full bg-surface px-4 py-2 text-xs font-bold text-primary", children: "Best on floor" }, void 0, false, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 474,
+                columnNumber: 19
+              }, this)
+            ] }, void 0, true, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 472,
+              columnNumber: 17
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { className: "mt-6 space-y-4", children: overview.topPerformers.map(
+              (member) => /* @__PURE__ */ jsxDEV("div", { className: "rounded-[1.7rem] border border-gray-100 bg-surface/70 px-5 py-4", children: [
+                /* @__PURE__ */ jsxDEV("div", { className: "flex items-center justify-between gap-4", children: [
+                  /* @__PURE__ */ jsxDEV("div", { children: [
+                    /* @__PURE__ */ jsxDEV("p", { className: "font-bold text-dark", children: member.name }, void 0, false, {
+                      fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                      lineNumber: 481,
+                      columnNumber: 27
+                    }, this),
+                    /* @__PURE__ */ jsxDEV("p", { className: "mt-1 text-sm text-muted", children: [
+                      member.role,
+                      " | ",
+                      member.department
+                    ] }, void 0, true, {
+                      fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                      lineNumber: 482,
+                      columnNumber: 27
+                    }, this)
+                  ] }, void 0, true, {
+                    fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                    lineNumber: 480,
+                    columnNumber: 25
+                  }, this),
+                  /* @__PURE__ */ jsxDEV("span", { className: "rounded-full bg-white px-3 py-1 text-xs font-bold text-primary", children: [
+                    member.performanceScore.toFixed(1),
+                    " / 5"
+                  ] }, void 0, true, {
+                    fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                    lineNumber: 484,
+                    columnNumber: 25
+                  }, this)
+                ] }, void 0, true, {
+                  fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                  lineNumber: 479,
+                  columnNumber: 23
+                }, this),
+                /* @__PURE__ */ jsxDEV("p", { className: "mt-3 text-sm text-muted", children: [
+                  "Assigned orders: ",
+                  member.assignedOrders,
+                  " | Shift: ",
+                  member.shift
+                ] }, void 0, true, {
+                  fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                  lineNumber: 488,
+                  columnNumber: 23
+                }, this)
+              ] }, member.id, true, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 478,
+                columnNumber: 17
+              }, this)
+            ) }, void 0, false, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 476,
+              columnNumber: 17
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 471,
+            columnNumber: 15
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { className: "rounded-[2.5rem] border border-gray-100 bg-white p-8 shadow-xl shadow-dark/5", children: [
+            /* @__PURE__ */ jsxDEV("h2", { className: "text-xl font-bold text-dark", children: "Attention Needed" }, void 0, false, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 495,
+              columnNumber: 17
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { className: "mt-6 space-y-4", children: overview.attentionNeeded.map(
+              (member) => /* @__PURE__ */ jsxDEV("div", { className: "rounded-[1.6rem] bg-surface px-4 py-4", children: /* @__PURE__ */ jsxDEV("div", { className: "flex items-start gap-3", children: [
+                /* @__PURE__ */ jsxDEV(AlertTriangle, { size: 18, className: "mt-1 text-amber-600" }, void 0, false, {
+                  fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                  lineNumber: 500,
+                  columnNumber: 25
+                }, this),
+                /* @__PURE__ */ jsxDEV("div", { children: [
+                  /* @__PURE__ */ jsxDEV("p", { className: "font-bold text-dark", children: member.name }, void 0, false, {
+                    fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                    lineNumber: 502,
+                    columnNumber: 27
+                  }, this),
+                  /* @__PURE__ */ jsxDEV("p", { className: "mt-1 text-sm text-muted", children: member.role }, void 0, false, {
+                    fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                    lineNumber: 503,
+                    columnNumber: 27
+                  }, this),
+                  /* @__PURE__ */ jsxDEV("p", { className: "mt-2 text-sm text-muted", children: [
+                    "Attendance: ",
+                    member.attendanceStatus,
+                    " | Leaves: ",
+                    member.pendingLeaves,
+                    " | Requests: ",
+                    member.pendingRequests
+                  ] }, void 0, true, {
+                    fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                    lineNumber: 504,
+                    columnNumber: 27
+                  }, this)
+                ] }, void 0, true, {
+                  fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                  lineNumber: 501,
+                  columnNumber: 25
+                }, this)
+              ] }, void 0, true, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 499,
+                columnNumber: 23
+              }, this) }, member.id, false, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 498,
+                columnNumber: 17
+              }, this)
+            ) }, void 0, false, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 496,
+              columnNumber: 17
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 494,
+            columnNumber: 15
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+          lineNumber: 470,
+          columnNumber: 13
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+        lineNumber: 453,
+        columnNumber: 9
+      }, this) : null,
+      activeTab === "team" ? /* @__PURE__ */ jsxDEV("div", { className: "rounded-[2.5rem] border border-gray-100 bg-white p-8 shadow-xl shadow-dark/5", children: [
+        /* @__PURE__ */ jsxDEV("h2", { className: "text-xl font-bold text-dark", children: "Team Progress Matrix" }, void 0, false, {
+          fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+          lineNumber: 519,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "mt-6 overflow-x-auto", children: /* @__PURE__ */ jsxDEV("table", { className: "w-full", children: [
+          /* @__PURE__ */ jsxDEV("thead", { children: /* @__PURE__ */ jsxDEV("tr", { className: "border-b border-gray-100 text-left text-xs font-bold uppercase tracking-[0.22em] text-muted", children: [
+            /* @__PURE__ */ jsxDEV("th", { className: "pb-4", children: "Staff" }, void 0, false, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 524,
+              columnNumber: 21
+            }, this),
+            /* @__PURE__ */ jsxDEV("th", { className: "pb-4", children: "Role" }, void 0, false, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 525,
+              columnNumber: 21
+            }, this),
+            /* @__PURE__ */ jsxDEV("th", { className: "pb-4", children: "Attendance" }, void 0, false, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 526,
+              columnNumber: 21
+            }, this),
+            /* @__PURE__ */ jsxDEV("th", { className: "pb-4", children: "Orders" }, void 0, false, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 527,
+              columnNumber: 21
+            }, this),
+            /* @__PURE__ */ jsxDEV("th", { className: "pb-4", children: "Leaves" }, void 0, false, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 528,
+              columnNumber: 21
+            }, this),
+            /* @__PURE__ */ jsxDEV("th", { className: "pb-4", children: "Requests" }, void 0, false, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 529,
+              columnNumber: 21
+            }, this),
+            /* @__PURE__ */ jsxDEV("th", { className: "pb-4", children: "Score" }, void 0, false, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 530,
+              columnNumber: 21
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 523,
+            columnNumber: 19
+          }, this) }, void 0, false, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 522,
+            columnNumber: 17
+          }, this),
+          /* @__PURE__ */ jsxDEV("tbody", { className: "divide-y divide-gray-50", children: overview.staffSnapshots.map(
+            (member) => /* @__PURE__ */ jsxDEV("tr", { children: [
+              /* @__PURE__ */ jsxDEV("td", { className: "py-4", children: [
+                /* @__PURE__ */ jsxDEV("p", { className: "font-bold text-dark", children: member.name }, void 0, false, {
+                  fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                  lineNumber: 537,
+                  columnNumber: 25
+                }, this),
+                /* @__PURE__ */ jsxDEV("p", { className: "text-xs text-muted", children: member.department }, void 0, false, {
+                  fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                  lineNumber: 538,
+                  columnNumber: 25
+                }, this)
+              ] }, void 0, true, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 536,
+                columnNumber: 23
+              }, this),
+              /* @__PURE__ */ jsxDEV("td", { className: "py-4 text-sm text-dark", children: member.role }, void 0, false, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 540,
+                columnNumber: 23
+              }, this),
+              /* @__PURE__ */ jsxDEV("td", { className: "py-4 text-sm text-muted", children: member.attendanceStatus }, void 0, false, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 541,
+                columnNumber: 23
+              }, this),
+              /* @__PURE__ */ jsxDEV("td", { className: "py-4 text-sm text-muted", children: member.assignedOrders }, void 0, false, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 542,
+                columnNumber: 23
+              }, this),
+              /* @__PURE__ */ jsxDEV("td", { className: "py-4 text-sm text-muted", children: member.pendingLeaves }, void 0, false, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 543,
+                columnNumber: 23
+              }, this),
+              /* @__PURE__ */ jsxDEV("td", { className: "py-4 text-sm text-muted", children: member.pendingRequests }, void 0, false, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 544,
+                columnNumber: 23
+              }, this),
+              /* @__PURE__ */ jsxDEV("td", { className: "py-4", children: /* @__PURE__ */ jsxDEV("span", { className: "rounded-full bg-surface px-3 py-2 text-xs font-bold text-primary", children: [
+                member.performanceScore.toFixed(1),
+                " / 5"
+              ] }, void 0, true, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 546,
+                columnNumber: 25
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 545,
+                columnNumber: 23
+              }, this)
+            ] }, member.id, true, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 535,
+              columnNumber: 17
+            }, this)
+          ) }, void 0, false, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 533,
+            columnNumber: 17
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+          lineNumber: 521,
+          columnNumber: 15
+        }, this) }, void 0, false, {
+          fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+          lineNumber: 520,
+          columnNumber: 13
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+        lineNumber: 518,
+        columnNumber: 9
+      }, this) : null,
+      activeTab === "requests" ? /* @__PURE__ */ jsxDEV("div", { className: "grid gap-8 xl:grid-cols-2", children: [
+        /* @__PURE__ */ jsxDEV("div", { className: "rounded-[2.5rem] border border-gray-100 bg-white p-8 shadow-xl shadow-dark/5", children: [
+          /* @__PURE__ */ jsxDEV("h2", { className: "text-xl font-bold text-dark", children: "Pending Requests" }, void 0, false, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 561,
+            columnNumber: 15
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { className: "mt-6 space-y-4", children: overview.pendingRequests.length ? overview.pendingRequests.map((request) => {
+            const busyKey = `request:${request.id}`;
+            const isBusy = decisionBusyKey === busyKey;
+            return /* @__PURE__ */ jsxDEV("div", { className: "rounded-[1.6rem] border border-gray-100 px-5 py-4", children: [
+              /* @__PURE__ */ jsxDEV("p", { className: "font-bold text-dark", children: request.subject }, void 0, false, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 570,
+                columnNumber: 25
+              }, this),
+              /* @__PURE__ */ jsxDEV("p", { className: "mt-1 text-sm text-muted", children: [
+                request.staffName,
+                " | ",
+                request.category
+              ] }, void 0, true, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 571,
+                columnNumber: 25
+              }, this),
+              /* @__PURE__ */ jsxDEV("p", { className: "mt-3 text-sm text-muted", children: request.message }, void 0, false, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 572,
+                columnNumber: 25
+              }, this),
+              /* @__PURE__ */ jsxDEV("div", { className: "mt-5 flex flex-wrap gap-3", children: [
+                /* @__PURE__ */ jsxDEV(
+                  "button",
+                  {
+                    type: "button",
+                    disabled: isBusy,
+                    onClick: () => void decideStaffRequest(request.id, "Approved"),
+                    className: "inline-flex items-center gap-2 rounded-xl bg-green-500 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-60",
+                    children: [
+                      /* @__PURE__ */ jsxDEV(Check, { size: 16 }, void 0, false, {
+                        fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                        lineNumber: 580,
+                        columnNumber: 29
+                      }, this),
+                      "Approve"
+                    ]
+                  },
+                  void 0,
+                  true,
+                  {
+                    fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                    lineNumber: 574,
+                    columnNumber: 27
+                  },
+                  this
+                ),
+                /* @__PURE__ */ jsxDEV(
+                  "button",
+                  {
+                    type: "button",
+                    disabled: isBusy,
+                    onClick: () => void decideStaffRequest(request.id, "Rejected"),
+                    className: "inline-flex items-center gap-2 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-bold text-red-500 transition hover:bg-red-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-60",
+                    children: [
+                      /* @__PURE__ */ jsxDEV(X, { size: 16 }, void 0, false, {
+                        fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                        lineNumber: 589,
+                        columnNumber: 29
+                      }, this),
+                      "Reject"
+                    ]
+                  },
+                  void 0,
+                  true,
+                  {
+                    fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                    lineNumber: 583,
+                    columnNumber: 27
+                  },
+                  this
+                )
+              ] }, void 0, true, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 573,
+                columnNumber: 25
+              }, this)
+            ] }, request.id, true, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 569,
+              columnNumber: 19
+            }, this);
+          }) : /* @__PURE__ */ jsxDEV("div", { className: "rounded-[1.6rem] border border-dashed border-gray-200 px-5 py-8 text-center text-sm font-medium text-muted", children: "No pending staff requests." }, void 0, false, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 597,
+            columnNumber: 15
+          }, this) }, void 0, false, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 562,
+            columnNumber: 15
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+          lineNumber: 560,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "rounded-[2.5rem] border border-gray-100 bg-white p-8 shadow-xl shadow-dark/5", children: [
+          /* @__PURE__ */ jsxDEV("h2", { className: "text-xl font-bold text-dark", children: "Pending Leaves" }, void 0, false, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 605,
+            columnNumber: 15
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { className: "mt-6 space-y-4", children: overview.pendingLeaves.length ? overview.pendingLeaves.map((leave) => {
+            const busyKey = `leave:${leave.id}`;
+            const isBusy = decisionBusyKey === busyKey;
+            return /* @__PURE__ */ jsxDEV("div", { className: "rounded-[1.6rem] border border-gray-100 px-5 py-4", children: [
+              /* @__PURE__ */ jsxDEV("p", { className: "font-bold text-dark", children: leave.staffName }, void 0, false, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 614,
+                columnNumber: 25
+              }, this),
+              /* @__PURE__ */ jsxDEV("p", { className: "mt-1 text-sm text-muted", children: [
+                leave.leaveType,
+                " | ",
+                leave.startDate,
+                " to ",
+                leave.endDate
+              ] }, void 0, true, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 615,
+                columnNumber: 25
+              }, this),
+              /* @__PURE__ */ jsxDEV("p", { className: "mt-3 text-sm text-muted", children: leave.reason }, void 0, false, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 616,
+                columnNumber: 25
+              }, this),
+              /* @__PURE__ */ jsxDEV("div", { className: "mt-5 flex flex-wrap gap-3", children: [
+                /* @__PURE__ */ jsxDEV(
+                  "button",
+                  {
+                    type: "button",
+                    disabled: isBusy,
+                    onClick: () => void decideLeaveRequest(leave.id, "Approved"),
+                    className: "inline-flex items-center gap-2 rounded-xl bg-green-500 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-60",
+                    children: [
+                      /* @__PURE__ */ jsxDEV(Check, { size: 16 }, void 0, false, {
+                        fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                        lineNumber: 624,
+                        columnNumber: 29
+                      }, this),
+                      "Approve"
+                    ]
+                  },
+                  void 0,
+                  true,
+                  {
+                    fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                    lineNumber: 618,
+                    columnNumber: 27
+                  },
+                  this
+                ),
+                /* @__PURE__ */ jsxDEV(
+                  "button",
+                  {
+                    type: "button",
+                    disabled: isBusy,
+                    onClick: () => void decideLeaveRequest(leave.id, "Rejected"),
+                    className: "inline-flex items-center gap-2 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-bold text-red-500 transition hover:bg-red-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-60",
+                    children: [
+                      /* @__PURE__ */ jsxDEV(X, { size: 16 }, void 0, false, {
+                        fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                        lineNumber: 633,
+                        columnNumber: 29
+                      }, this),
+                      "Reject"
+                    ]
+                  },
+                  void 0,
+                  true,
+                  {
+                    fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                    lineNumber: 627,
+                    columnNumber: 27
+                  },
+                  this
+                )
+              ] }, void 0, true, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 617,
+                columnNumber: 25
+              }, this)
+            ] }, leave.id, true, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 613,
+              columnNumber: 19
+            }, this);
+          }) : /* @__PURE__ */ jsxDEV("div", { className: "rounded-[1.6rem] border border-dashed border-gray-200 px-5 py-8 text-center text-sm font-medium text-muted", children: "No pending leave requests." }, void 0, false, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 641,
+            columnNumber: 15
+          }, this) }, void 0, false, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 606,
+            columnNumber: 15
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+          lineNumber: 604,
+          columnNumber: 13
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+        lineNumber: 559,
+        columnNumber: 9
+      }, this) : null,
+      activeTab === "orders" ? /* @__PURE__ */ jsxDEV("div", { className: "space-y-8", children: [
+        /* @__PURE__ */ jsxDEV("div", { className: "grid grid-cols-1 gap-6 md:grid-cols-5", children: [
+          { label: "Pending", value: overview.orderPulse.pending, icon: /* @__PURE__ */ jsxDEV(Clock3, { size: 18 }, void 0, false, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 654,
+            columnNumber: 75
+          }, this) },
+          { label: "Preparing", value: overview.orderPulse.preparing, icon: /* @__PURE__ */ jsxDEV(Layers3, { size: 18 }, void 0, false, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 655,
+            columnNumber: 79
+          }, this) },
+          { label: "On Route", value: overview.orderPulse.onRoute, icon: /* @__PURE__ */ jsxDEV(TrendingUp, { size: 18 }, void 0, false, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 656,
+            columnNumber: 76
+          }, this) },
+          { label: "Delivered", value: overview.orderPulse.delivered, icon: /* @__PURE__ */ jsxDEV(ShieldCheck, { size: 18 }, void 0, false, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 657,
+            columnNumber: 79
+          }, this) },
+          { label: "Cancelled", value: overview.orderPulse.cancelled, icon: /* @__PURE__ */ jsxDEV(AlertTriangle, { size: 18 }, void 0, false, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 658,
+            columnNumber: 79
+          }, this) }
+        ].map(
+          (item) => /* @__PURE__ */ jsxDEV("div", { className: "rounded-[2rem] border border-gray-100 bg-white p-6 shadow-xl shadow-dark/5", children: [
+            /* @__PURE__ */ jsxDEV("div", { className: "mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary", children: item.icon }, void 0, false, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 661,
+              columnNumber: 19
+            }, this),
+            /* @__PURE__ */ jsxDEV("p", { className: "text-xs font-bold uppercase tracking-[0.22em] text-muted", children: item.label }, void 0, false, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 662,
+              columnNumber: 19
+            }, this),
+            /* @__PURE__ */ jsxDEV("p", { className: "mt-2 text-2xl font-display font-bold text-dark", children: item.value }, void 0, false, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 663,
+              columnNumber: 19
+            }, this)
+          ] }, item.label, true, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 660,
+            columnNumber: 13
+          }, this)
+        ) }, void 0, false, {
+          fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+          lineNumber: 652,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "rounded-[2.5rem] border border-gray-100 bg-white p-8 shadow-xl shadow-dark/5", children: [
+          /* @__PURE__ */ jsxDEV("h2", { className: "text-xl font-bold text-dark", children: "Live Queue Review" }, void 0, false, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 669,
+            columnNumber: 15
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { className: "mt-6 space-y-4", children: overview.orderPulse.queue.map(
+            (order) => /* @__PURE__ */ jsxDEV("div", { className: "rounded-[1.6rem] border border-gray-100 px-5 py-4", children: /* @__PURE__ */ jsxDEV("div", { className: "flex flex-wrap items-center justify-between gap-4", children: [
+              /* @__PURE__ */ jsxDEV("div", { children: [
+                /* @__PURE__ */ jsxDEV("p", { className: "font-bold text-dark", children: order.id }, void 0, false, {
+                  fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                  lineNumber: 675,
+                  columnNumber: 25
+                }, this),
+                /* @__PURE__ */ jsxDEV("p", { className: "mt-1 text-sm text-muted", children: [
+                  order.customer,
+                  " | ",
+                  order.assignedTo
+                ] }, void 0, true, {
+                  fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                  lineNumber: 676,
+                  columnNumber: 25
+                }, this)
+              ] }, void 0, true, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 674,
+                columnNumber: 23
+              }, this),
+              /* @__PURE__ */ jsxDEV("div", { className: "text-right", children: [
+                /* @__PURE__ */ jsxDEV("p", { className: "text-sm font-bold text-primary", children: [
+                  "Rs. ",
+                  order.total.toLocaleString()
+                ] }, void 0, true, {
+                  fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                  lineNumber: 679,
+                  columnNumber: 25
+                }, this),
+                /* @__PURE__ */ jsxDEV("p", { className: "mt-1 text-xs uppercase tracking-[0.2em] text-muted", children: [
+                  order.status,
+                  " | ",
+                  order.assignedRole
+                ] }, void 0, true, {
+                  fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                  lineNumber: 680,
+                  columnNumber: 25
+                }, this)
+              ] }, void 0, true, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 678,
+                columnNumber: 23
+              }, this)
+            ] }, void 0, true, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 673,
+              columnNumber: 21
+            }, this) }, order.id, false, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 672,
+              columnNumber: 15
+            }, this)
+          ) }, void 0, false, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 670,
+            columnNumber: 15
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+          lineNumber: 668,
+          columnNumber: 13
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+        lineNumber: 651,
+        columnNumber: 9
+      }, this) : null,
+      activeTab === "inventory" ? /* @__PURE__ */ jsxDEV("div", { className: "rounded-[2.5rem] border border-gray-100 bg-white p-8 shadow-xl shadow-dark/5", children: [
+        /* @__PURE__ */ jsxDEV("h2", { className: "text-xl font-bold text-dark", children: "Inventory Pressure Board" }, void 0, false, {
+          fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+          lineNumber: 692,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "mt-6 grid gap-4 md:grid-cols-2", children: overview.inventoryAlerts.map(
+          (item) => /* @__PURE__ */ jsxDEV("div", { className: "rounded-[1.7rem] border border-gray-100 bg-surface/70 px-5 py-4", children: [
+            /* @__PURE__ */ jsxDEV("p", { className: "font-bold text-dark", children: item.name }, void 0, false, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 696,
+              columnNumber: 19
+            }, this),
+            /* @__PURE__ */ jsxDEV("p", { className: "mt-1 text-sm text-muted", children: item.category }, void 0, false, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 697,
+              columnNumber: 19
+            }, this),
+            /* @__PURE__ */ jsxDEV("p", { className: "mt-3 text-sm text-muted", children: [
+              "Current stock: ",
+              item.stock,
+              " ",
+              item.unit,
+              " | Minimum: ",
+              item.minStock,
+              " ",
+              item.unit
+            ] }, void 0, true, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 698,
+              columnNumber: 19
+            }, this)
+          ] }, item.id, true, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 695,
+            columnNumber: 13
+          }, this)
+        ) }, void 0, false, {
+          fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+          lineNumber: 693,
+          columnNumber: 13
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+        lineNumber: 691,
+        columnNumber: 9
+      }, this) : null,
+      activeTab === "activity" ? /* @__PURE__ */ jsxDEV("div", { className: "rounded-[2.5rem] border border-gray-100 bg-white p-8 shadow-xl shadow-dark/5", children: [
+        /* @__PURE__ */ jsxDEV("h2", { className: "text-xl font-bold text-dark", children: "Activity Feed" }, void 0, false, {
+          fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+          lineNumber: 709,
+          columnNumber: 13
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "mt-6 space-y-4", children: overview.activityFeed.map(
+          (entry) => /* @__PURE__ */ jsxDEV("div", { className: "rounded-[1.6rem] border border-gray-100 px-5 py-4", children: [
+            /* @__PURE__ */ jsxDEV("div", { className: "flex items-center justify-between gap-4", children: [
+              /* @__PURE__ */ jsxDEV("div", { children: [
+                /* @__PURE__ */ jsxDEV("p", { className: "font-bold text-dark", children: entry.title }, void 0, false, {
+                  fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                  lineNumber: 715,
+                  columnNumber: 23
+                }, this),
+                /* @__PURE__ */ jsxDEV("p", { className: "mt-1 text-sm text-muted", children: entry.actor }, void 0, false, {
+                  fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                  lineNumber: 716,
+                  columnNumber: 23
+                }, this)
+              ] }, void 0, true, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 714,
+                columnNumber: 21
+              }, this),
+              /* @__PURE__ */ jsxDEV("span", { className: "rounded-full bg-surface px-3 py-2 text-xs font-bold text-primary", children: new Date(entry.createdAt).toLocaleString("en-PK") }, void 0, false, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+                lineNumber: 718,
+                columnNumber: 21
+              }, this)
+            ] }, void 0, true, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 713,
+              columnNumber: 19
+            }, this),
+            /* @__PURE__ */ jsxDEV("p", { className: "mt-3 text-sm text-muted", children: entry.detail }, void 0, false, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+              lineNumber: 722,
+              columnNumber: 19
+            }, this)
+          ] }, entry.id, true, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+            lineNumber: 712,
+            columnNumber: 13
+          }, this)
+        ) }, void 0, false, {
+          fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+          lineNumber: 710,
+          columnNumber: 13
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+        lineNumber: 708,
+        columnNumber: 9
+      }, this) : null
+    ] }, void 0, true, {
+      fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+      lineNumber: 365,
+      columnNumber: 7
+    }, this)
+  ] }, void 0, true, {
+    fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx",
+    lineNumber: 298,
+    columnNumber: 5
+  }, this);
+};
+_s(ManagerWorkspace, "S2YiY2MmxKzKPNgxZNSmUZsWRVo=", false, function() {
+  return [useAuth, useNavigate, useRealtime];
+});
+_c = ManagerWorkspace;
+export default ManagerWorkspace;
+var _c;
+$RefreshReg$(_c, "ManagerWorkspace");
+import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react can't detect preamble. Something is wrong."
+    );
+  }
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+function $RefreshReg$(type, id) {
+  return RefreshRuntime.register(type, "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/admin/ManagerWorkspace.tsx " + id);
+}
+function $RefreshSig$() {
+  return RefreshRuntime.createSignatureFunctionForTransform();
+}
+
+//# sourceMappingURL=data:application/json;base64,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QUEwSDtBQUFBLGFBQUFBLElBQUEiLCJuYW1lcyI6WyJ1c2VFZmZlY3QiLCJ1c2VNZW1vIiwidXNlU3RhdGUiLCJBbGVydFRyaWFuZ2xlIiwiQmFyQ2hhcnQzIiwiQmVsbCIsIkNoZWNrIiwiQ2xpcGJvYXJkTGlzdCIsIkNsb2NrMyIsIkxheWVyczMiLCJMb2dPdXQiLCJNZW51IiwiUGFja2FnZSIsIlJlZnJlc2hDdyIsIlNoaWVsZENoZWNrIiwiVHJlbmRpbmdVcCIsIlVzZXJzIiwiWCIsInVzZU5hdmlnYXRlIiwidXNlQXV0aCIsInVzZVJlYWx0aW1lIiwiTWFuYWdlcldvcmtzcGFjZSIsIl9zIiwidXNlciIsImxvZ291dCIsIm5hdmlnYXRlIiwiYWN0aXZlVGFiIiwic2V0QWN0aXZlVGFiIiwibG9hZGluZyIsInNldExvYWRpbmciLCJlcnJvciIsInNldEVycm9yIiwib3ZlcnZpZXciLCJzZXRPdmVydmlldyIsInBlbmRpbmdQYXltZW50cyIsInNldFBlbmRpbmdQYXltZW50cyIsInNpZGViYXJPcGVuIiwic2V0U2lkZWJhck9wZW4iLCJkZWNpc2lvbkJ1c3lLZXkiLCJzZXREZWNpc2lvbkJ1c3lLZXkiLCJ0YWJzIiwiaWQiLCJsYWJlbCIsImljb24iLCJsb2FkT3ZlcnZpZXciLCJyZXNwb25zZSIsImZldGNoIiwiZGF0YSIsImpzb24iLCJvayIsIkVycm9yIiwiU3RyaW5nIiwibWVzc2FnZSIsImxvYWRFcnJvciIsImNvbnNvbGUiLCJsb2FkUGVuZGluZ1BheW1lbnRzIiwiQXJyYXkiLCJpc0FycmF5IiwiZmlsdGVyIiwib3JkZXIiLCJwYXltZW50U3RhdHVzIiwiaGFuZGxlUGF5bWVudCIsIm9yZGVySWQiLCJhY3Rpb24iLCJtZXRob2QiLCJoZWFkZXJzIiwiYm9keSIsIkpTT04iLCJzdHJpbmdpZnkiLCJjYXRjaCIsIlByb21pc2UiLCJhbGwiLCJwYXltZW50RXJyb3IiLCJkZWNpZGVTdGFmZlJlcXVlc3QiLCJyZXF1ZXN0SWQiLCJzdGF0dXMiLCJidXN5S2V5IiwiZGVjaXNpb25FcnJvciIsImRlY2lkZUxlYXZlUmVxdWVzdCIsImxlYXZlSWQiLCJuYW1lIiwic3RhdHMiLCJwcmVzZW50VG9kYXkiLCJwZW5kaW5nUmVxdWVzdHMiLCJtYXAiLCJ0YWIiLCJmaW5kIiwibGVuZ3RoIiwiY3VzdG9tZXIiLCJOdW1iZXIiLCJ0b3RhbCIsInRvTG9jYWxlU3RyaW5nIiwicGF5bWVudE1ldGhvZCIsInBheW1lbnRSZWZlcmVuY2UiLCJ2YWx1ZSIsInRvdGFsU3RhZmYiLCJ0b25lIiwiYWN0aXZlT3JkZXJzIiwidG9kYXlSZXZlbnVlIiwiY2FyZCIsInRvcFBlcmZvcm1lcnMiLCJtZW1iZXIiLCJyb2xlIiwiZGVwYXJ0bWVudCIsInBlcmZvcm1hbmNlU2NvcmUiLCJ0b0ZpeGVkIiwiYXNzaWduZWRPcmRlcnMiLCJzaGlmdCIsImF0dGVudGlvbk5lZWRlZCIsImF0dGVuZGFuY2VTdGF0dXMiLCJwZW5kaW5nTGVhdmVzIiwic3RhZmZTbmFwc2hvdHMiLCJyZXF1ZXN0IiwiaXNCdXN5Iiwic3ViamVjdCIsInN0YWZmTmFtZSIsImNhdGVnb3J5IiwibGVhdmUiLCJsZWF2ZVR5cGUiLCJzdGFydERhdGUiLCJlbmREYXRlIiwicmVhc29uIiwib3JkZXJQdWxzZSIsInBlbmRpbmciLCJwcmVwYXJpbmciLCJvblJvdXRlIiwiZGVsaXZlcmVkIiwiY2FuY2VsbGVkIiwiaXRlbSIsInF1ZXVlIiwiYXNzaWduZWRUbyIsImFzc2lnbmVkUm9sZSIsImludmVudG9yeUFsZXJ0cyIsInN0b2NrIiwidW5pdCIsIm1pblN0b2NrIiwiYWN0aXZpdHlGZWVkIiwiZW50cnkiLCJ0aXRsZSIsImFjdG9yIiwiRGF0ZSIsImNyZWF0ZWRBdCIsImRldGFpbCIsIl9jIl0sImlnbm9yZUxpc3QiOltdLCJzb3VyY2VzIjpbIk1hbmFnZXJXb3Jrc3BhY2UudHN4Il0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IHVzZUVmZmVjdCwgdXNlTWVtbywgdXNlU3RhdGUgfSBmcm9tIFwicmVhY3RcIjtcclxuaW1wb3J0IHtcclxuICBBbGVydFRyaWFuZ2xlLFxuICBCYXJDaGFydDMsXG4gIEJlbGwsXG4gIENoZWNrLFxuICBDbGlwYm9hcmRMaXN0LFxuICBDbG9jazMsXG4gIExheWVyczMsXG4gIExvZ091dCxcbiAgTWVudSxcbiAgUGFja2FnZSxcclxuICBSZWZyZXNoQ3csXHJcbiAgU2hpZWxkQ2hlY2ssXHJcbiAgVHJlbmRpbmdVcCxcbiAgVXNlckNvZyxcbiAgVXNlcnMsXG4gIFgsXG59IGZyb20gXCJsdWNpZGUtcmVhY3RcIjtcbmltcG9ydCB7IHVzZU5hdmlnYXRlIH0gZnJvbSBcInJlYWN0LXJvdXRlci1kb21cIjtcclxuaW1wb3J0IHsgdXNlQXV0aCB9IGZyb20gXCIuLi8uLi9jb250ZXh0L0F1dGhDb250ZXh0XCI7XHJcbmltcG9ydCB7IHVzZVJlYWx0aW1lIH0gZnJvbSBcIi4uLy4uL2xpYi9yZWFsdGltZVwiO1xyXG5cclxudHlwZSBPdmVydmlld1BheWxvYWQgPSB7XHJcbiAgcGFuZWxSb2xlOiBzdHJpbmc7XHJcbiAgc3RhdHM6IHtcclxuICAgIHRvdGFsU3RhZmY6IG51bWJlcjtcclxuICAgIGFjdGl2ZVN0YWZmOiBudW1iZXI7XHJcbiAgICBjdXN0b21lckFjY291bnRzOiBudW1iZXI7XHJcbiAgICBwcmVzZW50VG9kYXk6IG51bWJlcjtcclxuICAgIGxhdGVUb2RheTogbnVtYmVyO1xyXG4gICAgYWJzZW50VG9kYXk6IG51bWJlcjtcclxuICAgIHBlbmRpbmdMZWF2ZXM6IG51bWJlcjtcclxuICAgIHBlbmRpbmdSZXF1ZXN0czogbnVtYmVyO1xyXG4gICAgYWN0aXZlT3JkZXJzOiBudW1iZXI7XHJcbiAgICBsb3dTdG9ja0NvdW50OiBudW1iZXI7XHJcbiAgICB0b2RheVJldmVudWU6IG51bWJlcjtcclxuICB9O1xyXG4gIHJvbGVEaXN0cmlidXRpb246IEFycmF5PHsgcm9sZTogc3RyaW5nOyBjb3VudDogbnVtYmVyIH0+O1xyXG4gIHRvcFBlcmZvcm1lcnM6IEFycmF5PHtcclxuICAgIGlkOiBudW1iZXI7XHJcbiAgICBuYW1lOiBzdHJpbmc7XHJcbiAgICByb2xlOiBzdHJpbmc7XHJcbiAgICBkZXBhcnRtZW50OiBzdHJpbmc7XHJcbiAgICBzaGlmdDogc3RyaW5nO1xyXG4gICAgc3RhdHVzOiBzdHJpbmc7XHJcbiAgICBwZXJmb3JtYW5jZVNjb3JlOiBudW1iZXI7XHJcbiAgICBhdHRlbmRhbmNlU3RhdHVzOiBzdHJpbmc7XHJcbiAgICBwZW5kaW5nTGVhdmVzOiBudW1iZXI7XHJcbiAgICBwZW5kaW5nUmVxdWVzdHM6IG51bWJlcjtcclxuICAgIGFzc2lnbmVkT3JkZXJzOiBudW1iZXI7XHJcbiAgfT47XHJcbiAgYXR0ZW50aW9uTmVlZGVkOiBBcnJheTx7XHJcbiAgICBpZDogbnVtYmVyO1xyXG4gICAgbmFtZTogc3RyaW5nO1xyXG4gICAgcm9sZTogc3RyaW5nO1xyXG4gICAgYXR0ZW5kYW5jZVN0YXR1czogc3RyaW5nO1xyXG4gICAgcGVuZGluZ0xlYXZlczogbnVtYmVyO1xyXG4gICAgcGVuZGluZ1JlcXVlc3RzOiBudW1iZXI7XHJcbiAgICBhc3NpZ25lZE9yZGVyczogbnVtYmVyO1xyXG4gIH0+O1xyXG4gIHN0YWZmU25hcHNob3RzOiBBcnJheTx7XHJcbiAgICBpZDogbnVtYmVyO1xyXG4gICAgbmFtZTogc3RyaW5nO1xyXG4gICAgcm9sZTogc3RyaW5nO1xyXG4gICAgZGVwYXJ0bWVudDogc3RyaW5nO1xyXG4gICAgc2hpZnQ6IHN0cmluZztcclxuICAgIHN0YXR1czogc3RyaW5nO1xyXG4gICAgcGVyZm9ybWFuY2VTY29yZTogbnVtYmVyO1xyXG4gICAgYXR0ZW5kYW5jZVN0YXR1czogc3RyaW5nO1xyXG4gICAgcGVuZGluZ0xlYXZlczogbnVtYmVyO1xyXG4gICAgcGVuZGluZ1JlcXVlc3RzOiBudW1iZXI7XHJcbiAgICBhc3NpZ25lZE9yZGVyczogbnVtYmVyO1xyXG4gIH0+O1xyXG4gIHBlbmRpbmdMZWF2ZXM6IEFycmF5PHtcclxuICAgIGlkOiBzdHJpbmc7XHJcbiAgICBzdGFmZk5hbWU6IHN0cmluZztcclxuICAgIGxlYXZlVHlwZTogc3RyaW5nO1xyXG4gICAgc3RhcnREYXRlOiBzdHJpbmc7XHJcbiAgICBlbmREYXRlOiBzdHJpbmc7XHJcbiAgICByZWFzb246IHN0cmluZztcclxuICAgIHN0YXR1czogc3RyaW5nO1xyXG4gIH0+O1xyXG4gIHBlbmRpbmdSZXF1ZXN0czogQXJyYXk8e1xyXG4gICAgaWQ6IHN0cmluZztcclxuICAgIHN0YWZmTmFtZTogc3RyaW5nO1xyXG4gICAgY2F0ZWdvcnk6IHN0cmluZztcclxuICAgIHN1YmplY3Q6IHN0cmluZztcclxuICAgIG1lc3NhZ2U6IHN0cmluZztcclxuICAgIHN0YXR1czogc3RyaW5nO1xyXG4gIH0+O1xyXG4gIGludmVudG9yeUFsZXJ0czogQXJyYXk8e1xyXG4gICAgaWQ6IG51bWJlcjtcclxuICAgIG5hbWU6IHN0cmluZztcclxuICAgIHN0b2NrOiBudW1iZXI7XHJcbiAgICBtaW5TdG9jazogbnVtYmVyO1xyXG4gICAgdW5pdDogc3RyaW5nO1xyXG4gICAgY2F0ZWdvcnk6IHN0cmluZztcclxuICB9PjtcclxuICBvcmRlclB1bHNlOiB7XHJcbiAgICBwZW5kaW5nOiBudW1iZXI7XHJcbiAgICBwcmVwYXJpbmc6IG51bWJlcjtcclxuICAgIG9uUm91dGU6IG51bWJlcjtcclxuICAgIGRlbGl2ZXJlZDogbnVtYmVyO1xyXG4gICAgY2FuY2VsbGVkOiBudW1iZXI7XHJcbiAgICBxdWV1ZTogQXJyYXk8e1xyXG4gICAgICBpZDogc3RyaW5nO1xyXG4gICAgICBjdXN0b21lcjogc3RyaW5nO1xyXG4gICAgICBzdGF0dXM6IHN0cmluZztcclxuICAgICAgdG90YWw6IG51bWJlcjtcclxuICAgICAgYXNzaWduZWRUbzogc3RyaW5nO1xyXG4gICAgICBhc3NpZ25lZFJvbGU6IHN0cmluZztcclxuICAgIH0+O1xyXG4gIH07XHJcbiAgYWN0aXZpdHlGZWVkOiBBcnJheTx7XHJcbiAgICBpZDogc3RyaW5nO1xyXG4gICAgdGl0bGU6IHN0cmluZztcclxuICAgIGRldGFpbDogc3RyaW5nO1xyXG4gICAgYWN0b3I6IHN0cmluZztcclxuICAgIGNyZWF0ZWRBdDogc3RyaW5nO1xyXG4gIH0+O1xyXG59O1xyXG5cclxudHlwZSBNYW5hZ2VyVGFiID0gXCJvdmVydmlld1wiIHwgXCJ0ZWFtXCIgfCBcInJlcXVlc3RzXCIgfCBcIm9yZGVyc1wiIHwgXCJpbnZlbnRvcnlcIiB8IFwiYWN0aXZpdHlcIjtcbnR5cGUgRGVjaXNpb25TdGF0dXMgPSBcIkFwcHJvdmVkXCIgfCBcIlJlamVjdGVkXCI7XG5cbmNvbnN0IE1hbmFnZXJXb3Jrc3BhY2UgPSAoKSA9PiB7XG4gIGNvbnN0IHsgdXNlciwgbG9nb3V0IH0gPSB1c2VBdXRoKCk7XHJcbiAgY29uc3QgbmF2aWdhdGUgPSB1c2VOYXZpZ2F0ZSgpO1xyXG4gIGNvbnN0IFthY3RpdmVUYWIsIHNldEFjdGl2ZVRhYl0gPSB1c2VTdGF0ZTxNYW5hZ2VyVGFiPihcIm92ZXJ2aWV3XCIpO1xyXG4gIGNvbnN0IFtsb2FkaW5nLCBzZXRMb2FkaW5nXSA9IHVzZVN0YXRlKHRydWUpO1xyXG4gIGNvbnN0IFtlcnJvciwgc2V0RXJyb3JdID0gdXNlU3RhdGUoXCJcIik7XHJcbiAgY29uc3QgW292ZXJ2aWV3LCBzZXRPdmVydmlld10gPSB1c2VTdGF0ZTxPdmVydmlld1BheWxvYWQgfCBudWxsPihudWxsKTtcbiAgY29uc3QgW3BlbmRpbmdQYXltZW50cywgc2V0UGVuZGluZ1BheW1lbnRzXSA9IHVzZVN0YXRlPEFycmF5PFJlY29yZDxzdHJpbmcsIGFueT4+PihbXSk7XG4gIGNvbnN0IFtzaWRlYmFyT3Blbiwgc2V0U2lkZWJhck9wZW5dID0gdXNlU3RhdGUoZmFsc2UpO1xuICBjb25zdCBbZGVjaXNpb25CdXN5S2V5LCBzZXREZWNpc2lvbkJ1c3lLZXldID0gdXNlU3RhdGUoXCJcIik7XG5cclxuICBjb25zdCB0YWJzID0gdXNlTWVtbyhcclxuICAgICgpID0+IFtcclxuICAgICAgeyBpZDogXCJvdmVydmlld1wiIGFzIGNvbnN0LCBsYWJlbDogXCJPdmVydmlld1wiLCBpY29uOiA8QmFyQ2hhcnQzIHNpemU9ezE4fSAvPiB9LFxyXG4gICAgICB7IGlkOiBcInRlYW1cIiBhcyBjb25zdCwgbGFiZWw6IFwiVGVhbSBQcm9ncmVzc1wiLCBpY29uOiA8VXNlcnMgc2l6ZT17MTh9IC8+IH0sXHJcbiAgICAgIHsgaWQ6IFwicmVxdWVzdHNcIiBhcyBjb25zdCwgbGFiZWw6IFwiUmVxdWVzdHNcIiwgaWNvbjogPENsaXBib2FyZExpc3Qgc2l6ZT17MTh9IC8+IH0sXHJcbiAgICAgIHsgaWQ6IFwib3JkZXJzXCIgYXMgY29uc3QsIGxhYmVsOiBcIk9yZGVycyBQdWxzZVwiLCBpY29uOiA8TGF5ZXJzMyBzaXplPXsxOH0gLz4gfSxcclxuICAgICAgeyBpZDogXCJpbnZlbnRvcnlcIiBhcyBjb25zdCwgbGFiZWw6IFwiSW52ZW50b3J5IEFsZXJ0c1wiLCBpY29uOiA8UGFja2FnZSBzaXplPXsxOH0gLz4gfSxcclxuICAgICAgeyBpZDogXCJhY3Rpdml0eVwiIGFzIGNvbnN0LCBsYWJlbDogXCJBY3Rpdml0eSBGZWVkXCIsIGljb246IDxCZWxsIHNpemU9ezE4fSAvPiB9LFxyXG4gICAgXSxcclxuICAgIFtdLFxyXG4gICk7XHJcblxyXG4gIGNvbnN0IGxvYWRPdmVydmlldyA9IGFzeW5jICgpID0+IHtcclxuICAgIHNldExvYWRpbmcodHJ1ZSk7XHJcbiAgICBzZXRFcnJvcihcIlwiKTtcclxuXHJcbiAgICB0cnkge1xyXG4gICAgICBjb25zdCByZXNwb25zZSA9IGF3YWl0IGZldGNoKFwiL2FwaS9vcGVyYXRpb25zL292ZXJ2aWV3XCIpO1xyXG4gICAgICBjb25zdCBkYXRhID0gYXdhaXQgcmVzcG9uc2UuanNvbigpO1xyXG5cclxuICAgICAgaWYgKCFyZXNwb25zZS5vaykge1xyXG4gICAgICAgIHRocm93IG5ldyBFcnJvcihTdHJpbmcoZGF0YS5tZXNzYWdlID8/IFwiT3ZlcnZpZXcgY291bGQgbm90IGJlIGxvYWRlZC5cIikpO1xyXG4gICAgICB9XHJcblxyXG4gICAgICBzZXRPdmVydmlldyhkYXRhKTtcclxuICAgIH0gY2F0Y2ggKGxvYWRFcnJvcikge1xyXG4gICAgICBjb25zb2xlLmVycm9yKGxvYWRFcnJvcik7XHJcbiAgICAgIHNldEVycm9yKGxvYWRFcnJvciBpbnN0YW5jZW9mIEVycm9yID8gbG9hZEVycm9yLm1lc3NhZ2UgOiBcIk92ZXJ2aWV3IGNvdWxkIG5vdCBiZSBsb2FkZWQuXCIpO1xyXG4gICAgfSBmaW5hbGx5IHtcclxuICAgICAgc2V0TG9hZGluZyhmYWxzZSk7XHJcbiAgICB9XHJcbiAgfTtcclxuXHJcbiAgY29uc3QgbG9hZFBlbmRpbmdQYXltZW50cyA9IGFzeW5jICgpID0+IHtcclxuICAgIHRyeSB7XHJcbiAgICAgIGNvbnN0IHJlc3BvbnNlID0gYXdhaXQgZmV0Y2goXCIvYXBpL29yZGVyc1wiKTtcclxuICAgICAgY29uc3QgZGF0YSA9IGF3YWl0IHJlc3BvbnNlLmpzb24oKTtcclxuICAgICAgaWYgKEFycmF5LmlzQXJyYXkoZGF0YSkpIHtcclxuICAgICAgICBzZXRQZW5kaW5nUGF5bWVudHMoXHJcbiAgICAgICAgICBkYXRhLmZpbHRlcigob3JkZXI6IFJlY29yZDxzdHJpbmcsIGFueT4pID0+IG9yZGVyLnBheW1lbnRTdGF0dXMgPT09IFwiUGVuZGluZyBWZXJpZmljYXRpb25cIiksXHJcbiAgICAgICAgKTtcclxuICAgICAgfVxyXG4gICAgfSBjYXRjaCAobG9hZEVycm9yKSB7XHJcbiAgICAgIGNvbnNvbGUuZXJyb3IobG9hZEVycm9yKTtcclxuICAgIH1cclxuICB9O1xyXG5cclxuICBjb25zdCBoYW5kbGVQYXltZW50ID0gYXN5bmMgKG9yZGVySWQ6IHN0cmluZywgYWN0aW9uOiBcInZlcmlmeVwiIHwgXCJyZWplY3RcIikgPT4ge1xuICAgIHRyeSB7XHJcbiAgICAgIGNvbnN0IHJlc3BvbnNlID0gYXdhaXQgZmV0Y2goYC9hcGkvb3JkZXJzLyR7b3JkZXJJZH0vcGF5bWVudGAsIHtcclxuICAgICAgICBtZXRob2Q6IFwiUEFUQ0hcIixcclxuICAgICAgICBoZWFkZXJzOiB7IFwiQ29udGVudC1UeXBlXCI6IFwiYXBwbGljYXRpb24vanNvblwiIH0sXHJcbiAgICAgICAgYm9keTogSlNPTi5zdHJpbmdpZnkoeyBhY3Rpb24gfSksXHJcbiAgICAgIH0pO1xyXG4gICAgICBpZiAoIXJlc3BvbnNlLm9rKSB7XHJcbiAgICAgICAgY29uc3QgZGF0YSA9IGF3YWl0IHJlc3BvbnNlLmpzb24oKS5jYXRjaCgoKSA9PiAoe30pKTtcclxuICAgICAgICB0aHJvdyBuZXcgRXJyb3IoU3RyaW5nKGRhdGEubWVzc2FnZSA/PyBcIlBheW1lbnQgdXBkYXRlIGZhaWxlZC5cIikpO1xyXG4gICAgICB9XHJcbiAgICAgIGF3YWl0IFByb21pc2UuYWxsKFtsb2FkUGVuZGluZ1BheW1lbnRzKCksIGxvYWRPdmVydmlldygpXSk7XHJcbiAgICB9IGNhdGNoIChwYXltZW50RXJyb3IpIHtcclxuICAgICAgY29uc29sZS5lcnJvcihwYXltZW50RXJyb3IpO1xyXG4gICAgICBzZXRFcnJvcihwYXltZW50RXJyb3IgaW5zdGFuY2VvZiBFcnJvciA/IHBheW1lbnRFcnJvci5tZXNzYWdlIDogXCJQYXltZW50IHVwZGF0ZSBmYWlsZWQuXCIpO1xyXG4gICAgfVxyXG4gIH07XG5cbiAgY29uc3QgZGVjaWRlU3RhZmZSZXF1ZXN0ID0gYXN5bmMgKHJlcXVlc3RJZDogc3RyaW5nLCBzdGF0dXM6IERlY2lzaW9uU3RhdHVzKSA9PiB7XG4gICAgY29uc3QgYnVzeUtleSA9IGByZXF1ZXN0OiR7cmVxdWVzdElkfWA7XG4gICAgc2V0RGVjaXNpb25CdXN5S2V5KGJ1c3lLZXkpO1xuICAgIHNldEVycm9yKFwiXCIpO1xuXG4gICAgdHJ5IHtcbiAgICAgIGNvbnN0IHJlc3BvbnNlID0gYXdhaXQgZmV0Y2goYC9hcGkvb3BlcmF0aW9ucy9yZXF1ZXN0cy8ke3JlcXVlc3RJZH0vc3RhdHVzYCwge1xuICAgICAgICBtZXRob2Q6IFwiUEFUQ0hcIixcbiAgICAgICAgaGVhZGVyczogeyBcIkNvbnRlbnQtVHlwZVwiOiBcImFwcGxpY2F0aW9uL2pzb25cIiB9LFxuICAgICAgICBib2R5OiBKU09OLnN0cmluZ2lmeSh7IHN0YXR1cyB9KSxcbiAgICAgIH0pO1xuICAgICAgY29uc3QgZGF0YSA9IGF3YWl0IHJlc3BvbnNlLmpzb24oKS5jYXRjaCgoKSA9PiAoe30pKTtcblxuICAgICAgaWYgKCFyZXNwb25zZS5vaykge1xuICAgICAgICB0aHJvdyBuZXcgRXJyb3IoU3RyaW5nKGRhdGEubWVzc2FnZSA/PyBcIlJlcXVlc3QgdXBkYXRlIGZhaWxlZC5cIikpO1xuICAgICAgfVxuXG4gICAgICBhd2FpdCBsb2FkT3ZlcnZpZXcoKTtcbiAgICB9IGNhdGNoIChkZWNpc2lvbkVycm9yKSB7XG4gICAgICBjb25zb2xlLmVycm9yKGRlY2lzaW9uRXJyb3IpO1xuICAgICAgc2V0RXJyb3IoZGVjaXNpb25FcnJvciBpbnN0YW5jZW9mIEVycm9yID8gZGVjaXNpb25FcnJvci5tZXNzYWdlIDogXCJSZXF1ZXN0IHVwZGF0ZSBmYWlsZWQuXCIpO1xuICAgIH0gZmluYWxseSB7XG4gICAgICBzZXREZWNpc2lvbkJ1c3lLZXkoXCJcIik7XG4gICAgfVxuICB9O1xuXG4gIGNvbnN0IGRlY2lkZUxlYXZlUmVxdWVzdCA9IGFzeW5jIChsZWF2ZUlkOiBzdHJpbmcsIHN0YXR1czogRGVjaXNpb25TdGF0dXMpID0+IHtcbiAgICBjb25zdCBidXN5S2V5ID0gYGxlYXZlOiR7bGVhdmVJZH1gO1xuICAgIHNldERlY2lzaW9uQnVzeUtleShidXN5S2V5KTtcbiAgICBzZXRFcnJvcihcIlwiKTtcblxuICAgIHRyeSB7XG4gICAgICBjb25zdCByZXNwb25zZSA9IGF3YWl0IGZldGNoKGAvYXBpL29wZXJhdGlvbnMvbGVhdmVzLyR7bGVhdmVJZH0vc3RhdHVzYCwge1xuICAgICAgICBtZXRob2Q6IFwiUEFUQ0hcIixcbiAgICAgICAgaGVhZGVyczogeyBcIkNvbnRlbnQtVHlwZVwiOiBcImFwcGxpY2F0aW9uL2pzb25cIiB9LFxuICAgICAgICBib2R5OiBKU09OLnN0cmluZ2lmeSh7IHN0YXR1cyB9KSxcbiAgICAgIH0pO1xuICAgICAgY29uc3QgZGF0YSA9IGF3YWl0IHJlc3BvbnNlLmpzb24oKS5jYXRjaCgoKSA9PiAoe30pKTtcblxuICAgICAgaWYgKCFyZXNwb25zZS5vaykge1xuICAgICAgICB0aHJvdyBuZXcgRXJyb3IoU3RyaW5nKGRhdGEubWVzc2FnZSA/PyBcIkxlYXZlIHVwZGF0ZSBmYWlsZWQuXCIpKTtcbiAgICAgIH1cblxuICAgICAgYXdhaXQgbG9hZE92ZXJ2aWV3KCk7XG4gICAgfSBjYXRjaCAoZGVjaXNpb25FcnJvcikge1xuICAgICAgY29uc29sZS5lcnJvcihkZWNpc2lvbkVycm9yKTtcbiAgICAgIHNldEVycm9yKGRlY2lzaW9uRXJyb3IgaW5zdGFuY2VvZiBFcnJvciA/IGRlY2lzaW9uRXJyb3IubWVzc2FnZSA6IFwiTGVhdmUgdXBkYXRlIGZhaWxlZC5cIik7XG4gICAgfSBmaW5hbGx5IHtcbiAgICAgIHNldERlY2lzaW9uQnVzeUtleShcIlwiKTtcbiAgICB9XG4gIH07XG5cbiAgdXNlRWZmZWN0KCgpID0+IHtcbiAgICB2b2lkIGxvYWRPdmVydmlldygpO1xuICAgIHZvaWQgbG9hZFBlbmRpbmdQYXltZW50cygpO1xuICB9LCBbXSk7XHJcblxyXG4gIC8vIExpdmU6IHJlZnJlc2ggb3ZlcnZpZXcgKyBwZW5kaW5nIHBheW1lbnRzIHdoZW5ldmVyIGFueSBvcmRlciBjaGFuZ2VzLlxyXG4gIHVzZVJlYWx0aW1lKFwib3JkZXJzXCIsICgpID0+IHtcclxuICAgIHZvaWQgbG9hZE92ZXJ2aWV3KCk7XHJcbiAgICB2b2lkIGxvYWRQZW5kaW5nUGF5bWVudHMoKTtcclxuICB9KTtcclxuXHJcbiAgaWYgKGxvYWRpbmcgJiYgIW92ZXJ2aWV3KSB7XHJcbiAgICByZXR1cm4gPGRpdiBjbGFzc05hbWU9XCJtaW4taC1zY3JlZW4gYmctc3VyZmFjZSBwdC00MCB0ZXh0LWNlbnRlciB0ZXh0LW11dGVkXCI+TG9hZGluZyBtYW5hZ2VyIHdvcmtzcGFjZS4uLjwvZGl2PjtcclxuICB9XHJcblxyXG4gIGlmICghb3ZlcnZpZXcpIHtcclxuICAgIHJldHVybiAoXHJcbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBtaW4taC1zY3JlZW4gZmxleC1jb2wgaXRlbXMtY2VudGVyIGp1c3RpZnktY2VudGVyIGdhcC01IGJnLXN1cmZhY2UgcHgtNCB0ZXh0LWNlbnRlclwiPlxyXG4gICAgICAgIDxwIGNsYXNzTmFtZT1cIm1heC13LW1kIHRleHQtbXV0ZWRcIj57ZXJyb3IgfHwgXCJVbmFibGUgdG8gb3BlbiBtYW5hZ2VyIHdvcmtzcGFjZS5cIn08L3A+XHJcbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGZsZXgtd3JhcCBqdXN0aWZ5LWNlbnRlciBnYXAtM1wiPlxyXG4gICAgICAgICAgPGJ1dHRvblxyXG4gICAgICAgICAgICB0eXBlPVwiYnV0dG9uXCJcclxuICAgICAgICAgICAgb25DbGljaz17KCkgPT4gdm9pZCBsb2FkT3ZlcnZpZXcoKX1cclxuICAgICAgICAgICAgY2xhc3NOYW1lPVwicm91bmRlZC1mdWxsIGJnLXByaW1hcnkgcHgtNiBweS0zIGZvbnQtYm9sZCB0ZXh0LXdoaXRlIHRyYW5zaXRpb24gaG92ZXI6YmctcHJpbWFyeS1zdHJvbmdcIlxyXG4gICAgICAgICAgPlxyXG4gICAgICAgICAgICBSZXRyeVxyXG4gICAgICAgICAgPC9idXR0b24+XHJcbiAgICAgICAgICA8YnV0dG9uXHJcbiAgICAgICAgICAgIHR5cGU9XCJidXR0b25cIlxyXG4gICAgICAgICAgICBvbkNsaWNrPXsoKSA9PiB7XHJcbiAgICAgICAgICAgICAgdm9pZCBsb2dvdXQoKTtcclxuICAgICAgICAgICAgICBuYXZpZ2F0ZShcIi9sb2dpblwiKTtcclxuICAgICAgICAgICAgfX1cclxuICAgICAgICAgICAgY2xhc3NOYW1lPVwicm91bmRlZC1mdWxsIGJvcmRlciBib3JkZXItZ3JheS0yMDAgcHgtNiBweS0zIGZvbnQtYm9sZCB0ZXh0LWRhcmsgdHJhbnNpdGlvbiBob3ZlcjpiZy13aGl0ZVwiXHJcbiAgICAgICAgICA+XHJcbiAgICAgICAgICAgIExvZ291dFxyXG4gICAgICAgICAgPC9idXR0b24+XHJcbiAgICAgICAgPC9kaXY+XHJcbiAgICAgIDwvZGl2PlxyXG4gICAgKTtcclxuICB9XHJcblxyXG4gIHJldHVybiAoXHJcbiAgICA8ZGl2IGNsYXNzTmFtZT1cIm1pbi1oLXNjcmVlbiBiZy1zdXJmYWNlIGZsZXhcIj5cclxuICAgICAge3NpZGViYXJPcGVuICYmIChcclxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZpeGVkIGluc2V0LTAgei00MCBiZy1ibGFjay81MCBtZDpoaWRkZW5cIiBvbkNsaWNrPXsoKSA9PiBzZXRTaWRlYmFyT3BlbihmYWxzZSl9IGFyaWEtaGlkZGVuPVwidHJ1ZVwiIC8+XHJcbiAgICAgICl9XHJcblxyXG4gICAgICA8YXNpZGVcclxuICAgICAgICBjbGFzc05hbWU9e2BmaXhlZCBpbnNldC15LTAgbGVmdC0wIHotNTAgZmxleCB3LVsxOXJlbV0gZmxleC1jb2wgb3ZlcmZsb3cteS1hdXRvIGJvcmRlci1yIGJvcmRlci13aGl0ZS8xMCBiZy1kYXJrIHB4LTUgcHktNiB0ZXh0LXdoaXRlIHNoYWRvdy0yeGwgdHJhbnNpdGlvbi10cmFuc2Zvcm0gZHVyYXRpb24tMzAwICR7XHJcbiAgICAgICAgICBzaWRlYmFyT3BlbiA/IFwidHJhbnNsYXRlLXgtMFwiIDogXCItdHJhbnNsYXRlLXgtZnVsbFwiXHJcbiAgICAgICAgfSBtZDp0cmFuc2xhdGUteC0wYH1cclxuICAgICAgPlxyXG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTNcIj5cclxuICAgICAgICAgIDxpbWcgc3JjPVwiL2xvZ28uanBnXCIgYWx0PVwiQ2hpY2tlbiBIb3VzZVwiIGNsYXNzTmFtZT1cImgtMTIgdy0xMiByb3VuZGVkLTJ4bCBib3JkZXIgYm9yZGVyLXdoaXRlLzEwIG9iamVjdC1jb3ZlclwiIC8+XHJcbiAgICAgICAgICA8ZGl2PlxyXG4gICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LWxnIGZvbnQtZGlzcGxheSBmb250LWJvbGRcIj5NYW5hZ2VyIFBhbmVsPC9wPlxyXG4gICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXhzIHVwcGVyY2FzZSB0cmFja2luZy1bMC4yNGVtXSB0ZXh0LXdoaXRlLzQ1XCI+T3BlcmF0aW9ucyBPdmVyc2lnaHQ8L3A+XHJcbiAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICA8L2Rpdj5cclxuXHJcbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtdC04IHJvdW5kZWQtWzEuOHJlbV0gYm9yZGVyIGJvcmRlci13aGl0ZS8xMCBiZy13aGl0ZS81IHAtNFwiPlxyXG4gICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1zbSBmb250LWJvbGRcIj57dXNlcj8ubmFtZSA/PyBcIk1hbmFnZXJcIn08L3A+XHJcbiAgICAgICAgICA8cCBjbGFzc05hbWU9XCJtdC0xIHRleHQteHMgdGV4dC13aGl0ZS82MFwiPkRhaWx5IHByb2dyZXNzLCBxdWV1ZSBoZWFsdGgsIGFuZCB0ZWFtIHdhdGNoPC9wPlxyXG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtdC00IGdyaWQgZ3JpZC1jb2xzLTIgZ2FwLTMgdGV4dC1jZW50ZXJcIj5cclxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJyb3VuZGVkLTJ4bCBiZy13aGl0ZS82IHB4LTMgcHktM1wiPlxyXG4gICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQteHMgdXBwZXJjYXNlIHRyYWNraW5nLVswLjJlbV0gdGV4dC13aGl0ZS80MFwiPlByZXNlbnQ8L3A+XHJcbiAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwibXQtMiB0ZXh0LWxnIGZvbnQtYm9sZFwiPntvdmVydmlldy5zdGF0cy5wcmVzZW50VG9kYXl9PC9wPlxyXG4gICAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJyb3VuZGVkLTJ4bCBiZy13aGl0ZS82IHB4LTMgcHktM1wiPlxyXG4gICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQteHMgdXBwZXJjYXNlIHRyYWNraW5nLVswLjJlbV0gdGV4dC13aGl0ZS80MFwiPlJlcXVlc3RzPC9wPlxyXG4gICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cIm10LTIgdGV4dC1sZyBmb250LWJvbGRcIj57b3ZlcnZpZXcuc3RhdHMucGVuZGluZ1JlcXVlc3RzfTwvcD5cclxuICAgICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICA8L2Rpdj5cclxuXHJcbiAgICAgICAgPG5hdiBjbGFzc05hbWU9XCJtdC04IHNwYWNlLXktMlwiPlxyXG4gICAgICAgICAge3RhYnMubWFwKCh0YWIpID0+IChcclxuICAgICAgICAgICAgPGJ1dHRvblxyXG4gICAgICAgICAgICAgIGtleT17dGFiLmlkfVxyXG4gICAgICAgICAgICAgIHR5cGU9XCJidXR0b25cIlxyXG4gICAgICAgICAgICAgIG9uQ2xpY2s9eygpID0+IHtcclxuICAgICAgICAgICAgICAgIHNldEFjdGl2ZVRhYih0YWIuaWQpO1xyXG4gICAgICAgICAgICAgICAgc2V0U2lkZWJhck9wZW4oZmFsc2UpO1xyXG4gICAgICAgICAgICAgIH19XHJcbiAgICAgICAgICAgICAgY2xhc3NOYW1lPXtgZmxleCB3LWZ1bGwgaXRlbXMtY2VudGVyIGdhcC0zIHJvdW5kZWQtMnhsIHB4LTQgcHktMyB0ZXh0LWxlZnQgdHJhbnNpdGlvbi1hbGwgJHtcclxuICAgICAgICAgICAgICAgIGFjdGl2ZVRhYiA9PT0gdGFiLmlkXHJcbiAgICAgICAgICAgICAgICAgID8gXCJiZy1wcmltYXJ5IHRleHQtd2hpdGUgc2hhZG93LWxnIHNoYWRvdy1wcmltYXJ5LzIwXCJcclxuICAgICAgICAgICAgICAgICAgOiBcInRleHQtd2hpdGUvNjUgaG92ZXI6Ymctd2hpdGUvOCBob3Zlcjp0ZXh0LXdoaXRlXCJcclxuICAgICAgICAgICAgICB9YH1cclxuICAgICAgICAgICAgPlxyXG4gICAgICAgICAgICAgIHt0YWIuaWNvbn1cclxuICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LXNtIGZvbnQtYm9sZFwiPnt0YWIubGFiZWx9PC9zcGFuPlxyXG4gICAgICAgICAgICA8L2J1dHRvbj5cclxuICAgICAgICAgICkpfVxyXG4gICAgICAgIDwvbmF2PlxyXG5cclxuICAgICAgICA8YnV0dG9uXHJcbiAgICAgICAgICB0eXBlPVwiYnV0dG9uXCJcclxuICAgICAgICAgIG9uQ2xpY2s9eygpID0+IHtcclxuICAgICAgICAgICAgdm9pZCBsb2dvdXQoKTtcclxuICAgICAgICAgICAgbmF2aWdhdGUoXCIvbG9naW5cIik7XHJcbiAgICAgICAgICB9fVxyXG4gICAgICAgICAgY2xhc3NOYW1lPVwibXQtOCBmbGV4IHctZnVsbCBpdGVtcy1jZW50ZXIgZ2FwLTMgcm91bmRlZC0yeGwgcHgtNCBweS0zIHRleHQtbGVmdCB0ZXh0LXdoaXRlLzY1IHRyYW5zaXRpb24tYWxsIGhvdmVyOmJnLXJlZC01MDAvMTAgaG92ZXI6dGV4dC1yZWQtMzAwXCJcclxuICAgICAgICA+XHJcbiAgICAgICAgICA8TG9nT3V0IHNpemU9ezE4fSAvPlxyXG4gICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwidGV4dC1zbSBmb250LWJvbGRcIj5Mb2dvdXQ8L3NwYW4+XHJcbiAgICAgICAgPC9idXR0b24+XHJcbiAgICAgIDwvYXNpZGU+XHJcblxyXG4gICAgICA8bWFpbiBjbGFzc05hbWU9XCJtbC0wIG1kOm1sLVsxOXJlbV0gZmxleC0xIHAtNCBtZDpwLThcIj5cclxuICAgICAgICA8aGVhZGVyIGNsYXNzTmFtZT1cInN0aWNreSB0b3AtMCB6LTIwIG1iLTggcm91bmRlZC1bMnJlbV0gYm9yZGVyIGJvcmRlci1ncmF5LTEwMCBiZy13aGl0ZS84NSBweC02IHB5LTUgc2hhZG93LWxnIHNoYWRvdy1kYXJrLzUgYmFja2Ryb3AtYmx1ci1tZFwiPlxyXG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGZsZXgtd3JhcCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuIGdhcC00XCI+XHJcbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTNcIj5cclxuICAgICAgICAgICAgICA8YnV0dG9uXHJcbiAgICAgICAgICAgICAgICB0eXBlPVwiYnV0dG9uXCJcclxuICAgICAgICAgICAgICAgIG9uQ2xpY2s9eygpID0+IHNldFNpZGViYXJPcGVuKHRydWUpfVxyXG4gICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwibWQ6aGlkZGVuIHJvdW5kZWQtbGcgcC0yIHRleHQtbXV0ZWQgaG92ZXI6YmctZ3JheS0xMDBcIlxyXG4gICAgICAgICAgICAgICAgYXJpYS1sYWJlbD1cIk9wZW4gbWVudVwiXHJcbiAgICAgICAgICAgICAgPlxyXG4gICAgICAgICAgICAgICAgPE1lbnUgc2l6ZT17MjJ9IC8+XHJcbiAgICAgICAgICAgICAgPC9idXR0b24+XHJcbiAgICAgICAgICAgICAgPGRpdj5cclxuICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQteHMgZm9udC1ib2xkIHVwcGVyY2FzZSB0cmFja2luZy1bMC4yNGVtXSB0ZXh0LW11dGVkXCI+TWFuYWdlciBPcGVyYXRpb25zIERlc2s8L3A+XHJcbiAgICAgICAgICAgICAgICA8aDEgY2xhc3NOYW1lPVwibXQtMiB0ZXh0LTJ4bCBzbTp0ZXh0LTN4bCBmb250LWRpc3BsYXkgZm9udC1ib2xkIHRleHQtZGFya1wiPlxyXG4gICAgICAgICAgICAgICAgICB7dGFicy5maW5kKCh0YWIpID0+IHRhYi5pZCA9PT0gYWN0aXZlVGFiKT8ubGFiZWx9XHJcbiAgICAgICAgICAgICAgICA8L2gxPlxyXG4gICAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICAgICAgPGJ1dHRvblxyXG4gICAgICAgICAgICAgIHR5cGU9XCJidXR0b25cIlxyXG4gICAgICAgICAgICAgIG9uQ2xpY2s9eygpID0+IHZvaWQgbG9hZE92ZXJ2aWV3KCl9XHJcbiAgICAgICAgICAgICAgY2xhc3NOYW1lPVwiaW5saW5lLWZsZXggaXRlbXMtY2VudGVyIGdhcC0yIHJvdW5kZWQtZnVsbCBiZy1wcmltYXJ5IHB4LTUgcHktMyB0ZXh0LXNtIGZvbnQtYm9sZCB0ZXh0LXdoaXRlXCJcclxuICAgICAgICAgICAgPlxyXG4gICAgICAgICAgICAgIDxSZWZyZXNoQ3cgc2l6ZT17MTZ9IGNsYXNzTmFtZT17bG9hZGluZyA/IFwiYW5pbWF0ZS1zcGluXCIgOiBcIlwifSAvPlxyXG4gICAgICAgICAgICAgIFJlZnJlc2hcclxuICAgICAgICAgICAgPC9idXR0b24+XHJcbiAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICAgIHtlcnJvciA/IChcclxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtdC00IHJvdW5kZWQtMnhsIGJvcmRlciBib3JkZXItcmVkLTEwMCBiZy1yZWQtNTAgcHgtNCBweS0zIHRleHQtc20gZm9udC1tZWRpdW0gdGV4dC1yZWQtNzAwXCI+XHJcbiAgICAgICAgICAgICAge2Vycm9yfVxyXG4gICAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICAgICkgOiBudWxsfVxyXG4gICAgICAgIDwvaGVhZGVyPlxyXG5cclxuICAgICAgICB7cGVuZGluZ1BheW1lbnRzLmxlbmd0aCA+IDAgJiYgKFxyXG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtYi04IHJvdW5kZWQtWzIuNXJlbV0gYm9yZGVyIGJvcmRlci1hbWJlci0yMDAgYmctYW1iZXItNTAvNzAgcC04IHNoYWRvdy14bCBzaGFkb3ctZGFyay81XCI+XHJcbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTNcIj5cclxuICAgICAgICAgICAgICA8U2hpZWxkQ2hlY2sgY2xhc3NOYW1lPVwidGV4dC1hbWJlci02MDBcIiAvPlxyXG4gICAgICAgICAgICAgIDxoMiBjbGFzc05hbWU9XCJ0ZXh0LXhsIGZvbnQtYm9sZCB0ZXh0LWRhcmtcIj5cclxuICAgICAgICAgICAgICAgIFBheW1lbnRzIHRvIHZlcmlmeSA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LWFtYmVyLTYwMFwiPih7cGVuZGluZ1BheW1lbnRzLmxlbmd0aH0pPC9zcGFuPlxyXG4gICAgICAgICAgICAgIDwvaDI+XHJcbiAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJtdC0xIHRleHQtc20gdGV4dC1tdXRlZFwiPlxyXG4gICAgICAgICAgICAgIENvbmZpcm0gdGhlIGJhbmsgdHJhbnNmZXIgd2FzIHJlY2VpdmVkLCB0aGVuIHZlcmlmeSBvciByZWplY3QuIFRoZSBjdXN0b21lciBpcyB1cGRhdGVkIGxpdmUuXHJcbiAgICAgICAgICAgIDwvcD5cclxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtdC02IHNwYWNlLXktM1wiPlxyXG4gICAgICAgICAgICAgIHtwZW5kaW5nUGF5bWVudHMubWFwKChvcmRlcikgPT4gKFxyXG4gICAgICAgICAgICAgICAgPGRpdlxyXG4gICAgICAgICAgICAgICAgICBrZXk9e1N0cmluZyhvcmRlci5pZCl9XHJcbiAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cImZsZXggZmxleC13cmFwIGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWJldHdlZW4gZ2FwLTQgcm91bmRlZC0yeGwgYm9yZGVyIGJvcmRlci1hbWJlci0xMDAgYmctd2hpdGUgcHgtNSBweS00XCJcclxuICAgICAgICAgICAgICAgID5cclxuICAgICAgICAgICAgICAgICAgPGRpdj5cclxuICAgICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJmb250LWJvbGQgdGV4dC1kYXJrXCI+XHJcbiAgICAgICAgICAgICAgICAgICAgICB7U3RyaW5nKG9yZGVyLmlkKX0gwrcge1N0cmluZyhvcmRlci5jdXN0b21lciA/PyBcIlwiKX1cclxuICAgICAgICAgICAgICAgICAgICA8L3A+XHJcbiAgICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1zbSB0ZXh0LW11dGVkXCI+XHJcbiAgICAgICAgICAgICAgICAgICAgICBScy4ge051bWJlcihvcmRlci50b3RhbCA/PyAwKS50b0xvY2FsZVN0cmluZygpfSDCtyB7U3RyaW5nKG9yZGVyLnBheW1lbnRNZXRob2QgPz8gXCJCYW5rIFRyYW5zZmVyXCIpfVxyXG4gICAgICAgICAgICAgICAgICAgICAge29yZGVyLnBheW1lbnRSZWZlcmVuY2UgPyAoXHJcbiAgICAgICAgICAgICAgICAgICAgICAgIDw+XHJcbiAgICAgICAgICAgICAgICAgICAgICAgICAge1wiIFwifcK3IFJlZjogPHNwYW4gY2xhc3NOYW1lPVwiZm9udC1tb25vIGZvbnQtYm9sZCB0ZXh0LWRhcmtcIj57U3RyaW5nKG9yZGVyLnBheW1lbnRSZWZlcmVuY2UpfTwvc3Bhbj5cclxuICAgICAgICAgICAgICAgICAgICAgICAgPC8+XHJcbiAgICAgICAgICAgICAgICAgICAgICApIDogbnVsbH1cclxuICAgICAgICAgICAgICAgICAgICA8L3A+XHJcbiAgICAgICAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggZ2FwLTNcIj5cclxuICAgICAgICAgICAgICAgICAgICA8YnV0dG9uXHJcbiAgICAgICAgICAgICAgICAgICAgICB0eXBlPVwiYnV0dG9uXCJcclxuICAgICAgICAgICAgICAgICAgICAgIG9uQ2xpY2s9eygpID0+IHZvaWQgaGFuZGxlUGF5bWVudChTdHJpbmcob3JkZXIuaWQpLCBcInZlcmlmeVwiKX1cclxuICAgICAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cInJvdW5kZWQteGwgYmctZ3JlZW4tNTAwIHB4LTUgcHktMi41IHRleHQtc20gZm9udC1ib2xkIHRleHQtd2hpdGUgdHJhbnNpdGlvbiBob3ZlcjpiZy1ncmVlbi02MDBcIlxyXG4gICAgICAgICAgICAgICAgICAgID5cclxuICAgICAgICAgICAgICAgICAgICAgIFZlcmlmeVxyXG4gICAgICAgICAgICAgICAgICAgIDwvYnV0dG9uPlxyXG4gICAgICAgICAgICAgICAgICAgIDxidXR0b25cclxuICAgICAgICAgICAgICAgICAgICAgIHR5cGU9XCJidXR0b25cIlxyXG4gICAgICAgICAgICAgICAgICAgICAgb25DbGljaz17KCkgPT4gdm9pZCBoYW5kbGVQYXltZW50KFN0cmluZyhvcmRlci5pZCksIFwicmVqZWN0XCIpfVxyXG4gICAgICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwicm91bmRlZC14bCBiZy1yZWQtNTAgcHgtNSBweS0yLjUgdGV4dC1zbSBmb250LWJvbGQgdGV4dC1yZWQtNTAwIHRyYW5zaXRpb24gaG92ZXI6YmctcmVkLTUwMCBob3Zlcjp0ZXh0LXdoaXRlXCJcclxuICAgICAgICAgICAgICAgICAgICA+XHJcbiAgICAgICAgICAgICAgICAgICAgICBSZWplY3RcclxuICAgICAgICAgICAgICAgICAgICA8L2J1dHRvbj5cclxuICAgICAgICAgICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICAgICAgICApKX1cclxuICAgICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICApfVxyXG5cclxuICAgICAgICB7YWN0aXZlVGFiID09PSBcIm92ZXJ2aWV3XCIgPyAoXHJcbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktOFwiPlxyXG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImdyaWQgZ3JpZC1jb2xzLTEgZ2FwLTYgbWQ6Z3JpZC1jb2xzLTIgeGw6Z3JpZC1jb2xzLTVcIj5cclxuICAgICAgICAgICAgICB7W1xyXG4gICAgICAgICAgICAgICAgeyBsYWJlbDogXCJUb3RhbCBTdGFmZlwiLCB2YWx1ZTogb3ZlcnZpZXcuc3RhdHMudG90YWxTdGFmZiwgaWNvbjogPFVzZXJzIHNpemU9ezIwfSAvPiwgdG9uZTogXCJ0ZXh0LXByaW1hcnkgYmctcHJpbWFyeS8xMFwiIH0sXHJcbiAgICAgICAgICAgICAgICB7IGxhYmVsOiBcIlByZXNlbnQgVG9kYXlcIiwgdmFsdWU6IG92ZXJ2aWV3LnN0YXRzLnByZXNlbnRUb2RheSwgaWNvbjogPFNoaWVsZENoZWNrIHNpemU9ezIwfSAvPiwgdG9uZTogXCJ0ZXh0LWdyZWVuLTYwMCBiZy1ncmVlbi01MDAvMTBcIiB9LFxyXG4gICAgICAgICAgICAgICAgeyBsYWJlbDogXCJQZW5kaW5nIFJlcXVlc3RzXCIsIHZhbHVlOiBvdmVydmlldy5zdGF0cy5wZW5kaW5nUmVxdWVzdHMsIGljb246IDxDbGlwYm9hcmRMaXN0IHNpemU9ezIwfSAvPiwgdG9uZTogXCJ0ZXh0LWFtYmVyLTYwMCBiZy1hbWJlci01MDAvMTBcIiB9LFxyXG4gICAgICAgICAgICAgICAgeyBsYWJlbDogXCJBY3RpdmUgT3JkZXJzXCIsIHZhbHVlOiBvdmVydmlldy5zdGF0cy5hY3RpdmVPcmRlcnMsIGljb246IDxMYXllcnMzIHNpemU9ezIwfSAvPiwgdG9uZTogXCJ0ZXh0LWJsdWUtNjAwIGJnLWJsdWUtNTAwLzEwXCIgfSxcclxuICAgICAgICAgICAgICAgIHsgbGFiZWw6IFwiUmV2ZW51ZSBUb2RheVwiLCB2YWx1ZTogYFJzLiAke292ZXJ2aWV3LnN0YXRzLnRvZGF5UmV2ZW51ZS50b0xvY2FsZVN0cmluZygpfWAsIGljb246IDxUcmVuZGluZ1VwIHNpemU9ezIwfSAvPiwgdG9uZTogXCJ0ZXh0LXB1cnBsZS02MDAgYmctcHVycGxlLTUwMC8xMFwiIH0sXHJcbiAgICAgICAgICAgICAgXS5tYXAoKGNhcmQpID0+IChcclxuICAgICAgICAgICAgICAgIDxkaXYga2V5PXtjYXJkLmxhYmVsfSBjbGFzc05hbWU9XCJyb3VuZGVkLVsycmVtXSBib3JkZXIgYm9yZGVyLWdyYXktMTAwIGJnLXdoaXRlIHAtNiBzaGFkb3cteGwgc2hhZG93LWRhcmsvNVwiPlxyXG4gICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT17YG1iLTQgZmxleCBoLTExIHctMTEgaXRlbXMtY2VudGVyIGp1c3RpZnktY2VudGVyIHJvdW5kZWQtMnhsICR7Y2FyZC50b25lfWB9PntjYXJkLmljb259PC9kaXY+XHJcbiAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQteHMgZm9udC1ib2xkIHVwcGVyY2FzZSB0cmFja2luZy1bMC4yNGVtXSB0ZXh0LW11dGVkXCI+e2NhcmQubGFiZWx9PC9wPlxyXG4gICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJtdC0yIHRleHQtMnhsIGZvbnQtZGlzcGxheSBmb250LWJvbGQgdGV4dC1kYXJrXCI+e2NhcmQudmFsdWV9PC9wPlxyXG4gICAgICAgICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgICAgICAgKSl9XHJcbiAgICAgICAgICAgIDwvZGl2PlxyXG5cclxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJncmlkIGdhcC04IHhsOmdyaWQtY29scy1bMS4xNWZyXzAuODVmcl1cIj5cclxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInJvdW5kZWQtWzIuNXJlbV0gYm9yZGVyIGJvcmRlci1ncmF5LTEwMCBiZy13aGl0ZSBwLTggc2hhZG93LXhsIHNoYWRvdy1kYXJrLzVcIj5cclxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuXCI+XHJcbiAgICAgICAgICAgICAgICAgIDxoMiBjbGFzc05hbWU9XCJ0ZXh0LXhsIGZvbnQtYm9sZCB0ZXh0LWRhcmtcIj5Ub3AgUGVyZm9ybWVyczwvaDI+XHJcbiAgICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInJvdW5kZWQtZnVsbCBiZy1zdXJmYWNlIHB4LTQgcHktMiB0ZXh0LXhzIGZvbnQtYm9sZCB0ZXh0LXByaW1hcnlcIj5CZXN0IG9uIGZsb29yPC9zcGFuPlxyXG4gICAgICAgICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm10LTYgc3BhY2UteS00XCI+XHJcbiAgICAgICAgICAgICAgICAgIHtvdmVydmlldy50b3BQZXJmb3JtZXJzLm1hcCgobWVtYmVyKSA9PiAoXHJcbiAgICAgICAgICAgICAgICAgICAgPGRpdiBrZXk9e21lbWJlci5pZH0gY2xhc3NOYW1lPVwicm91bmRlZC1bMS43cmVtXSBib3JkZXIgYm9yZGVyLWdyYXktMTAwIGJnLXN1cmZhY2UvNzAgcHgtNSBweS00XCI+XHJcbiAgICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlbiBnYXAtNFwiPlxyXG4gICAgICAgICAgICAgICAgICAgICAgICA8ZGl2PlxyXG4gICAgICAgICAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cImZvbnQtYm9sZCB0ZXh0LWRhcmtcIj57bWVtYmVyLm5hbWV9PC9wPlxyXG4gICAgICAgICAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cIm10LTEgdGV4dC1zbSB0ZXh0LW11dGVkXCI+e21lbWJlci5yb2xlfSB8IHttZW1iZXIuZGVwYXJ0bWVudH08L3A+XHJcbiAgICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJyb3VuZGVkLWZ1bGwgYmctd2hpdGUgcHgtMyBweS0xIHRleHQteHMgZm9udC1ib2xkIHRleHQtcHJpbWFyeVwiPlxyXG4gICAgICAgICAgICAgICAgICAgICAgICAgIHttZW1iZXIucGVyZm9ybWFuY2VTY29yZS50b0ZpeGVkKDEpfSAvIDVcclxuICAgICAgICAgICAgICAgICAgICAgICAgPC9zcGFuPlxyXG4gICAgICAgICAgICAgICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJtdC0zIHRleHQtc20gdGV4dC1tdXRlZFwiPkFzc2lnbmVkIG9yZGVyczoge21lbWJlci5hc3NpZ25lZE9yZGVyc30gfCBTaGlmdDoge21lbWJlci5zaGlmdH08L3A+XHJcbiAgICAgICAgICAgICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgICAgICAgICAgICkpfVxyXG4gICAgICAgICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgICAgICAgPC9kaXY+XHJcblxyXG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwicm91bmRlZC1bMi41cmVtXSBib3JkZXIgYm9yZGVyLWdyYXktMTAwIGJnLXdoaXRlIHAtOCBzaGFkb3cteGwgc2hhZG93LWRhcmsvNVwiPlxyXG4gICAgICAgICAgICAgICAgPGgyIGNsYXNzTmFtZT1cInRleHQteGwgZm9udC1ib2xkIHRleHQtZGFya1wiPkF0dGVudGlvbiBOZWVkZWQ8L2gyPlxyXG4gICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtdC02IHNwYWNlLXktNFwiPlxyXG4gICAgICAgICAgICAgICAgICB7b3ZlcnZpZXcuYXR0ZW50aW9uTmVlZGVkLm1hcCgobWVtYmVyKSA9PiAoXHJcbiAgICAgICAgICAgICAgICAgICAgPGRpdiBrZXk9e21lbWJlci5pZH0gY2xhc3NOYW1lPVwicm91bmRlZC1bMS42cmVtXSBiZy1zdXJmYWNlIHB4LTQgcHktNFwiPlxyXG4gICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLXN0YXJ0IGdhcC0zXCI+XHJcbiAgICAgICAgICAgICAgICAgICAgICAgIDxBbGVydFRyaWFuZ2xlIHNpemU9ezE4fSBjbGFzc05hbWU9XCJtdC0xIHRleHQtYW1iZXItNjAwXCIgLz5cclxuICAgICAgICAgICAgICAgICAgICAgICAgPGRpdj5cclxuICAgICAgICAgICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJmb250LWJvbGQgdGV4dC1kYXJrXCI+e21lbWJlci5uYW1lfTwvcD5cclxuICAgICAgICAgICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJtdC0xIHRleHQtc20gdGV4dC1tdXRlZFwiPnttZW1iZXIucm9sZX08L3A+XHJcbiAgICAgICAgICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwibXQtMiB0ZXh0LXNtIHRleHQtbXV0ZWRcIj5cclxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIEF0dGVuZGFuY2U6IHttZW1iZXIuYXR0ZW5kYW5jZVN0YXR1c30gfCBMZWF2ZXM6IHttZW1iZXIucGVuZGluZ0xlYXZlc30gfCBSZXF1ZXN0czoge21lbWJlci5wZW5kaW5nUmVxdWVzdHN9XHJcbiAgICAgICAgICAgICAgICAgICAgICAgICAgPC9wPlxyXG4gICAgICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgICAgICAgICApKX1cclxuICAgICAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICkgOiBudWxsfVxyXG5cclxuICAgICAgICB7YWN0aXZlVGFiID09PSBcInRlYW1cIiA/IChcclxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwicm91bmRlZC1bMi41cmVtXSBib3JkZXIgYm9yZGVyLWdyYXktMTAwIGJnLXdoaXRlIHAtOCBzaGFkb3cteGwgc2hhZG93LWRhcmsvNVwiPlxyXG4gICAgICAgICAgICA8aDIgY2xhc3NOYW1lPVwidGV4dC14bCBmb250LWJvbGQgdGV4dC1kYXJrXCI+VGVhbSBQcm9ncmVzcyBNYXRyaXg8L2gyPlxyXG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm10LTYgb3ZlcmZsb3cteC1hdXRvXCI+XHJcbiAgICAgICAgICAgICAgPHRhYmxlIGNsYXNzTmFtZT1cInctZnVsbFwiPlxyXG4gICAgICAgICAgICAgICAgPHRoZWFkPlxyXG4gICAgICAgICAgICAgICAgICA8dHIgY2xhc3NOYW1lPVwiYm9yZGVyLWIgYm9yZGVyLWdyYXktMTAwIHRleHQtbGVmdCB0ZXh0LXhzIGZvbnQtYm9sZCB1cHBlcmNhc2UgdHJhY2tpbmctWzAuMjJlbV0gdGV4dC1tdXRlZFwiPlxyXG4gICAgICAgICAgICAgICAgICAgIDx0aCBjbGFzc05hbWU9XCJwYi00XCI+U3RhZmY8L3RoPlxyXG4gICAgICAgICAgICAgICAgICAgIDx0aCBjbGFzc05hbWU9XCJwYi00XCI+Um9sZTwvdGg+XHJcbiAgICAgICAgICAgICAgICAgICAgPHRoIGNsYXNzTmFtZT1cInBiLTRcIj5BdHRlbmRhbmNlPC90aD5cclxuICAgICAgICAgICAgICAgICAgICA8dGggY2xhc3NOYW1lPVwicGItNFwiPk9yZGVyczwvdGg+XHJcbiAgICAgICAgICAgICAgICAgICAgPHRoIGNsYXNzTmFtZT1cInBiLTRcIj5MZWF2ZXM8L3RoPlxyXG4gICAgICAgICAgICAgICAgICAgIDx0aCBjbGFzc05hbWU9XCJwYi00XCI+UmVxdWVzdHM8L3RoPlxyXG4gICAgICAgICAgICAgICAgICAgIDx0aCBjbGFzc05hbWU9XCJwYi00XCI+U2NvcmU8L3RoPlxyXG4gICAgICAgICAgICAgICAgICA8L3RyPlxyXG4gICAgICAgICAgICAgICAgPC90aGVhZD5cclxuICAgICAgICAgICAgICAgIDx0Ym9keSBjbGFzc05hbWU9XCJkaXZpZGUteSBkaXZpZGUtZ3JheS01MFwiPlxyXG4gICAgICAgICAgICAgICAgICB7b3ZlcnZpZXcuc3RhZmZTbmFwc2hvdHMubWFwKChtZW1iZXIpID0+IChcclxuICAgICAgICAgICAgICAgICAgICA8dHIga2V5PXttZW1iZXIuaWR9PlxyXG4gICAgICAgICAgICAgICAgICAgICAgPHRkIGNsYXNzTmFtZT1cInB5LTRcIj5cclxuICAgICAgICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwiZm9udC1ib2xkIHRleHQtZGFya1wiPnttZW1iZXIubmFtZX08L3A+XHJcbiAgICAgICAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQteHMgdGV4dC1tdXRlZFwiPnttZW1iZXIuZGVwYXJ0bWVudH08L3A+XHJcbiAgICAgICAgICAgICAgICAgICAgICA8L3RkPlxyXG4gICAgICAgICAgICAgICAgICAgICAgPHRkIGNsYXNzTmFtZT1cInB5LTQgdGV4dC1zbSB0ZXh0LWRhcmtcIj57bWVtYmVyLnJvbGV9PC90ZD5cclxuICAgICAgICAgICAgICAgICAgICAgIDx0ZCBjbGFzc05hbWU9XCJweS00IHRleHQtc20gdGV4dC1tdXRlZFwiPnttZW1iZXIuYXR0ZW5kYW5jZVN0YXR1c308L3RkPlxyXG4gICAgICAgICAgICAgICAgICAgICAgPHRkIGNsYXNzTmFtZT1cInB5LTQgdGV4dC1zbSB0ZXh0LW11dGVkXCI+e21lbWJlci5hc3NpZ25lZE9yZGVyc308L3RkPlxyXG4gICAgICAgICAgICAgICAgICAgICAgPHRkIGNsYXNzTmFtZT1cInB5LTQgdGV4dC1zbSB0ZXh0LW11dGVkXCI+e21lbWJlci5wZW5kaW5nTGVhdmVzfTwvdGQ+XHJcbiAgICAgICAgICAgICAgICAgICAgICA8dGQgY2xhc3NOYW1lPVwicHktNCB0ZXh0LXNtIHRleHQtbXV0ZWRcIj57bWVtYmVyLnBlbmRpbmdSZXF1ZXN0c308L3RkPlxyXG4gICAgICAgICAgICAgICAgICAgICAgPHRkIGNsYXNzTmFtZT1cInB5LTRcIj5cclxuICAgICAgICAgICAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwicm91bmRlZC1mdWxsIGJnLXN1cmZhY2UgcHgtMyBweS0yIHRleHQteHMgZm9udC1ib2xkIHRleHQtcHJpbWFyeVwiPlxyXG4gICAgICAgICAgICAgICAgICAgICAgICAgIHttZW1iZXIucGVyZm9ybWFuY2VTY29yZS50b0ZpeGVkKDEpfSAvIDVcclxuICAgICAgICAgICAgICAgICAgICAgICAgPC9zcGFuPlxyXG4gICAgICAgICAgICAgICAgICAgICAgPC90ZD5cclxuICAgICAgICAgICAgICAgICAgICA8L3RyPlxyXG4gICAgICAgICAgICAgICAgICApKX1cclxuICAgICAgICAgICAgICAgIDwvdGJvZHk+XHJcbiAgICAgICAgICAgICAgPC90YWJsZT5cclxuICAgICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICApIDogbnVsbH1cclxuXHJcbiAgICAgICAge2FjdGl2ZVRhYiA9PT0gXCJyZXF1ZXN0c1wiID8gKFxyXG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJncmlkIGdhcC04IHhsOmdyaWQtY29scy0yXCI+XHJcbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwicm91bmRlZC1bMi41cmVtXSBib3JkZXIgYm9yZGVyLWdyYXktMTAwIGJnLXdoaXRlIHAtOCBzaGFkb3cteGwgc2hhZG93LWRhcmsvNVwiPlxuICAgICAgICAgICAgICA8aDIgY2xhc3NOYW1lPVwidGV4dC14bCBmb250LWJvbGQgdGV4dC1kYXJrXCI+UGVuZGluZyBSZXF1ZXN0czwvaDI+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwibXQtNiBzcGFjZS15LTRcIj5cbiAgICAgICAgICAgICAgICB7b3ZlcnZpZXcucGVuZGluZ1JlcXVlc3RzLmxlbmd0aCA/IChcbiAgICAgICAgICAgICAgICAgIG92ZXJ2aWV3LnBlbmRpbmdSZXF1ZXN0cy5tYXAoKHJlcXVlc3QpID0+IHtcbiAgICAgICAgICAgICAgICAgICAgY29uc3QgYnVzeUtleSA9IGByZXF1ZXN0OiR7cmVxdWVzdC5pZH1gO1xuICAgICAgICAgICAgICAgICAgICBjb25zdCBpc0J1c3kgPSBkZWNpc2lvbkJ1c3lLZXkgPT09IGJ1c3lLZXk7XG5cbiAgICAgICAgICAgICAgICAgICAgcmV0dXJuIChcbiAgICAgICAgICAgICAgICAgICAgICA8ZGl2IGtleT17cmVxdWVzdC5pZH0gY2xhc3NOYW1lPVwicm91bmRlZC1bMS42cmVtXSBib3JkZXIgYm9yZGVyLWdyYXktMTAwIHB4LTUgcHktNFwiPlxuICAgICAgICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwiZm9udC1ib2xkIHRleHQtZGFya1wiPntyZXF1ZXN0LnN1YmplY3R9PC9wPlxuICAgICAgICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwibXQtMSB0ZXh0LXNtIHRleHQtbXV0ZWRcIj57cmVxdWVzdC5zdGFmZk5hbWV9IHwge3JlcXVlc3QuY2F0ZWdvcnl9PC9wPlxuICAgICAgICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwibXQtMyB0ZXh0LXNtIHRleHQtbXV0ZWRcIj57cmVxdWVzdC5tZXNzYWdlfTwvcD5cbiAgICAgICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwibXQtNSBmbGV4IGZsZXgtd3JhcCBnYXAtM1wiPlxuICAgICAgICAgICAgICAgICAgICAgICAgICA8YnV0dG9uXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgdHlwZT1cImJ1dHRvblwiXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgZGlzYWJsZWQ9e2lzQnVzeX1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICBvbkNsaWNrPXsoKSA9PiB2b2lkIGRlY2lkZVN0YWZmUmVxdWVzdChyZXF1ZXN0LmlkLCBcIkFwcHJvdmVkXCIpfVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cImlubGluZS1mbGV4IGl0ZW1zLWNlbnRlciBnYXAtMiByb3VuZGVkLXhsIGJnLWdyZWVuLTUwMCBweC00IHB5LTIuNSB0ZXh0LXNtIGZvbnQtYm9sZCB0ZXh0LXdoaXRlIHRyYW5zaXRpb24gaG92ZXI6YmctZ3JlZW4tNjAwIGRpc2FibGVkOmN1cnNvci1ub3QtYWxsb3dlZCBkaXNhYmxlZDpvcGFjaXR5LTYwXCJcbiAgICAgICAgICAgICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxDaGVjayBzaXplPXsxNn0gLz5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICBBcHByb3ZlXG4gICAgICAgICAgICAgICAgICAgICAgICAgIDwvYnV0dG9uPlxuICAgICAgICAgICAgICAgICAgICAgICAgICA8YnV0dG9uXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgdHlwZT1cImJ1dHRvblwiXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgZGlzYWJsZWQ9e2lzQnVzeX1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICBvbkNsaWNrPXsoKSA9PiB2b2lkIGRlY2lkZVN0YWZmUmVxdWVzdChyZXF1ZXN0LmlkLCBcIlJlamVjdGVkXCIpfVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cImlubGluZS1mbGV4IGl0ZW1zLWNlbnRlciBnYXAtMiByb3VuZGVkLXhsIGJnLXJlZC01MCBweC00IHB5LTIuNSB0ZXh0LXNtIGZvbnQtYm9sZCB0ZXh0LXJlZC01MDAgdHJhbnNpdGlvbiBob3ZlcjpiZy1yZWQtNTAwIGhvdmVyOnRleHQtd2hpdGUgZGlzYWJsZWQ6Y3Vyc29yLW5vdC1hbGxvd2VkIGRpc2FibGVkOm9wYWNpdHktNjBcIlxuICAgICAgICAgICAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgPFggc2l6ZT17MTZ9IC8+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgUmVqZWN0XG4gICAgICAgICAgICAgICAgICAgICAgICAgIDwvYnV0dG9uPlxuICAgICAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICAgICk7XG4gICAgICAgICAgICAgICAgICB9KVxuICAgICAgICAgICAgICAgICkgOiAoXG4gICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInJvdW5kZWQtWzEuNnJlbV0gYm9yZGVyIGJvcmRlci1kYXNoZWQgYm9yZGVyLWdyYXktMjAwIHB4LTUgcHktOCB0ZXh0LWNlbnRlciB0ZXh0LXNtIGZvbnQtbWVkaXVtIHRleHQtbXV0ZWRcIj5cbiAgICAgICAgICAgICAgICAgICAgTm8gcGVuZGluZyBzdGFmZiByZXF1ZXN0cy5cbiAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICl9XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwicm91bmRlZC1bMi41cmVtXSBib3JkZXIgYm9yZGVyLWdyYXktMTAwIGJnLXdoaXRlIHAtOCBzaGFkb3cteGwgc2hhZG93LWRhcmsvNVwiPlxuICAgICAgICAgICAgICA8aDIgY2xhc3NOYW1lPVwidGV4dC14bCBmb250LWJvbGQgdGV4dC1kYXJrXCI+UGVuZGluZyBMZWF2ZXM8L2gyPlxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm10LTYgc3BhY2UteS00XCI+XG4gICAgICAgICAgICAgICAge292ZXJ2aWV3LnBlbmRpbmdMZWF2ZXMubGVuZ3RoID8gKFxuICAgICAgICAgICAgICAgICAgb3ZlcnZpZXcucGVuZGluZ0xlYXZlcy5tYXAoKGxlYXZlKSA9PiB7XG4gICAgICAgICAgICAgICAgICAgIGNvbnN0IGJ1c3lLZXkgPSBgbGVhdmU6JHtsZWF2ZS5pZH1gO1xuICAgICAgICAgICAgICAgICAgICBjb25zdCBpc0J1c3kgPSBkZWNpc2lvbkJ1c3lLZXkgPT09IGJ1c3lLZXk7XG5cbiAgICAgICAgICAgICAgICAgICAgcmV0dXJuIChcbiAgICAgICAgICAgICAgICAgICAgICA8ZGl2IGtleT17bGVhdmUuaWR9IGNsYXNzTmFtZT1cInJvdW5kZWQtWzEuNnJlbV0gYm9yZGVyIGJvcmRlci1ncmF5LTEwMCBweC01IHB5LTRcIj5cbiAgICAgICAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cImZvbnQtYm9sZCB0ZXh0LWRhcmtcIj57bGVhdmUuc3RhZmZOYW1lfTwvcD5cbiAgICAgICAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cIm10LTEgdGV4dC1zbSB0ZXh0LW11dGVkXCI+e2xlYXZlLmxlYXZlVHlwZX0gfCB7bGVhdmUuc3RhcnREYXRlfSB0byB7bGVhdmUuZW5kRGF0ZX08L3A+XG4gICAgICAgICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJtdC0zIHRleHQtc20gdGV4dC1tdXRlZFwiPntsZWF2ZS5yZWFzb259PC9wPlxuICAgICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtdC01IGZsZXggZmxleC13cmFwIGdhcC0zXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICAgIDxidXR0b25cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICB0eXBlPVwiYnV0dG9uXCJcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICBkaXNhYmxlZD17aXNCdXN5fVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIG9uQ2xpY2s9eygpID0+IHZvaWQgZGVjaWRlTGVhdmVSZXF1ZXN0KGxlYXZlLmlkLCBcIkFwcHJvdmVkXCIpfVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cImlubGluZS1mbGV4IGl0ZW1zLWNlbnRlciBnYXAtMiByb3VuZGVkLXhsIGJnLWdyZWVuLTUwMCBweC00IHB5LTIuNSB0ZXh0LXNtIGZvbnQtYm9sZCB0ZXh0LXdoaXRlIHRyYW5zaXRpb24gaG92ZXI6YmctZ3JlZW4tNjAwIGRpc2FibGVkOmN1cnNvci1ub3QtYWxsb3dlZCBkaXNhYmxlZDpvcGFjaXR5LTYwXCJcbiAgICAgICAgICAgICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxDaGVjayBzaXplPXsxNn0gLz5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICBBcHByb3ZlXG4gICAgICAgICAgICAgICAgICAgICAgICAgIDwvYnV0dG9uPlxuICAgICAgICAgICAgICAgICAgICAgICAgICA8YnV0dG9uXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgdHlwZT1cImJ1dHRvblwiXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgZGlzYWJsZWQ9e2lzQnVzeX1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICBvbkNsaWNrPXsoKSA9PiB2b2lkIGRlY2lkZUxlYXZlUmVxdWVzdChsZWF2ZS5pZCwgXCJSZWplY3RlZFwiKX1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJpbmxpbmUtZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTIgcm91bmRlZC14bCBiZy1yZWQtNTAgcHgtNCBweS0yLjUgdGV4dC1zbSBmb250LWJvbGQgdGV4dC1yZWQtNTAwIHRyYW5zaXRpb24gaG92ZXI6YmctcmVkLTUwMCBob3Zlcjp0ZXh0LXdoaXRlIGRpc2FibGVkOmN1cnNvci1ub3QtYWxsb3dlZCBkaXNhYmxlZDpvcGFjaXR5LTYwXCJcbiAgICAgICAgICAgICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxYIHNpemU9ezE2fSAvPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIFJlamVjdFxuICAgICAgICAgICAgICAgICAgICAgICAgICA8L2J1dHRvbj5cbiAgICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgICApO1xuICAgICAgICAgICAgICAgICAgfSlcbiAgICAgICAgICAgICAgICApIDogKFxuICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJyb3VuZGVkLVsxLjZyZW1dIGJvcmRlciBib3JkZXItZGFzaGVkIGJvcmRlci1ncmF5LTIwMCBweC01IHB5LTggdGV4dC1jZW50ZXIgdGV4dC1zbSBmb250LW1lZGl1bSB0ZXh0LW11dGVkXCI+XG4gICAgICAgICAgICAgICAgICAgIE5vIHBlbmRpbmcgbGVhdmUgcmVxdWVzdHMuXG4gICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgIDwvZGl2PlxuICAgICAgICApIDogbnVsbH1cclxuXHJcbiAgICAgICAge2FjdGl2ZVRhYiA9PT0gXCJvcmRlcnNcIiA/IChcclxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS04XCI+XHJcbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZ3JpZCBncmlkLWNvbHMtMSBnYXAtNiBtZDpncmlkLWNvbHMtNVwiPlxyXG4gICAgICAgICAgICAgIHtbXHJcbiAgICAgICAgICAgICAgICB7IGxhYmVsOiBcIlBlbmRpbmdcIiwgdmFsdWU6IG92ZXJ2aWV3Lm9yZGVyUHVsc2UucGVuZGluZywgaWNvbjogPENsb2NrMyBzaXplPXsxOH0gLz4gfSxcclxuICAgICAgICAgICAgICAgIHsgbGFiZWw6IFwiUHJlcGFyaW5nXCIsIHZhbHVlOiBvdmVydmlldy5vcmRlclB1bHNlLnByZXBhcmluZywgaWNvbjogPExheWVyczMgc2l6ZT17MTh9IC8+IH0sXHJcbiAgICAgICAgICAgICAgICB7IGxhYmVsOiBcIk9uIFJvdXRlXCIsIHZhbHVlOiBvdmVydmlldy5vcmRlclB1bHNlLm9uUm91dGUsIGljb246IDxUcmVuZGluZ1VwIHNpemU9ezE4fSAvPiB9LFxyXG4gICAgICAgICAgICAgICAgeyBsYWJlbDogXCJEZWxpdmVyZWRcIiwgdmFsdWU6IG92ZXJ2aWV3Lm9yZGVyUHVsc2UuZGVsaXZlcmVkLCBpY29uOiA8U2hpZWxkQ2hlY2sgc2l6ZT17MTh9IC8+IH0sXHJcbiAgICAgICAgICAgICAgICB7IGxhYmVsOiBcIkNhbmNlbGxlZFwiLCB2YWx1ZTogb3ZlcnZpZXcub3JkZXJQdWxzZS5jYW5jZWxsZWQsIGljb246IDxBbGVydFRyaWFuZ2xlIHNpemU9ezE4fSAvPiB9LFxyXG4gICAgICAgICAgICAgIF0ubWFwKChpdGVtKSA9PiAoXHJcbiAgICAgICAgICAgICAgICA8ZGl2IGtleT17aXRlbS5sYWJlbH0gY2xhc3NOYW1lPVwicm91bmRlZC1bMnJlbV0gYm9yZGVyIGJvcmRlci1ncmF5LTEwMCBiZy13aGl0ZSBwLTYgc2hhZG93LXhsIHNoYWRvdy1kYXJrLzVcIj5cclxuICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtYi00IGZsZXggaC0xMCB3LTEwIGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWNlbnRlciByb3VuZGVkLTJ4bCBiZy1wcmltYXJ5LzEwIHRleHQtcHJpbWFyeVwiPntpdGVtLmljb259PC9kaXY+XHJcbiAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQteHMgZm9udC1ib2xkIHVwcGVyY2FzZSB0cmFja2luZy1bMC4yMmVtXSB0ZXh0LW11dGVkXCI+e2l0ZW0ubGFiZWx9PC9wPlxyXG4gICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJtdC0yIHRleHQtMnhsIGZvbnQtZGlzcGxheSBmb250LWJvbGQgdGV4dC1kYXJrXCI+e2l0ZW0udmFsdWV9PC9wPlxyXG4gICAgICAgICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgICAgICAgKSl9XHJcbiAgICAgICAgICAgIDwvZGl2PlxyXG5cclxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJyb3VuZGVkLVsyLjVyZW1dIGJvcmRlciBib3JkZXItZ3JheS0xMDAgYmctd2hpdGUgcC04IHNoYWRvdy14bCBzaGFkb3ctZGFyay81XCI+XHJcbiAgICAgICAgICAgICAgPGgyIGNsYXNzTmFtZT1cInRleHQteGwgZm9udC1ib2xkIHRleHQtZGFya1wiPkxpdmUgUXVldWUgUmV2aWV3PC9oMj5cclxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm10LTYgc3BhY2UteS00XCI+XHJcbiAgICAgICAgICAgICAgICB7b3ZlcnZpZXcub3JkZXJQdWxzZS5xdWV1ZS5tYXAoKG9yZGVyKSA9PiAoXHJcbiAgICAgICAgICAgICAgICAgIDxkaXYga2V5PXtvcmRlci5pZH0gY2xhc3NOYW1lPVwicm91bmRlZC1bMS42cmVtXSBib3JkZXIgYm9yZGVyLWdyYXktMTAwIHB4LTUgcHktNFwiPlxyXG4gICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBmbGV4LXdyYXAgaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlbiBnYXAtNFwiPlxyXG4gICAgICAgICAgICAgICAgICAgICAgPGRpdj5cclxuICAgICAgICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwiZm9udC1ib2xkIHRleHQtZGFya1wiPntvcmRlci5pZH08L3A+XHJcbiAgICAgICAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cIm10LTEgdGV4dC1zbSB0ZXh0LW11dGVkXCI+e29yZGVyLmN1c3RvbWVyfSB8IHtvcmRlci5hc3NpZ25lZFRvfTwvcD5cclxuICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0ZXh0LXJpZ2h0XCI+XHJcbiAgICAgICAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQtc20gZm9udC1ib2xkIHRleHQtcHJpbWFyeVwiPlJzLiB7b3JkZXIudG90YWwudG9Mb2NhbGVTdHJpbmcoKX08L3A+XHJcbiAgICAgICAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cIm10LTEgdGV4dC14cyB1cHBlcmNhc2UgdHJhY2tpbmctWzAuMmVtXSB0ZXh0LW11dGVkXCI+e29yZGVyLnN0YXR1c30gfCB7b3JkZXIuYXNzaWduZWRSb2xlfTwvcD5cclxuICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICAgICAgICAgICkpfVxyXG4gICAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICkgOiBudWxsfVxyXG5cclxuICAgICAgICB7YWN0aXZlVGFiID09PSBcImludmVudG9yeVwiID8gKFxyXG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJyb3VuZGVkLVsyLjVyZW1dIGJvcmRlciBib3JkZXItZ3JheS0xMDAgYmctd2hpdGUgcC04IHNoYWRvdy14bCBzaGFkb3ctZGFyay81XCI+XHJcbiAgICAgICAgICAgIDxoMiBjbGFzc05hbWU9XCJ0ZXh0LXhsIGZvbnQtYm9sZCB0ZXh0LWRhcmtcIj5JbnZlbnRvcnkgUHJlc3N1cmUgQm9hcmQ8L2gyPlxyXG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm10LTYgZ3JpZCBnYXAtNCBtZDpncmlkLWNvbHMtMlwiPlxyXG4gICAgICAgICAgICAgIHtvdmVydmlldy5pbnZlbnRvcnlBbGVydHMubWFwKChpdGVtKSA9PiAoXHJcbiAgICAgICAgICAgICAgICA8ZGl2IGtleT17aXRlbS5pZH0gY2xhc3NOYW1lPVwicm91bmRlZC1bMS43cmVtXSBib3JkZXIgYm9yZGVyLWdyYXktMTAwIGJnLXN1cmZhY2UvNzAgcHgtNSBweS00XCI+XHJcbiAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cImZvbnQtYm9sZCB0ZXh0LWRhcmtcIj57aXRlbS5uYW1lfTwvcD5cclxuICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwibXQtMSB0ZXh0LXNtIHRleHQtbXV0ZWRcIj57aXRlbS5jYXRlZ29yeX08L3A+XHJcbiAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cIm10LTMgdGV4dC1zbSB0ZXh0LW11dGVkXCI+XHJcbiAgICAgICAgICAgICAgICAgICAgQ3VycmVudCBzdG9jazoge2l0ZW0uc3RvY2t9IHtpdGVtLnVuaXR9IHwgTWluaW11bToge2l0ZW0ubWluU3RvY2t9IHtpdGVtLnVuaXR9XHJcbiAgICAgICAgICAgICAgICAgIDwvcD5cclxuICAgICAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgICAgICkpfVxyXG4gICAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICkgOiBudWxsfVxyXG5cclxuICAgICAgICB7YWN0aXZlVGFiID09PSBcImFjdGl2aXR5XCIgPyAoXHJcbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInJvdW5kZWQtWzIuNXJlbV0gYm9yZGVyIGJvcmRlci1ncmF5LTEwMCBiZy13aGl0ZSBwLTggc2hhZG93LXhsIHNoYWRvdy1kYXJrLzVcIj5cclxuICAgICAgICAgICAgPGgyIGNsYXNzTmFtZT1cInRleHQteGwgZm9udC1ib2xkIHRleHQtZGFya1wiPkFjdGl2aXR5IEZlZWQ8L2gyPlxyXG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm10LTYgc3BhY2UteS00XCI+XHJcbiAgICAgICAgICAgICAge292ZXJ2aWV3LmFjdGl2aXR5RmVlZC5tYXAoKGVudHJ5KSA9PiAoXHJcbiAgICAgICAgICAgICAgICA8ZGl2IGtleT17ZW50cnkuaWR9IGNsYXNzTmFtZT1cInJvdW5kZWQtWzEuNnJlbV0gYm9yZGVyIGJvcmRlci1ncmF5LTEwMCBweC01IHB5LTRcIj5cclxuICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWJldHdlZW4gZ2FwLTRcIj5cclxuICAgICAgICAgICAgICAgICAgICA8ZGl2PlxyXG4gICAgICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwiZm9udC1ib2xkIHRleHQtZGFya1wiPntlbnRyeS50aXRsZX08L3A+XHJcbiAgICAgICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJtdC0xIHRleHQtc20gdGV4dC1tdXRlZFwiPntlbnRyeS5hY3Rvcn08L3A+XHJcbiAgICAgICAgICAgICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwicm91bmRlZC1mdWxsIGJnLXN1cmZhY2UgcHgtMyBweS0yIHRleHQteHMgZm9udC1ib2xkIHRleHQtcHJpbWFyeVwiPlxyXG4gICAgICAgICAgICAgICAgICAgICAge25ldyBEYXRlKGVudHJ5LmNyZWF0ZWRBdCkudG9Mb2NhbGVTdHJpbmcoXCJlbi1QS1wiKX1cclxuICAgICAgICAgICAgICAgICAgICA8L3NwYW4+XHJcbiAgICAgICAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJtdC0zIHRleHQtc20gdGV4dC1tdXRlZFwiPntlbnRyeS5kZXRhaWx9PC9wPlxyXG4gICAgICAgICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgICAgICAgKSl9XHJcbiAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgKSA6IG51bGx9XHJcbiAgICAgIDwvbWFpbj5cclxuICAgIDwvZGl2PlxyXG4gICk7XHJcbn07XHJcblxyXG5leHBvcnQgZGVmYXVsdCBNYW5hZ2VyV29ya3NwYWNlO1xyXG4iXSwiZmlsZSI6IkM6L1VzZXJzL00uQWhtYWQvRG93bmxvYWRzL0NoaWNrZW4tSG91c2UtbWFpbiAoMSkvQ2hpY2tlbi1Ib3VzZS1tYWluL2Zyb250ZW5kL3NyYy9jb21wb25lbnRzL2FkbWluL01hbmFnZXJXb3Jrc3BhY2UudHN4In0=

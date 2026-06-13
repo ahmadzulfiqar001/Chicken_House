@@ -247,7 +247,7 @@ const ContactPage = () => {
 
       <section className="pb-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+          <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
             <motion.div
               initial={{ opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -388,7 +388,7 @@ const ContactPage = () => {
               </AnimatePresence>
             </motion.div>
 
-            <div className="space-y-6">
+            <div className="min-w-0">
               <motion.div
                 initial={{ opacity: 0, y: 18 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -425,58 +425,86 @@ const ContactPage = () => {
                   </Link>
                 </div>
               </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 18 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-80px" }}
-                className="relative overflow-hidden rounded-[3rem] border border-gray-100 bg-white shadow-[0_30px_90px_rgba(27,18,14,0.08)]"
-              >
-                <div className="relative h-[24rem]">
-                  {!mapLoaded ? (
-                    <div className="absolute inset-0 flex animate-pulse items-center justify-center bg-[linear-gradient(135deg,#f9f5ef,#f2e6d8,#efe4d2)] text-sm font-bold uppercase tracking-[0.24em] text-muted">
-                      Loading map
-                    </div>
-                  ) : null}
-                  <iframe
-                    src={siteConfig.googleMapsEmbedUrl}
-                    width="100%"
-                    height="100%"
-                    style={{ border: 0 }}
-                    allowFullScreen={true}
-                    loading="lazy"
-                    title="Chicken House location map"
-                    onLoad={() => setMapLoaded(true)}
-                    className={`h-full w-full transition duration-500 ${mapLoaded ? "opacity-100" : "opacity-0"}`}
-                  />
-                </div>
-                <div className="grid gap-4 p-6 md:grid-cols-2">
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">Address</p>
-                    <p className="mt-2 text-sm leading-7 text-dark">
-                      {siteConfig.addressLine1}, {siteConfig.addressLine2}, {siteConfig.city}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">Social & Support</p>
-                    <div className="mt-3 flex flex-wrap gap-3">
-                      {[...socialMediaLinks, { label: "WhatsApp", href: buildWhatsAppUrl("Hello Chicken House, I need assistance.") }].map((item) => (
-                        <a
-                          key={item.label}
-                          href={item.href}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="rounded-full border border-gray-200 bg-surface px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-dark transition hover:border-primary/30 hover:text-primary"
-                        >
-                          {item.label}
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
             </div>
           </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            className="mt-8 overflow-hidden rounded-[3rem] border border-gray-100 bg-white shadow-[0_30px_90px_rgba(27,18,14,0.08)]"
+          >
+            <div className="grid lg:grid-cols-[1.55fr_0.75fr]">
+              <div className="relative min-h-[22rem] lg:min-h-[28rem]">
+                {!mapLoaded ? (
+                  <div className="absolute inset-0 flex animate-pulse items-center justify-center bg-[linear-gradient(135deg,#f9f5ef,#f2e6d8,#efe4d2)] text-sm font-bold uppercase tracking-[0.24em] text-muted">
+                    Loading map
+                  </div>
+                ) : null}
+                <iframe
+                  src={siteConfig.googleMapsEmbedUrl}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen={true}
+                  loading="lazy"
+                  title="Chicken House location map"
+                  onLoad={() => setMapLoaded(true)}
+                  className={`absolute inset-0 h-full w-full transition duration-500 ${mapLoaded ? "opacity-100" : "opacity-0"}`}
+                />
+              </div>
+
+              <div className="flex flex-col justify-center gap-6 border-t border-gray-100 bg-[linear-gradient(180deg,#fffdf8,#fff7ea)] p-6 lg:border-l lg:border-t-0 lg:p-8">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">Location</p>
+                  <h2 className="mt-3 text-3xl font-display font-bold leading-tight text-dark">
+                    Find Chicken House faster.
+                  </h2>
+                  <p className="mt-4 text-sm leading-7 text-muted">
+                    {siteConfig.addressLine1}, {siteConfig.addressLine2}, {siteConfig.city}
+                  </p>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                  <a
+                    href={siteConfig.googleMapsUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold text-white transition hover:bg-primary-strong"
+                  >
+                    Open Maps
+                    <MapPin size={16} />
+                  </a>
+                  <a
+                    href={buildWhatsAppUrl("Hello Chicken House, I need assistance.")}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center justify-center gap-2 rounded-full border border-primary/15 bg-white px-5 py-3 text-sm font-bold text-dark transition hover:border-primary/35 hover:text-primary"
+                  >
+                    WhatsApp
+                    <MessageCircle size={16} />
+                  </a>
+                </div>
+
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">Social & Support</p>
+                  <div className="mt-3 flex flex-wrap gap-3">
+                    {[...socialMediaLinks, { label: "WhatsApp", href: buildWhatsAppUrl("Hello Chicken House, I need assistance.") }].map((item) => (
+                      <a
+                        key={item.label}
+                        href={item.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="rounded-full border border-gray-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-dark transition hover:border-primary/30 hover:text-primary"
+                      >
+                        {item.label}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
     </div>

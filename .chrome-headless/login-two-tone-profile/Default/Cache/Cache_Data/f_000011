@@ -1,0 +1,501 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/whatsapp/WhatsAppBot.tsx");import __vite__cjsImport0_react_jsxDevRuntime from "/@fs/C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=f15cf18c"; const Fragment = __vite__cjsImport0_react_jsxDevRuntime["Fragment"]; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+import __vite__cjsImport1_react from "/@fs/C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/node_modules/.vite/deps/react.js?v=f15cf18c"; const useEffect = __vite__cjsImport1_react["useEffect"]; const useMemo = __vite__cjsImport1_react["useMemo"]; const useState = __vite__cjsImport1_react["useState"];
+import { motion, AnimatePresence } from "/@fs/C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/node_modules/.vite/deps/motion_react.js?v=f15cf18c";
+import { Bot, Send, X, User, LoaderCircle, ChevronRight } from "/@fs/C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/node_modules/.vite/deps/lucide-react.js?v=f15cf18c";
+import { Link, useLocation } from "/@fs/C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/node_modules/.vite/deps/react-router-dom.js?v=f15cf18c";
+import { useAuth } from "/src/context/AuthContext.tsx";
+const CHAT_STORAGE_KEY = "chicken_house_web_chat_session";
+const readSessionKey = () => {
+  if (typeof window === "undefined") return "web-guest";
+  const existing = window.localStorage.getItem(CHAT_STORAGE_KEY);
+  if (existing) return existing;
+  const next = `web-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  window.localStorage.setItem(CHAT_STORAGE_KEY, next);
+  return next;
+};
+const createBubble = (role, payload) => ({
+  id: `${role}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+  role,
+  payload,
+  time: (/* @__PURE__ */ new Date()).toLocaleTimeString("en-PK", {
+    hour: "2-digit",
+    minute: "2-digit"
+  })
+});
+const WhatsAppBot = () => {
+  _s();
+  const { user } = useAuth();
+  const location = useLocation();
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [booting, setBooting] = useState(true);
+  const [suggestedReplies, setSuggestedReplies] = useState([]);
+  const [error, setError] = useState("");
+  const customerName = user?.name ?? "Website Guest";
+  const customerNumber = useMemo(() => readSessionKey(), []);
+  const hideWidget = ["/booking", "/cart", "/checkout", "/login", "/signup"].includes(location.pathname);
+  useEffect(() => {
+    const loadWelcome = async () => {
+      setBooting(true);
+      setError("");
+      try {
+        const response = await fetch("/api/assistant/welcome");
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error("Assistant welcome failed.");
+        }
+        setMessages(data.messages.map((message) => createBubble("assistant", message)));
+        setSuggestedReplies(data.suggestedReplies ?? []);
+      } catch (welcomeError) {
+        console.error(welcomeError);
+        setMessages(
+          [
+            createBubble("assistant", {
+              type: "text",
+              text: "Chicken House assistant is temporarily unavailable. You can still use WhatsApp for menu, booking, and delivery help."
+            })
+          ]
+        );
+        setSuggestedReplies(["Show menu", "Share location", "Book a table"]);
+        setError("Assistant is temporarily unavailable.");
+      } finally {
+        setBooting(false);
+      }
+    };
+    void loadWelcome();
+  }, []);
+  const sendMessage = async (messageText) => {
+    const trimmed = messageText.trim();
+    if (!trimmed || loading) return;
+    const customerBubble = createBubble("customer", {
+      type: "text",
+      text: trimmed
+    });
+    setMessages((prev) => [...prev, customerBubble]);
+    setInput("");
+    setLoading(true);
+    setError("");
+    try {
+      const response = await fetch("/api/assistant/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          message: trimmed,
+          customerName,
+          customerNumber,
+          channel: "Website Chatbot"
+        })
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error("Assistant reply failed.");
+      }
+      setMessages(
+        (prev) => [
+          ...prev,
+          ...data.messages.map((message) => createBubble("assistant", message))
+        ]
+      );
+      setSuggestedReplies(data.suggestedReplies ?? []);
+    } catch (chatError) {
+      console.error(chatError);
+      setMessages(
+        (prev) => [
+          ...prev,
+          createBubble("assistant", {
+            type: "text",
+            text: "The assistant cannot reply right now. Please try again shortly or continue on WhatsApp."
+          })
+        ]
+      );
+      setError("Reply temporarily unavailable.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  if (hideWidget) {
+    return null;
+  }
+  return /* @__PURE__ */ jsxDEV(Fragment, { children: [
+    /* @__PURE__ */ jsxDEV(
+      motion.button,
+      {
+        whileHover: { scale: 1.08 },
+        whileTap: { scale: 0.92 },
+        onClick: () => setIsOpen((prev) => !prev),
+        className: "fixed bottom-28 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full border-4 border-white bg-primary text-white shadow-2xl shadow-primary/40 sm:bottom-32 sm:right-6 sm:h-16 sm:w-16",
+        "aria-label": "Open Chicken House chatbot",
+        children: [
+          /* @__PURE__ */ jsxDEV(Bot, { size: 26 }, void 0, false, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+            lineNumber: 164,
+            columnNumber: 9
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { className: "absolute -right-1 -top-1 h-4 w-4 animate-pulse rounded-full border-2 border-white bg-green-500" }, void 0, false, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+            lineNumber: 165,
+            columnNumber: 9
+          }, this)
+        ]
+      },
+      void 0,
+      true,
+      {
+        fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+        lineNumber: 157,
+        columnNumber: 7
+      },
+      this
+    ),
+    /* @__PURE__ */ jsxDEV(AnimatePresence, { children: isOpen && /* @__PURE__ */ jsxDEV(
+      motion.div,
+      {
+        initial: { opacity: 0, y: 80, scale: 0.7, transformOrigin: "bottom right" },
+        animate: { opacity: 1, y: 0, scale: 1 },
+        exit: { opacity: 0, y: 80, scale: 0.7 },
+        className: "fixed bottom-28 right-4 z-[60] flex h-[min(38rem,calc(100dvh-9rem))] w-[92vw] max-w-[430px] flex-col overflow-hidden rounded-[2.5rem] border border-white/10 bg-white shadow-2xl shadow-black/20 sm:bottom-32 sm:right-6 sm:h-[min(42rem,calc(100dvh-10rem))]",
+        children: [
+          /* @__PURE__ */ jsxDEV("div", { className: "relative overflow-hidden bg-primary p-6 text-white", children: [
+            /* @__PURE__ */ jsxDEV("div", { className: "relative z-10 flex items-start justify-between gap-4", children: [
+              /* @__PURE__ */ jsxDEV("div", { className: "flex items-center gap-4", children: [
+                /* @__PURE__ */ jsxDEV("div", { className: "flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-md", children: /* @__PURE__ */ jsxDEV(Bot, { size: 24 }, void 0, false, {
+                  fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+                  lineNumber: 180,
+                  columnNumber: 21
+                }, this) }, void 0, false, {
+                  fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+                  lineNumber: 179,
+                  columnNumber: 19
+                }, this),
+                /* @__PURE__ */ jsxDEV("div", { children: [
+                  /* @__PURE__ */ jsxDEV("h3", { className: "font-bold", children: "Chicken House Assistant" }, void 0, false, {
+                    fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+                    lineNumber: 183,
+                    columnNumber: 21
+                  }, this),
+                  /* @__PURE__ */ jsxDEV("p", { className: "text-xs uppercase tracking-[0.28em] text-white/70", children: "Live Menu • Booking • Location" }, void 0, false, {
+                    fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+                    lineNumber: 184,
+                    columnNumber: 21
+                  }, this)
+                ] }, void 0, true, {
+                  fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+                  lineNumber: 182,
+                  columnNumber: 19
+                }, this)
+              ] }, void 0, true, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+                lineNumber: 178,
+                columnNumber: 17
+              }, this),
+              /* @__PURE__ */ jsxDEV("button", { onClick: () => setIsOpen(false), className: "rounded-xl p-2 transition-colors hover:bg-white/10", children: /* @__PURE__ */ jsxDEV(X, { size: 20 }, void 0, false, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+                lineNumber: 190,
+                columnNumber: 19
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+                lineNumber: 189,
+                columnNumber: 17
+              }, this)
+            ] }, void 0, true, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+              lineNumber: 177,
+              columnNumber: 15
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { className: "absolute right-0 top-0 h-28 w-28 rounded-full bg-white/10 blur-3xl" }, void 0, false, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+              lineNumber: 193,
+              columnNumber: 15
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+            lineNumber: 176,
+            columnNumber: 13
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { className: "flex-1 space-y-5 overflow-y-auto bg-surface p-5", children: booting ? /* @__PURE__ */ jsxDEV("div", { className: "flex h-full items-center justify-center", children: /* @__PURE__ */ jsxDEV(LoaderCircle, { size: 30, className: "animate-spin text-primary" }, void 0, false, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+            lineNumber: 199,
+            columnNumber: 19
+          }, this) }, void 0, false, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+            lineNumber: 198,
+            columnNumber: 13
+          }, this) : /* @__PURE__ */ jsxDEV(Fragment, { children: [
+            messages.map(
+              (message) => /* @__PURE__ */ jsxDEV(
+                motion.div,
+                {
+                  initial: { opacity: 0, x: message.role === "assistant" ? -18 : 18 },
+                  animate: { opacity: 1, x: 0 },
+                  className: `flex ${message.role === "assistant" ? "justify-start" : "justify-end"}`,
+                  children: /* @__PURE__ */ jsxDEV(
+                    "div",
+                    {
+                      className: `max-w-[84%] rounded-[1.8rem] p-4 shadow-sm ${message.role === "assistant" ? "rounded-tl-none bg-white text-dark" : "rounded-tr-none bg-primary text-white"}`,
+                      children: [
+                        message.payload.type === "image" && /* @__PURE__ */ jsxDEV(
+                          "img",
+                          {
+                            src: message.payload.imageUrl,
+                            alt: message.payload.text,
+                            className: "mb-3 h-44 w-full rounded-[1.2rem] object-cover",
+                            referrerPolicy: "no-referrer"
+                          },
+                          void 0,
+                          false,
+                          {
+                            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+                            lineNumber: 218,
+                            columnNumber: 19
+                          },
+                          this
+                        ),
+                        /* @__PURE__ */ jsxDEV("p", { className: "text-sm leading-7", children: message.payload.text }, void 0, false, {
+                          fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+                          lineNumber: 226,
+                          columnNumber: 25
+                        }, this),
+                        message.payload.type === "cta" && /* @__PURE__ */ jsxDEV(
+                          Link,
+                          {
+                            to: message.payload.href,
+                            className: "mt-3 inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-dark",
+                            children: [
+                              message.payload.label,
+                              /* @__PURE__ */ jsxDEV(ChevronRight, { size: 14 }, void 0, false, {
+                                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+                                lineNumber: 234,
+                                columnNumber: 29
+                              }, this)
+                            ]
+                          },
+                          void 0,
+                          true,
+                          {
+                            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+                            lineNumber: 229,
+                            columnNumber: 19
+                          },
+                          this
+                        ),
+                        /* @__PURE__ */ jsxDEV(
+                          "div",
+                          {
+                            className: `mt-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.24em] ${message.role === "assistant" ? "text-muted" : "text-white/60"}`,
+                            children: [
+                              message.role === "assistant" ? /* @__PURE__ */ jsxDEV(Bot, { size: 12 }, void 0, false, {
+                                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+                                lineNumber: 243,
+                                columnNumber: 59
+                              }, this) : /* @__PURE__ */ jsxDEV(User, { size: 12 }, void 0, false, {
+                                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+                                lineNumber: 243,
+                                columnNumber: 79
+                              }, this),
+                              message.time
+                            ]
+                          },
+                          void 0,
+                          true,
+                          {
+                            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+                            lineNumber: 238,
+                            columnNumber: 25
+                          },
+                          this
+                        )
+                      ]
+                    },
+                    void 0,
+                    true,
+                    {
+                      fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+                      lineNumber: 210,
+                      columnNumber: 23
+                    },
+                    this
+                  )
+                },
+                message.id,
+                false,
+                {
+                  fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+                  lineNumber: 204,
+                  columnNumber: 15
+                },
+                this
+              )
+            ),
+            loading && /* @__PURE__ */ jsxDEV("div", { className: "flex justify-start", children: /* @__PURE__ */ jsxDEV("div", { className: "rounded-[1.8rem] rounded-tl-none bg-white px-4 py-3 text-muted shadow-sm", children: /* @__PURE__ */ jsxDEV("div", { className: "flex items-center gap-2 text-sm", children: [
+              /* @__PURE__ */ jsxDEV(LoaderCircle, { size: 16, className: "animate-spin" }, void 0, false, {
+                fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+                lineNumber: 254,
+                columnNumber: 27
+              }, this),
+              "Chicken House is typing..."
+            ] }, void 0, true, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+              lineNumber: 253,
+              columnNumber: 25
+            }, this) }, void 0, false, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+              lineNumber: 252,
+              columnNumber: 23
+            }, this) }, void 0, false, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+              lineNumber: 251,
+              columnNumber: 15
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+            lineNumber: 202,
+            columnNumber: 13
+          }, this) }, void 0, false, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+            lineNumber: 196,
+            columnNumber: 13
+          }, this),
+          /* @__PURE__ */ jsxDEV("div", { className: "border-t border-gray-100 bg-white p-4", children: [
+            suggestedReplies.length > 0 && /* @__PURE__ */ jsxDEV("div", { className: "mb-3 flex flex-wrap gap-2", children: suggestedReplies.slice(0, 4).map(
+              (reply) => /* @__PURE__ */ jsxDEV(
+                "button",
+                {
+                  type: "button",
+                  onClick: () => void sendMessage(reply),
+                  className: "rounded-full border border-primary/10 bg-primary/5 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-primary transition hover:bg-primary hover:text-white",
+                  children: reply
+                },
+                reply,
+                false,
+                {
+                  fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+                  lineNumber: 268,
+                  columnNumber: 15
+                },
+                this
+              )
+            ) }, void 0, false, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+              lineNumber: 266,
+              columnNumber: 13
+            }, this),
+            error && /* @__PURE__ */ jsxDEV("p", { className: "mb-3 text-xs font-medium text-red-500", children: error }, void 0, false, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+              lineNumber: 280,
+              columnNumber: 25
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { className: "flex items-center gap-3 rounded-2xl bg-surface px-4 py-3", children: [
+              /* @__PURE__ */ jsxDEV(
+                "input",
+                {
+                  type: "text",
+                  value: input,
+                  onChange: (e) => setInput(e.target.value),
+                  onKeyDown: (e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      void sendMessage(input);
+                    }
+                  },
+                  placeholder: "Ask about menu, booking, location, or delivery...",
+                  className: "flex-1 bg-transparent text-sm outline-none"
+                },
+                void 0,
+                false,
+                {
+                  fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+                  lineNumber: 283,
+                  columnNumber: 17
+                },
+                this
+              ),
+              /* @__PURE__ */ jsxDEV(
+                "button",
+                {
+                  type: "button",
+                  onClick: () => void sendMessage(input),
+                  disabled: loading,
+                  className: "flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white transition hover:bg-primary-strong disabled:opacity-60",
+                  children: /* @__PURE__ */ jsxDEV(Send, { size: 18 }, void 0, false, {
+                    fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+                    lineNumber: 302,
+                    columnNumber: 19
+                  }, this)
+                },
+                void 0,
+                false,
+                {
+                  fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+                  lineNumber: 296,
+                  columnNumber: 17
+                },
+                this
+              )
+            ] }, void 0, true, {
+              fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+              lineNumber: 282,
+              columnNumber: 15
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+            lineNumber: 264,
+            columnNumber: 13
+          }, this)
+        ]
+      },
+      void 0,
+      true,
+      {
+        fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+        lineNumber: 170,
+        columnNumber: 9
+      },
+      this
+    ) }, void 0, false, {
+      fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+      lineNumber: 168,
+      columnNumber: 7
+    }, this)
+  ] }, void 0, true, {
+    fileName: "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx",
+    lineNumber: 156,
+    columnNumber: 5
+  }, this);
+};
+_s(WhatsAppBot, "2ZluXIxfj7RHrdDof8R7n6vOWgE=", false, function() {
+  return [useAuth, useLocation];
+});
+_c = WhatsAppBot;
+export default WhatsAppBot;
+var _c;
+$RefreshReg$(_c, "WhatsAppBot");
+import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react can't detect preamble. Something is wrong."
+    );
+  }
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+function $RefreshReg$(type, id) {
+  return RefreshRuntime.register(type, "C:/Users/M.Ahmad/Downloads/Chicken-House-main (1)/Chicken-House-main/frontend/src/components/whatsapp/WhatsAppBot.tsx " + id);
+}
+function $RefreshSig$() {
+  return RefreshRuntime.createSignatureFunctionForTransform();
+}
+
+//# sourceMappingURL=data:application/json;base64,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QUFBO0FBQUE7QUFBQTtBQUFBO0FBQUEsY0FPQTtBQUFBLGlCQXJCRjtBQUFBO0FBQUE7QUFBQTtBQUFBLG1CQXNCQTtBQUFBLGVBeENGO0FBQUE7QUFBQTtBQUFBO0FBQUEsaUJBeUNBO0FBQUE7QUFBQTtBQUFBLE1BdklGO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQSxJQXdJQSxLQTFJSjtBQUFBO0FBQUE7QUFBQTtBQUFBLFdBNElBO0FBQUEsT0F4SkY7QUFBQTtBQUFBO0FBQUE7QUFBQSxTQXlKQTtBQUVKO0FBQUVULEdBdFFJRCxhQUFXO0FBQUEsVUFDRXZCLFNBQ0FELFdBQVc7QUFBQTtBQUFBLEtBRnhCd0I7QUF3UU4sZUFBZUE7QUFBWSxJQUFBaUU7QUFBQSxhQUFBQSxJQUFBIiwibmFtZXMiOlsidXNlRWZmZWN0IiwidXNlTWVtbyIsInVzZVN0YXRlIiwibW90aW9uIiwiQW5pbWF0ZVByZXNlbmNlIiwiQm90IiwiU2VuZCIsIlgiLCJVc2VyIiwiTG9hZGVyQ2lyY2xlIiwiQ2hldnJvblJpZ2h0IiwiTGluayIsInVzZUxvY2F0aW9uIiwidXNlQXV0aCIsIkNIQVRfU1RPUkFHRV9LRVkiLCJyZWFkU2Vzc2lvbktleSIsIndpbmRvdyIsImV4aXN0aW5nIiwibG9jYWxTdG9yYWdlIiwiZ2V0SXRlbSIsIm5leHQiLCJEYXRlIiwibm93IiwiTWF0aCIsInJhbmRvbSIsInRvU3RyaW5nIiwic2xpY2UiLCJzZXRJdGVtIiwiY3JlYXRlQnViYmxlIiwicm9sZSIsInBheWxvYWQiLCJpZCIsInRpbWUiLCJ0b0xvY2FsZVRpbWVTdHJpbmciLCJob3VyIiwibWludXRlIiwiV2hhdHNBcHBCb3QiLCJfcyIsInVzZXIiLCJsb2NhdGlvbiIsImlzT3BlbiIsInNldElzT3BlbiIsIm1lc3NhZ2VzIiwic2V0TWVzc2FnZXMiLCJpbnB1dCIsInNldElucHV0IiwibG9hZGluZyIsInNldExvYWRpbmciLCJib290aW5nIiwic2V0Qm9vdGluZyIsInN1Z2dlc3RlZFJlcGxpZXMiLCJzZXRTdWdnZXN0ZWRSZXBsaWVzIiwiZXJyb3IiLCJzZXRFcnJvciIsImN1c3RvbWVyTmFtZSIsIm5hbWUiLCJjdXN0b21lck51bWJlciIsImhpZGVXaWRnZXQiLCJpbmNsdWRlcyIsInBhdGhuYW1lIiwibG9hZFdlbGNvbWUiLCJyZXNwb25zZSIsImZldGNoIiwiZGF0YSIsImpzb24iLCJvayIsIkVycm9yIiwibWFwIiwibWVzc2FnZSIsIndlbGNvbWVFcnJvciIsImNvbnNvbGUiLCJ0eXBlIiwidGV4dCIsInNlbmRNZXNzYWdlIiwibWVzc2FnZVRleHQiLCJ0cmltbWVkIiwidHJpbSIsImN1c3RvbWVyQnViYmxlIiwicHJldiIsIm1ldGhvZCIsImhlYWRlcnMiLCJib2R5IiwiSlNPTiIsInN0cmluZ2lmeSIsImNoYW5uZWwiLCJjaGF0RXJyb3IiLCJzY2FsZSIsIm9wYWNpdHkiLCJ5IiwidHJhbnNmb3JtT3JpZ2luIiwieCIsImltYWdlVXJsIiwiaHJlZiIsImxhYmVsIiwibGVuZ3RoIiwicmVwbHkiLCJlIiwidGFyZ2V0IiwidmFsdWUiLCJrZXkiLCJwcmV2ZW50RGVmYXVsdCIsIl9jIl0sImlnbm9yZUxpc3QiOltdLCJzb3VyY2VzIjpbIldoYXRzQXBwQm90LnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyB1c2VFZmZlY3QsIHVzZU1lbW8sIHVzZVN0YXRlIH0gZnJvbSBcInJlYWN0XCI7XHJcbmltcG9ydCB7IG1vdGlvbiwgQW5pbWF0ZVByZXNlbmNlIH0gZnJvbSBcIm1vdGlvbi9yZWFjdFwiO1xyXG5pbXBvcnQgeyBCb3QsIFNlbmQsIFgsIFVzZXIsIExvYWRlckNpcmNsZSwgQ2hldnJvblJpZ2h0IH0gZnJvbSBcImx1Y2lkZS1yZWFjdFwiO1xyXG5pbXBvcnQgeyBMaW5rLCB1c2VMb2NhdGlvbiB9IGZyb20gXCJyZWFjdC1yb3V0ZXItZG9tXCI7XHJcbmltcG9ydCB7IHVzZUF1dGggfSBmcm9tIFwiLi4vLi4vY29udGV4dC9BdXRoQ29udGV4dFwiO1xyXG5cclxudHlwZSBBc3Npc3RhbnRNZXNzYWdlID1cclxuICB8IHsgdHlwZTogXCJ0ZXh0XCI7IHRleHQ6IHN0cmluZyB9XHJcbiAgfCB7IHR5cGU6IFwiaW1hZ2VcIjsgdGV4dDogc3RyaW5nOyBpbWFnZVVybDogc3RyaW5nIH1cclxuICB8IHsgdHlwZTogXCJjdGFcIjsgdGV4dDogc3RyaW5nOyBocmVmOiBzdHJpbmc7IGxhYmVsOiBzdHJpbmcgfTtcclxuXHJcbnR5cGUgQXNzaXN0YW50UGF5bG9hZCA9IHtcclxuICBpbnRlbnQ6IHN0cmluZztcclxuICBtZXNzYWdlczogQXNzaXN0YW50TWVzc2FnZVtdO1xyXG4gIHN1Z2dlc3RlZFJlcGxpZXM6IHN0cmluZ1tdO1xyXG4gIHNlc3Npb25JZD86IHN0cmluZztcclxufTtcclxuXHJcbnR5cGUgQ2hhdEJ1YmJsZSA9IHtcclxuICBpZDogc3RyaW5nO1xyXG4gIHJvbGU6IFwiY3VzdG9tZXJcIiB8IFwiYXNzaXN0YW50XCI7XHJcbiAgcGF5bG9hZDogQXNzaXN0YW50TWVzc2FnZTtcclxuICB0aW1lOiBzdHJpbmc7XHJcbn07XHJcblxyXG5jb25zdCBDSEFUX1NUT1JBR0VfS0VZID0gXCJjaGlja2VuX2hvdXNlX3dlYl9jaGF0X3Nlc3Npb25cIjtcclxuXHJcbmNvbnN0IHJlYWRTZXNzaW9uS2V5ID0gKCkgPT4ge1xyXG4gIGlmICh0eXBlb2Ygd2luZG93ID09PSBcInVuZGVmaW5lZFwiKSByZXR1cm4gXCJ3ZWItZ3Vlc3RcIjtcclxuXHJcbiAgY29uc3QgZXhpc3RpbmcgPSB3aW5kb3cubG9jYWxTdG9yYWdlLmdldEl0ZW0oQ0hBVF9TVE9SQUdFX0tFWSk7XHJcbiAgaWYgKGV4aXN0aW5nKSByZXR1cm4gZXhpc3Rpbmc7XHJcblxyXG4gIGNvbnN0IG5leHQgPSBgd2ViLSR7RGF0ZS5ub3coKX0tJHtNYXRoLnJhbmRvbSgpLnRvU3RyaW5nKDM2KS5zbGljZSgyLCA3KX1gO1xyXG4gIHdpbmRvdy5sb2NhbFN0b3JhZ2Uuc2V0SXRlbShDSEFUX1NUT1JBR0VfS0VZLCBuZXh0KTtcclxuICByZXR1cm4gbmV4dDtcclxufTtcclxuXHJcbmNvbnN0IGNyZWF0ZUJ1YmJsZSA9IChyb2xlOiBDaGF0QnViYmxlW1wicm9sZVwiXSwgcGF5bG9hZDogQXNzaXN0YW50TWVzc2FnZSk6IENoYXRCdWJibGUgPT4gKHtcclxuICBpZDogYCR7cm9sZX0tJHtEYXRlLm5vdygpfS0ke01hdGgucmFuZG9tKCkudG9TdHJpbmcoMzYpLnNsaWNlKDIsIDcpfWAsXHJcbiAgcm9sZSxcclxuICBwYXlsb2FkLFxyXG4gIHRpbWU6IG5ldyBEYXRlKCkudG9Mb2NhbGVUaW1lU3RyaW5nKFwiZW4tUEtcIiwge1xyXG4gICAgaG91cjogXCIyLWRpZ2l0XCIsXHJcbiAgICBtaW51dGU6IFwiMi1kaWdpdFwiLFxyXG4gIH0pLFxyXG59KTtcclxuXHJcbmNvbnN0IFdoYXRzQXBwQm90ID0gKCkgPT4ge1xyXG4gIGNvbnN0IHsgdXNlciB9ID0gdXNlQXV0aCgpO1xyXG4gIGNvbnN0IGxvY2F0aW9uID0gdXNlTG9jYXRpb24oKTtcclxuICBjb25zdCBbaXNPcGVuLCBzZXRJc09wZW5dID0gdXNlU3RhdGUoZmFsc2UpO1xyXG4gIGNvbnN0IFttZXNzYWdlcywgc2V0TWVzc2FnZXNdID0gdXNlU3RhdGU8Q2hhdEJ1YmJsZVtdPihbXSk7XHJcbiAgY29uc3QgW2lucHV0LCBzZXRJbnB1dF0gPSB1c2VTdGF0ZShcIlwiKTtcclxuICBjb25zdCBbbG9hZGluZywgc2V0TG9hZGluZ10gPSB1c2VTdGF0ZShmYWxzZSk7XHJcbiAgY29uc3QgW2Jvb3RpbmcsIHNldEJvb3RpbmddID0gdXNlU3RhdGUodHJ1ZSk7XHJcbiAgY29uc3QgW3N1Z2dlc3RlZFJlcGxpZXMsIHNldFN1Z2dlc3RlZFJlcGxpZXNdID0gdXNlU3RhdGU8c3RyaW5nW10+KFtdKTtcclxuICBjb25zdCBbZXJyb3IsIHNldEVycm9yXSA9IHVzZVN0YXRlKFwiXCIpO1xyXG5cclxuICBjb25zdCBjdXN0b21lck5hbWUgPSB1c2VyPy5uYW1lID8/IFwiV2Vic2l0ZSBHdWVzdFwiO1xyXG4gIGNvbnN0IGN1c3RvbWVyTnVtYmVyID0gdXNlTWVtbygoKSA9PiByZWFkU2Vzc2lvbktleSgpLCBbXSk7XHJcbiAgY29uc3QgaGlkZVdpZGdldCA9IFtcIi9ib29raW5nXCIsIFwiL2NhcnRcIiwgXCIvY2hlY2tvdXRcIiwgXCIvbG9naW5cIiwgXCIvc2lnbnVwXCJdLmluY2x1ZGVzKGxvY2F0aW9uLnBhdGhuYW1lKTtcclxuXHJcbiAgdXNlRWZmZWN0KCgpID0+IHtcclxuICAgIGNvbnN0IGxvYWRXZWxjb21lID0gYXN5bmMgKCkgPT4ge1xyXG4gICAgICBzZXRCb290aW5nKHRydWUpO1xyXG4gICAgICBzZXRFcnJvcihcIlwiKTtcclxuXHJcbiAgICAgIHRyeSB7XHJcbiAgICAgICAgY29uc3QgcmVzcG9uc2UgPSBhd2FpdCBmZXRjaChcIi9hcGkvYXNzaXN0YW50L3dlbGNvbWVcIik7XHJcbiAgICAgICAgY29uc3QgZGF0YSA9IChhd2FpdCByZXNwb25zZS5qc29uKCkpIGFzIEFzc2lzdGFudFBheWxvYWQ7XHJcblxyXG4gICAgICAgIGlmICghcmVzcG9uc2Uub2spIHtcclxuICAgICAgICAgIHRocm93IG5ldyBFcnJvcihcIkFzc2lzdGFudCB3ZWxjb21lIGZhaWxlZC5cIik7XHJcbiAgICAgICAgfVxyXG5cclxuICAgICAgICBzZXRNZXNzYWdlcyhkYXRhLm1lc3NhZ2VzLm1hcCgobWVzc2FnZSkgPT4gY3JlYXRlQnViYmxlKFwiYXNzaXN0YW50XCIsIG1lc3NhZ2UpKSk7XHJcbiAgICAgICAgc2V0U3VnZ2VzdGVkUmVwbGllcyhkYXRhLnN1Z2dlc3RlZFJlcGxpZXMgPz8gW10pO1xyXG4gICAgICB9IGNhdGNoICh3ZWxjb21lRXJyb3IpIHtcclxuICAgICAgICBjb25zb2xlLmVycm9yKHdlbGNvbWVFcnJvcik7XHJcbiAgICAgICAgc2V0TWVzc2FnZXMoW1xyXG4gICAgICAgICAgY3JlYXRlQnViYmxlKFwiYXNzaXN0YW50XCIsIHtcclxuICAgICAgICAgICAgdHlwZTogXCJ0ZXh0XCIsXHJcbiAgICAgICAgICAgIHRleHQ6IFwiQ2hpY2tlbiBIb3VzZSBhc3Npc3RhbnQgaXMgdGVtcG9yYXJpbHkgdW5hdmFpbGFibGUuIFlvdSBjYW4gc3RpbGwgdXNlIFdoYXRzQXBwIGZvciBtZW51LCBib29raW5nLCBhbmQgZGVsaXZlcnkgaGVscC5cIixcclxuICAgICAgICAgIH0pLFxyXG4gICAgICAgIF0pO1xyXG4gICAgICAgIHNldFN1Z2dlc3RlZFJlcGxpZXMoW1wiU2hvdyBtZW51XCIsIFwiU2hhcmUgbG9jYXRpb25cIiwgXCJCb29rIGEgdGFibGVcIl0pO1xyXG4gICAgICAgIHNldEVycm9yKFwiQXNzaXN0YW50IGlzIHRlbXBvcmFyaWx5IHVuYXZhaWxhYmxlLlwiKTtcclxuICAgICAgfSBmaW5hbGx5IHtcclxuICAgICAgICBzZXRCb290aW5nKGZhbHNlKTtcclxuICAgICAgfVxyXG4gICAgfTtcclxuXHJcbiAgICB2b2lkIGxvYWRXZWxjb21lKCk7XHJcbiAgfSwgW10pO1xyXG5cclxuICBjb25zdCBzZW5kTWVzc2FnZSA9IGFzeW5jIChtZXNzYWdlVGV4dDogc3RyaW5nKSA9PiB7XHJcbiAgICBjb25zdCB0cmltbWVkID0gbWVzc2FnZVRleHQudHJpbSgpO1xyXG4gICAgaWYgKCF0cmltbWVkIHx8IGxvYWRpbmcpIHJldHVybjtcclxuXHJcbiAgICBjb25zdCBjdXN0b21lckJ1YmJsZSA9IGNyZWF0ZUJ1YmJsZShcImN1c3RvbWVyXCIsIHtcclxuICAgICAgdHlwZTogXCJ0ZXh0XCIsXHJcbiAgICAgIHRleHQ6IHRyaW1tZWQsXHJcbiAgICB9KTtcclxuXHJcbiAgICBzZXRNZXNzYWdlcygocHJldikgPT4gWy4uLnByZXYsIGN1c3RvbWVyQnViYmxlXSk7XHJcbiAgICBzZXRJbnB1dChcIlwiKTtcclxuICAgIHNldExvYWRpbmcodHJ1ZSk7XHJcbiAgICBzZXRFcnJvcihcIlwiKTtcclxuXHJcbiAgICB0cnkge1xyXG4gICAgICBjb25zdCByZXNwb25zZSA9IGF3YWl0IGZldGNoKFwiL2FwaS9hc3Npc3RhbnQvY2hhdFwiLCB7XHJcbiAgICAgICAgbWV0aG9kOiBcIlBPU1RcIixcclxuICAgICAgICBoZWFkZXJzOiB7XHJcbiAgICAgICAgICBcIkNvbnRlbnQtVHlwZVwiOiBcImFwcGxpY2F0aW9uL2pzb25cIixcclxuICAgICAgICB9LFxyXG4gICAgICAgIGJvZHk6IEpTT04uc3RyaW5naWZ5KHtcclxuICAgICAgICAgIG1lc3NhZ2U6IHRyaW1tZWQsXHJcbiAgICAgICAgICBjdXN0b21lck5hbWUsXHJcbiAgICAgICAgICBjdXN0b21lck51bWJlcixcclxuICAgICAgICAgIGNoYW5uZWw6IFwiV2Vic2l0ZSBDaGF0Ym90XCIsXHJcbiAgICAgICAgfSksXHJcbiAgICAgIH0pO1xyXG5cclxuICAgICAgY29uc3QgZGF0YSA9IChhd2FpdCByZXNwb25zZS5qc29uKCkpIGFzIEFzc2lzdGFudFBheWxvYWQ7XHJcblxyXG4gICAgICBpZiAoIXJlc3BvbnNlLm9rKSB7XHJcbiAgICAgICAgdGhyb3cgbmV3IEVycm9yKFwiQXNzaXN0YW50IHJlcGx5IGZhaWxlZC5cIik7XHJcbiAgICAgIH1cclxuXHJcbiAgICAgIHNldE1lc3NhZ2VzKChwcmV2KSA9PiBbXHJcbiAgICAgICAgLi4ucHJldixcclxuICAgICAgICAuLi5kYXRhLm1lc3NhZ2VzLm1hcCgobWVzc2FnZSkgPT4gY3JlYXRlQnViYmxlKFwiYXNzaXN0YW50XCIsIG1lc3NhZ2UpKSxcclxuICAgICAgXSk7XHJcbiAgICAgIHNldFN1Z2dlc3RlZFJlcGxpZXMoZGF0YS5zdWdnZXN0ZWRSZXBsaWVzID8/IFtdKTtcclxuICAgIH0gY2F0Y2ggKGNoYXRFcnJvcikge1xyXG4gICAgICBjb25zb2xlLmVycm9yKGNoYXRFcnJvcik7XHJcbiAgICAgIHNldE1lc3NhZ2VzKChwcmV2KSA9PiBbXHJcbiAgICAgICAgLi4ucHJldixcclxuICAgICAgICBjcmVhdGVCdWJibGUoXCJhc3Npc3RhbnRcIiwge1xyXG4gICAgICAgICAgdHlwZTogXCJ0ZXh0XCIsXHJcbiAgICAgICAgICB0ZXh0OiBcIlRoZSBhc3Npc3RhbnQgY2Fubm90IHJlcGx5IHJpZ2h0IG5vdy4gUGxlYXNlIHRyeSBhZ2FpbiBzaG9ydGx5IG9yIGNvbnRpbnVlIG9uIFdoYXRzQXBwLlwiLFxyXG4gICAgICAgIH0pLFxyXG4gICAgICBdKTtcclxuICAgICAgc2V0RXJyb3IoXCJSZXBseSB0ZW1wb3JhcmlseSB1bmF2YWlsYWJsZS5cIik7XHJcbiAgICB9IGZpbmFsbHkge1xyXG4gICAgICBzZXRMb2FkaW5nKGZhbHNlKTtcclxuICAgIH1cclxuICB9O1xyXG5cclxuICBpZiAoaGlkZVdpZGdldCkge1xyXG4gICAgcmV0dXJuIG51bGw7XHJcbiAgfVxyXG5cclxuICByZXR1cm4gKFxyXG4gICAgPD5cclxuICAgICAgPG1vdGlvbi5idXR0b25cclxuICAgICAgICB3aGlsZUhvdmVyPXt7IHNjYWxlOiAxLjA4IH19XHJcbiAgICAgICAgd2hpbGVUYXA9e3sgc2NhbGU6IDAuOTIgfX1cclxuICAgICAgICBvbkNsaWNrPXsoKSA9PiBzZXRJc09wZW4oKHByZXYpID0+ICFwcmV2KX1cclxuICAgICAgICBjbGFzc05hbWU9XCJmaXhlZCBib3R0b20tMjggcmlnaHQtNCB6LTUwIGZsZXggaC0xNCB3LTE0IGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWNlbnRlciByb3VuZGVkLWZ1bGwgYm9yZGVyLTQgYm9yZGVyLXdoaXRlIGJnLXByaW1hcnkgdGV4dC13aGl0ZSBzaGFkb3ctMnhsIHNoYWRvdy1wcmltYXJ5LzQwIHNtOmJvdHRvbS0zMiBzbTpyaWdodC02IHNtOmgtMTYgc206dy0xNlwiXHJcbiAgICAgICAgYXJpYS1sYWJlbD1cIk9wZW4gQ2hpY2tlbiBIb3VzZSBjaGF0Ym90XCJcclxuICAgICAgPlxyXG4gICAgICAgIDxCb3Qgc2l6ZT17MjZ9IC8+XHJcbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJhYnNvbHV0ZSAtcmlnaHQtMSAtdG9wLTEgaC00IHctNCBhbmltYXRlLXB1bHNlIHJvdW5kZWQtZnVsbCBib3JkZXItMiBib3JkZXItd2hpdGUgYmctZ3JlZW4tNTAwXCIgLz5cclxuICAgICAgPC9tb3Rpb24uYnV0dG9uPlxyXG5cclxuICAgICAgPEFuaW1hdGVQcmVzZW5jZT5cclxuICAgICAgICB7aXNPcGVuICYmIChcclxuICAgICAgICAgIDxtb3Rpb24uZGl2XHJcbiAgICAgICAgICAgIGluaXRpYWw9e3sgb3BhY2l0eTogMCwgeTogODAsIHNjYWxlOiAwLjcsIHRyYW5zZm9ybU9yaWdpbjogXCJib3R0b20gcmlnaHRcIiB9fVxyXG4gICAgICAgICAgICBhbmltYXRlPXt7IG9wYWNpdHk6IDEsIHk6IDAsIHNjYWxlOiAxIH19XHJcbiAgICAgICAgICAgIGV4aXQ9e3sgb3BhY2l0eTogMCwgeTogODAsIHNjYWxlOiAwLjcgfX1cclxuICAgICAgICAgICAgY2xhc3NOYW1lPVwiZml4ZWQgYm90dG9tLTI4IHJpZ2h0LTQgei1bNjBdIGZsZXggaC1bbWluKDM4cmVtLGNhbGMoMTAwZHZoLTlyZW0pKV0gdy1bOTJ2d10gbWF4LXctWzQzMHB4XSBmbGV4LWNvbCBvdmVyZmxvdy1oaWRkZW4gcm91bmRlZC1bMi41cmVtXSBib3JkZXIgYm9yZGVyLXdoaXRlLzEwIGJnLXdoaXRlIHNoYWRvdy0yeGwgc2hhZG93LWJsYWNrLzIwIHNtOmJvdHRvbS0zMiBzbTpyaWdodC02IHNtOmgtW21pbig0MnJlbSxjYWxjKDEwMGR2aC0xMHJlbSkpXVwiXHJcbiAgICAgICAgICA+XHJcbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwicmVsYXRpdmUgb3ZlcmZsb3ctaGlkZGVuIGJnLXByaW1hcnkgcC02IHRleHQtd2hpdGVcIj5cclxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInJlbGF0aXZlIHotMTAgZmxleCBpdGVtcy1zdGFydCBqdXN0aWZ5LWJldHdlZW4gZ2FwLTRcIj5cclxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTRcIj5cclxuICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGgtMTIgdy0xMiBpdGVtcy1jZW50ZXIganVzdGlmeS1jZW50ZXIgcm91bmRlZC0yeGwgYmctd2hpdGUvMTUgYmFja2Ryb3AtYmx1ci1tZFwiPlxyXG4gICAgICAgICAgICAgICAgICAgIDxCb3Qgc2l6ZT17MjR9IC8+XHJcbiAgICAgICAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgICAgICAgICA8ZGl2PlxyXG4gICAgICAgICAgICAgICAgICAgIDxoMyBjbGFzc05hbWU9XCJmb250LWJvbGRcIj5DaGlja2VuIEhvdXNlIEFzc2lzdGFudDwvaDM+XHJcbiAgICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC14cyB1cHBlcmNhc2UgdHJhY2tpbmctWzAuMjhlbV0gdGV4dC13aGl0ZS83MFwiPlxyXG4gICAgICAgICAgICAgICAgICAgICAgTGl2ZSBNZW51IOKAoiBCb29raW5nIOKAoiBMb2NhdGlvblxyXG4gICAgICAgICAgICAgICAgICAgIDwvcD5cclxuICAgICAgICAgICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICAgICAgICAgIDxidXR0b24gb25DbGljaz17KCkgPT4gc2V0SXNPcGVuKGZhbHNlKX0gY2xhc3NOYW1lPVwicm91bmRlZC14bCBwLTIgdHJhbnNpdGlvbi1jb2xvcnMgaG92ZXI6Ymctd2hpdGUvMTBcIj5cclxuICAgICAgICAgICAgICAgICAgPFggc2l6ZT17MjB9IC8+XHJcbiAgICAgICAgICAgICAgICA8L2J1dHRvbj5cclxuICAgICAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImFic29sdXRlIHJpZ2h0LTAgdG9wLTAgaC0yOCB3LTI4IHJvdW5kZWQtZnVsbCBiZy13aGl0ZS8xMCBibHVyLTN4bFwiIC8+XHJcbiAgICAgICAgICAgIDwvZGl2PlxyXG5cclxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4LTEgc3BhY2UteS01IG92ZXJmbG93LXktYXV0byBiZy1zdXJmYWNlIHAtNVwiPlxyXG4gICAgICAgICAgICAgIHtib290aW5nID8gKFxyXG4gICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGgtZnVsbCBpdGVtcy1jZW50ZXIganVzdGlmeS1jZW50ZXJcIj5cclxuICAgICAgICAgICAgICAgICAgPExvYWRlckNpcmNsZSBzaXplPXszMH0gY2xhc3NOYW1lPVwiYW5pbWF0ZS1zcGluIHRleHQtcHJpbWFyeVwiIC8+XHJcbiAgICAgICAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICAgICAgICApIDogKFxyXG4gICAgICAgICAgICAgICAgPD5cclxuICAgICAgICAgICAgICAgICAge21lc3NhZ2VzLm1hcCgobWVzc2FnZSkgPT4gKFxyXG4gICAgICAgICAgICAgICAgICAgIDxtb3Rpb24uZGl2XHJcbiAgICAgICAgICAgICAgICAgICAgICBrZXk9e21lc3NhZ2UuaWR9XHJcbiAgICAgICAgICAgICAgICAgICAgICBpbml0aWFsPXt7IG9wYWNpdHk6IDAsIHg6IG1lc3NhZ2Uucm9sZSA9PT0gXCJhc3Npc3RhbnRcIiA/IC0xOCA6IDE4IH19XHJcbiAgICAgICAgICAgICAgICAgICAgICBhbmltYXRlPXt7IG9wYWNpdHk6IDEsIHg6IDAgfX1cclxuICAgICAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT17YGZsZXggJHttZXNzYWdlLnJvbGUgPT09IFwiYXNzaXN0YW50XCIgPyBcImp1c3RpZnktc3RhcnRcIiA6IFwianVzdGlmeS1lbmRcIn1gfVxyXG4gICAgICAgICAgICAgICAgICAgID5cclxuICAgICAgICAgICAgICAgICAgICAgIDxkaXZcclxuICAgICAgICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPXtgbWF4LXctWzg0JV0gcm91bmRlZC1bMS44cmVtXSBwLTQgc2hhZG93LXNtICR7XHJcbiAgICAgICAgICAgICAgICAgICAgICAgICAgbWVzc2FnZS5yb2xlID09PSBcImFzc2lzdGFudFwiXHJcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICA/IFwicm91bmRlZC10bC1ub25lIGJnLXdoaXRlIHRleHQtZGFya1wiXHJcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICA6IFwicm91bmRlZC10ci1ub25lIGJnLXByaW1hcnkgdGV4dC13aGl0ZVwiXHJcbiAgICAgICAgICAgICAgICAgICAgICAgIH1gfVxyXG4gICAgICAgICAgICAgICAgICAgICAgPlxyXG4gICAgICAgICAgICAgICAgICAgICAgICB7bWVzc2FnZS5wYXlsb2FkLnR5cGUgPT09IFwiaW1hZ2VcIiAmJiAoXHJcbiAgICAgICAgICAgICAgICAgICAgICAgICAgPGltZ1xyXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgc3JjPXttZXNzYWdlLnBheWxvYWQuaW1hZ2VVcmx9XHJcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICBhbHQ9e21lc3NhZ2UucGF5bG9hZC50ZXh0fVxyXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwibWItMyBoLTQ0IHctZnVsbCByb3VuZGVkLVsxLjJyZW1dIG9iamVjdC1jb3ZlclwiXHJcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICByZWZlcnJlclBvbGljeT1cIm5vLXJlZmVycmVyXCJcclxuICAgICAgICAgICAgICAgICAgICAgICAgICAvPlxyXG4gICAgICAgICAgICAgICAgICAgICAgICApfVxyXG5cclxuICAgICAgICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1zbSBsZWFkaW5nLTdcIj57bWVzc2FnZS5wYXlsb2FkLnRleHR9PC9wPlxyXG5cclxuICAgICAgICAgICAgICAgICAgICAgICAge21lc3NhZ2UucGF5bG9hZC50eXBlID09PSBcImN0YVwiICYmIChcclxuICAgICAgICAgICAgICAgICAgICAgICAgICA8TGlua1xyXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgdG89e21lc3NhZ2UucGF5bG9hZC5ocmVmfVxyXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwibXQtMyBpbmxpbmUtZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTIgcm91bmRlZC1mdWxsIGJnLWFjY2VudCBweC00IHB5LTIgdGV4dC14cyBmb250LWJvbGQgdXBwZXJjYXNlIHRyYWNraW5nLVswLjE4ZW1dIHRleHQtZGFya1wiXHJcbiAgICAgICAgICAgICAgICAgICAgICAgICAgPlxyXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAge21lc3NhZ2UucGF5bG9hZC5sYWJlbH1cclxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxDaGV2cm9uUmlnaHQgc2l6ZT17MTR9IC8+XHJcbiAgICAgICAgICAgICAgICAgICAgICAgICAgPC9MaW5rPlxyXG4gICAgICAgICAgICAgICAgICAgICAgICApfVxyXG5cclxuICAgICAgICAgICAgICAgICAgICAgICAgPGRpdlxyXG4gICAgICAgICAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT17YG10LTIgZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTIgdGV4dC1bMTBweF0gZm9udC1ib2xkIHVwcGVyY2FzZSB0cmFja2luZy1bMC4yNGVtXSAke1xyXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgbWVzc2FnZS5yb2xlID09PSBcImFzc2lzdGFudFwiID8gXCJ0ZXh0LW11dGVkXCIgOiBcInRleHQtd2hpdGUvNjBcIlxyXG4gICAgICAgICAgICAgICAgICAgICAgICAgIH1gfVxyXG4gICAgICAgICAgICAgICAgICAgICAgICA+XHJcbiAgICAgICAgICAgICAgICAgICAgICAgICAge21lc3NhZ2Uucm9sZSA9PT0gXCJhc3Npc3RhbnRcIiA/IDxCb3Qgc2l6ZT17MTJ9IC8+IDogPFVzZXIgc2l6ZT17MTJ9IC8+fVxyXG4gICAgICAgICAgICAgICAgICAgICAgICAgIHttZXNzYWdlLnRpbWV9XHJcbiAgICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgICAgICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgICAgICAgICAgICAgPC9tb3Rpb24uZGl2PlxyXG4gICAgICAgICAgICAgICAgICApKX1cclxuXHJcbiAgICAgICAgICAgICAgICAgIHtsb2FkaW5nICYmIChcclxuICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXgganVzdGlmeS1zdGFydFwiPlxyXG4gICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJyb3VuZGVkLVsxLjhyZW1dIHJvdW5kZWQtdGwtbm9uZSBiZy13aGl0ZSBweC00IHB5LTMgdGV4dC1tdXRlZCBzaGFkb3ctc21cIj5cclxuICAgICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMiB0ZXh0LXNtXCI+XHJcbiAgICAgICAgICAgICAgICAgICAgICAgICAgPExvYWRlckNpcmNsZSBzaXplPXsxNn0gY2xhc3NOYW1lPVwiYW5pbWF0ZS1zcGluXCIgLz5cclxuICAgICAgICAgICAgICAgICAgICAgICAgICBDaGlja2VuIEhvdXNlIGlzIHR5cGluZy4uLlxyXG4gICAgICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgICAgICAgICApfVxyXG4gICAgICAgICAgICAgICAgPC8+XHJcbiAgICAgICAgICAgICAgKX1cclxuICAgICAgICAgICAgPC9kaXY+XHJcblxyXG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImJvcmRlci10IGJvcmRlci1ncmF5LTEwMCBiZy13aGl0ZSBwLTRcIj5cclxuICAgICAgICAgICAgICB7c3VnZ2VzdGVkUmVwbGllcy5sZW5ndGggPiAwICYmIChcclxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwibWItMyBmbGV4IGZsZXgtd3JhcCBnYXAtMlwiPlxyXG4gICAgICAgICAgICAgICAgICB7c3VnZ2VzdGVkUmVwbGllcy5zbGljZSgwLCA0KS5tYXAoKHJlcGx5KSA9PiAoXHJcbiAgICAgICAgICAgICAgICAgICAgPGJ1dHRvblxyXG4gICAgICAgICAgICAgICAgICAgICAga2V5PXtyZXBseX1cclxuICAgICAgICAgICAgICAgICAgICAgIHR5cGU9XCJidXR0b25cIlxyXG4gICAgICAgICAgICAgICAgICAgICAgb25DbGljaz17KCkgPT4gdm9pZCBzZW5kTWVzc2FnZShyZXBseSl9XHJcbiAgICAgICAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJyb3VuZGVkLWZ1bGwgYm9yZGVyIGJvcmRlci1wcmltYXJ5LzEwIGJnLXByaW1hcnkvNSBweC0zIHB5LTIgdGV4dC1bMTFweF0gZm9udC1ib2xkIHVwcGVyY2FzZSB0cmFja2luZy1bMC4xNmVtXSB0ZXh0LXByaW1hcnkgdHJhbnNpdGlvbiBob3ZlcjpiZy1wcmltYXJ5IGhvdmVyOnRleHQtd2hpdGVcIlxyXG4gICAgICAgICAgICAgICAgICAgID5cclxuICAgICAgICAgICAgICAgICAgICAgIHtyZXBseX1cclxuICAgICAgICAgICAgICAgICAgICA8L2J1dHRvbj5cclxuICAgICAgICAgICAgICAgICAgKSl9XHJcbiAgICAgICAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICAgICAgICApfVxyXG5cclxuICAgICAgICAgICAgICB7ZXJyb3IgJiYgPHAgY2xhc3NOYW1lPVwibWItMyB0ZXh0LXhzIGZvbnQtbWVkaXVtIHRleHQtcmVkLTUwMFwiPntlcnJvcn08L3A+fVxyXG5cclxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0zIHJvdW5kZWQtMnhsIGJnLXN1cmZhY2UgcHgtNCBweS0zXCI+XHJcbiAgICAgICAgICAgICAgICA8aW5wdXRcclxuICAgICAgICAgICAgICAgICAgdHlwZT1cInRleHRcIlxyXG4gICAgICAgICAgICAgICAgICB2YWx1ZT17aW5wdXR9XHJcbiAgICAgICAgICAgICAgICAgIG9uQ2hhbmdlPXsoZSkgPT4gc2V0SW5wdXQoZS50YXJnZXQudmFsdWUpfVxyXG4gICAgICAgICAgICAgICAgICBvbktleURvd249eyhlKSA9PiB7XHJcbiAgICAgICAgICAgICAgICAgICAgaWYgKGUua2V5ID09PSBcIkVudGVyXCIpIHtcclxuICAgICAgICAgICAgICAgICAgICAgIGUucHJldmVudERlZmF1bHQoKTtcclxuICAgICAgICAgICAgICAgICAgICAgIHZvaWQgc2VuZE1lc3NhZ2UoaW5wdXQpO1xyXG4gICAgICAgICAgICAgICAgICAgIH1cclxuICAgICAgICAgICAgICAgICAgfX1cclxuICAgICAgICAgICAgICAgICAgcGxhY2Vob2xkZXI9XCJBc2sgYWJvdXQgbWVudSwgYm9va2luZywgbG9jYXRpb24sIG9yIGRlbGl2ZXJ5Li4uXCJcclxuICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwiZmxleC0xIGJnLXRyYW5zcGFyZW50IHRleHQtc20gb3V0bGluZS1ub25lXCJcclxuICAgICAgICAgICAgICAgIC8+XHJcbiAgICAgICAgICAgICAgICA8YnV0dG9uXHJcbiAgICAgICAgICAgICAgICAgIHR5cGU9XCJidXR0b25cIlxyXG4gICAgICAgICAgICAgICAgICBvbkNsaWNrPXsoKSA9PiB2b2lkIHNlbmRNZXNzYWdlKGlucHV0KX1cclxuICAgICAgICAgICAgICAgICAgZGlzYWJsZWQ9e2xvYWRpbmd9XHJcbiAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cImZsZXggaC0xMCB3LTEwIGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWNlbnRlciByb3VuZGVkLXhsIGJnLXByaW1hcnkgdGV4dC13aGl0ZSB0cmFuc2l0aW9uIGhvdmVyOmJnLXByaW1hcnktc3Ryb25nIGRpc2FibGVkOm9wYWNpdHktNjBcIlxyXG4gICAgICAgICAgICAgICAgPlxyXG4gICAgICAgICAgICAgICAgICA8U2VuZCBzaXplPXsxOH0gLz5cclxuICAgICAgICAgICAgICAgIDwvYnV0dG9uPlxyXG4gICAgICAgICAgICAgIDwvZGl2PlxyXG4gICAgICAgICAgICA8L2Rpdj5cclxuICAgICAgICAgIDwvbW90aW9uLmRpdj5cclxuICAgICAgICApfVxyXG4gICAgICA8L0FuaW1hdGVQcmVzZW5jZT5cclxuICAgIDwvPlxyXG4gICk7XHJcbn07XHJcblxyXG5leHBvcnQgZGVmYXVsdCBXaGF0c0FwcEJvdDtcclxuIl0sImZpbGUiOiJDOi9Vc2Vycy9NLkFobWFkL0Rvd25sb2Fkcy9DaGlja2VuLUhvdXNlLW1haW4gKDEpL0NoaWNrZW4tSG91c2UtbWFpbi9mcm9udGVuZC9zcmMvY29tcG9uZW50cy93aGF0c2FwcC9XaGF0c0FwcEJvdC50c3gifQ==

@@ -53,7 +53,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="relative overflow-hidden border-t border-white/10 bg-[#120a07] pb-10 pt-24 text-white">
+    <footer className="relative overflow-hidden border-t border-white/10 bg-[#120a07] pb-10 pt-20 text-white">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,170,73,0.22),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(210,74,21,0.18),transparent_28%)]" />
 
       <motion.div
@@ -76,32 +76,34 @@ const Footer = () => {
       </motion.div>
 
       <div className="relative z-10 mx-auto max-w-[1800px] px-4 sm:px-6 lg:px-12">
-        <div className="mb-16 mt-10 rounded-[2.5rem] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,170,73,0.08),rgba(255,255,255,0.02))] p-6 shadow-[0_30px_80px_rgba(0,0,0,0.35)] backdrop-blur-xl">
-          <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-[1.3fr,0.9fr]">
+        <div className="mb-10 mt-6 rounded-3xl border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,170,73,0.08),rgba(255,255,255,0.02))] p-4 shadow-[0_22px_60px_rgba(0,0,0,0.28)] backdrop-blur-xl sm:p-5 lg:p-6">
+          <div className="grid grid-cols-1 gap-6">
             <div>
-              <span className="mb-4 inline-flex items-center gap-3 rounded-full border border-white/12 bg-white/6 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.38em] text-accent">
+              <span className="mb-3 inline-flex items-center gap-3 rounded-full border border-white/12 bg-white/6 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.32em] text-accent">
                 Renala Khurd
               </span>
-              <h2 className="max-w-3xl text-4xl font-anton uppercase leading-[0.92] tracking-tight md:text-6xl">
+              <h2 className="max-w-5xl font-anton text-3xl uppercase leading-[0.95] tracking-tight sm:text-4xl lg:text-5xl">
                 A premium local restaurant experience, built for meals, families, and events.
               </h2>
             </div>
-            <div className="grid gap-4">
+            <div className="grid gap-3 md:grid-cols-3">
               {highlights.map((item) => (
                 <motion.div
                   key={item.title}
                   whileHover={{ y: -4, scale: 1.01 }}
-                  className="rounded-[1.8rem] border border-white/10 bg-black/20 px-5 py-4"
+                  className="flex min-h-[108px] items-start gap-4 rounded-2xl border border-white/10 bg-black/20 px-4 py-4"
                 >
-                  <div className="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-accent text-dark">
+                  <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent text-dark">
                     {item.icon}
                   </div>
-                  <p className="font-anton text-2xl uppercase tracking-tight">
-                    {item.title}
-                  </p>
-                  <p className="mt-1 text-sm leading-6 text-white/60">
-                    {item.detail}
-                  </p>
+                  <div className="min-w-0">
+                    <p className="font-anton text-xl uppercase tracking-tight">
+                      {item.title}
+                    </p>
+                    <p className="mt-1 text-xs leading-5 text-white/60">
+                      {item.detail}
+                    </p>
+                  </div>
                 </motion.div>
               ))}
             </div>
