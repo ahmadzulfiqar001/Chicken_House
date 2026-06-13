@@ -465,6 +465,7 @@ const bookingRequestSchema = new Schema(
     customerPhone: { type: String, default: "" },
     eventType: { type: String, default: "", index: true },
     zone: { type: String, default: "", index: true },
+    tableId: { type: Number, default: 0, index: true },
     guests: { type: Number, default: 0 },
     package: { type: String, default: "" },
     date: { type: String, default: "", index: true },

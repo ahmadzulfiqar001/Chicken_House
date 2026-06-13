@@ -12,12 +12,6 @@ type LoginLocationState = {
 
 const BACKOFFICE_ROLES: UserRole[] = ["admin", "manager", "hr", "rider", "staff"];
 
-const portalHighlights = [
-  { icon: CheckCircle2, label: "Orders", detail: "Live queue" },
-  { icon: Lock, label: "Access", detail: "Role based" },
-  { icon: Mail, label: "Support", detail: "Inbox ready" },
-];
-
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -117,27 +111,38 @@ const LoginPage = () => {
             </div>
           </Link>
 
-          <div className="relative z-10 my-8 rounded-2xl border border-white/10 bg-white/[0.06] p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
-            <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-accent">Portal Flow</p>
-            <div className="mt-5 grid grid-cols-3 gap-3">
-              {portalHighlights.map((item) => {
-                const HighlightIcon = item.icon;
+          <div className="relative z-10 flex flex-1 flex-col justify-center py-10">
+            <div className="max-w-sm">
+              <div className="flex items-end gap-4 border-y border-white/10 py-6">
+                <span className="font-anton text-7xl leading-none text-accent">CH</span>
+                <div className="pb-2">
+                  <p className="text-xs font-bold uppercase tracking-[0.28em] text-orange-300">
+                    A Symbol Of
+                  </p>
+                  <p className="mt-2 font-display text-3xl font-bold leading-tight">
+                    Quality & Freshness
+                  </p>
+                </div>
+              </div>
 
-                return (
-                  <div key={item.label} className="rounded-xl border border-white/10 bg-black/18 p-3">
-                    <HighlightIcon size={18} className="text-accent" />
-                    <p className="mt-3 font-anton text-lg uppercase tracking-tight">{item.label}</p>
-                    <p className="mt-1 text-[11px] leading-4 text-white/52">{item.detail}</p>
-                  </div>
-                );
-              })}
+              <div className="mt-8 grid grid-cols-2 gap-4">
+                <div className="border-l border-accent/60 pl-4">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-white/42">
+                    Location
+                  </p>
+                  <p className="mt-2 text-sm font-bold text-white/85">Renala Khurd</p>
+                </div>
+                <div className="border-l border-accent/60 pl-4">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-white/42">
+                    Brand
+                  </p>
+                  <p className="mt-2 text-sm font-bold text-white/85">Chicken House</p>
+                </div>
+              </div>
             </div>
-            <p className="mt-5 text-sm leading-7 text-white/62">
-              Orders, bookings, staff work, and customer messages stay ready inside one protected workspace.
-            </p>
           </div>
 
-          <div className="relative z-10 mt-auto">
+          <div className="relative z-10">
             <p className="text-xs font-bold uppercase tracking-[0.28em] text-white/45">
               Authorized access
             </p>

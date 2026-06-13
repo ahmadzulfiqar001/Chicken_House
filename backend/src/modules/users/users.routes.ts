@@ -141,15 +141,23 @@ const buildStaffRecord = ({
   performanceScore: 4.0,
 });
 
-const attachLinkedProfile = (user: Record<string, unknown>) => {
+const attachLinkedProfile = (
+  user: Record<string, unknown>,
+  linkedStaffOverride?: Record<string, unknown> | null,
+  linkedCustomerOverride?: Record<string, unknown> | null,
+) => {
   const staffMemberId = Number(user.staffMemberId ?? 0);
   const customerProfileId = String(user.customerProfileId ?? "");
   const linkedStaff =
-    staffMemberId > 0
+    linkedStaffOverride !== undefined
+      ? linkedStaffOverride
+      : staffMemberId > 0
       ? db.staff.find((member) => Number(member.id) === staffMemberId) ?? null
       : null;
   const linkedCustomer =
-    customerProfileId
+    linkedCustomerOverride !== undefined
+      ? linkedCustomerOverride
+      : customerProfileId
       ? db.customers.find((customer) => String(customer.id) === customerProfileId) ?? null
       : null;
 
@@ -177,13 +185,31 @@ const attachLinkedProfile = (user: Record<string, unknown>) => {
   };
 };
 
+const loadMongoLinkedProfile = async (user: Record<string, unknown>) => {
+  const staffMemberId = Number(user.staffMemberId ?? 0);
+  const customerProfileId = String(user.customerProfileId ?? "");
+  const [linkedStaff, linkedCustomer] = await Promise.all([
+    staffMemberId > 0 ? StaffModel.findOne({ id: staffMemberId }).lean() : null,
+    customerProfileId ? CustomerModel.findOne({ id: customerProfileId }).lean() : null,
+  ]);
+
+  return attachLinkedProfile(
+    user,
+    linkedStaff as Record<string, unknown> | null,
+    linkedCustomer as Record<string, unknown> | null,
+  );
+};
+
 router.get("/", requirePermission("users:view"), async (req, res) => {
   if (isMongoConfigured()) {
     const users = await UserAccountModel.find({ role: { $in: ["admin", ...managedLoginRoles] } })
       .select("-passwordHash")
       .sort({ createdAt: -1 })
       .lean();
-    return res.json(users);
+    const linkedUsers = await Promise.all(
+      users.map((user) => loadMongoLinkedProfile(user as Record<string, unknown>)),
+    );
+    return res.json(linkedUsers);
   }
 
   const users = db.userAccounts
@@ -202,7 +228,7 @@ router.get("/:id", requirePermission("users:view"), async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    return res.json(user);
+    return res.json(await loadMongoLinkedProfile(user as Record<string, unknown>));
   }
 
   const user = db.userAccounts.find((entry) => entry.id === req.params.id);
@@ -358,25 +384,77 @@ router.patch("/:id", requirePermission("users:update"), async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    if (req.body?.name) user.name = String(req.body.name).trim();
-    if (isPrimaryAdminAccount(user.toObject())) {
-      if (req.body?.role && String(req.body.role) !== "admin") {
+    const currentUser = user.toObject() as Record<string, unknown>;
+    const nextRole = String(req.body?.role ?? currentUser.role ?? "user") as UserRole;
+
+    if (isPrimaryAdminAccount(currentUser)) {
+      if (nextRole !== "admin") {
         return res.status(400).json({ message: "The primary admin role is locked." });
       }
-    } else if (req.body?.role) {
-      const nextRole = String(req.body.role) as UserRole;
-      if (!allowedRoles.includes(nextRole)) {
-        return res.status(400).json({ message: "Only manager, HR, rider, and staff roles can be assigned here." });
-      }
-      user.role = nextRole;
+    } else if (!allowedRoles.includes(nextRole)) {
+      return res.status(400).json({ message: "Only manager, HR, rider, and staff roles can be assigned here." });
     }
-    if (req.body?.status) user.status = String(req.body.status);
-    if (req.body?.phone !== undefined) user.phone = String(req.body.phone).trim();
+
+    const nextStatus = String(req.body?.status ?? currentUser.status ?? "Active");
+    const nextName = String(req.body?.name ?? currentUser.name ?? "").trim() || String(currentUser.name ?? "");
+    const nextPhone = req.body?.phone !== undefined ? String(req.body.phone).trim() : String(currentUser.phone ?? "");
+    const nextShift = String(req.body?.shift ?? roleShiftMap[nextRole] ?? "Morning").trim();
+    const nextDepartment = String(req.body?.department ?? roleDepartmentMap[nextRole] ?? "").trim();
+    const nextSalary = Math.max(0, Number(req.body?.salary ?? 0));
+    const nextAddress = String(req.body?.address ?? "").trim();
+    const nextEmergencyContact = String(req.body?.emergencyContact ?? "").trim();
+
+    user.name = nextName;
+    user.role = nextRole;
+    user.status = nextStatus;
+    user.phone = nextPhone;
     if (req.body?.password) user.passwordHash = hashPassword(String(req.body.password));
-    user.avatarInitials = buildInitials(String(user.name));
+    user.avatarInitials = buildInitials(nextName);
+
+    if (isStaffRole(nextRole)) {
+      if (!Number(user.staffMemberId ?? 0)) {
+        const latest = await StaffModel.findOne().sort({ id: -1 }).select("id").lean();
+        const staffId = Number(latest?.id ?? 0) + 1;
+        await StaffModel.create(
+          buildStaffRecord({
+            id: staffId,
+            userAccountId: String(user.id),
+            name: nextName,
+            email: String(user.email),
+            phone: nextPhone,
+            role: nextRole,
+            status: nextStatus,
+            shift: nextShift,
+            department: nextDepartment,
+            salary: nextSalary,
+            address: nextAddress,
+            emergencyContact: nextEmergencyContact,
+          }),
+        );
+        user.staffMemberId = staffId;
+      } else {
+        await StaffModel.findOneAndUpdate(
+          { id: Number(user.staffMemberId) },
+          {
+            name: nextName,
+            email: String(user.email),
+            phone: nextPhone,
+            role: roleLabelMap[nextRole],
+            status: toStaffStatus(nextStatus),
+            shift: nextShift,
+            department: nextDepartment,
+            salary: nextSalary,
+            address: nextAddress,
+            emergencyContact: nextEmergencyContact,
+            userAccountId: String(user.id),
+          },
+          { runValidators: true },
+        );
+      }
+    }
 
     await user.save();
-    return res.json(sanitizeUser(user.toObject()));
+    return res.json(await loadMongoLinkedProfile(user.toObject() as Record<string, unknown>));
   }
 
   const user = db.userAccounts.find((entry) => entry.id === req.params.id);
@@ -491,6 +569,17 @@ router.delete("/:id", requirePermission("users:delete"), async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    await StaffModel.deleteOne({
+      $or: [
+        { id: Number(deleted.staffMemberId ?? 0) },
+        { userAccountId: String(deleted.id ?? "") },
+      ],
+    });
+
+    if (String(deleted.customerProfileId ?? "")) {
+      await CustomerModel.deleteOne({ id: String(deleted.customerProfileId) });
+    }
+
     return res.json({ message: "User deleted", user: deleted });
   }
 
@@ -505,13 +594,13 @@ router.delete("/:id", requirePermission("users:delete"), async (req, res) => {
 
   const [deleted] = db.userAccounts.splice(index, 1);
 
-  if (Number(deleted.staffMemberId ?? 0)) {
-    const staffIndex = db.staff.findIndex(
-      (member) => Number(member.id) === Number(deleted.staffMemberId),
-    );
-    if (staffIndex !== -1) {
-      db.staff.splice(staffIndex, 1);
-    }
+  const staffIndex = db.staff.findIndex(
+    (member) =>
+      Number(member.id) === Number(deleted.staffMemberId) ||
+      String(member.userAccountId ?? "") === String(deleted.id),
+  );
+  if (staffIndex !== -1) {
+    db.staff.splice(staffIndex, 1);
   }
 
   if (String(deleted.customerProfileId ?? "")) {

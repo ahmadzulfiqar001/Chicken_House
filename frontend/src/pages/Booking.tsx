@@ -51,6 +51,8 @@ const BookingPage = () => {
   const [formData, setFormData] = useState({
     eventType: "",
     zone: "",
+    tableId: 0,
+    tableCapacity: 0,
     guests: "",
     package: "",
     date: "",
@@ -82,9 +84,9 @@ const BookingPage = () => {
         return "Please enter the expected number of guests.";
       }
 
-      const capacity = getZoneCapacity(formData.zone);
+      const capacity = formData.tableCapacity || getZoneCapacity(formData.zone);
       if (capacity && guests > capacity) {
-        return `Guest count exceeds the selected zone capacity of ${capacity}.`;
+        return `Guest count exceeds the selected ${formData.tableId ? "table" : "zone"} capacity of ${capacity}.`;
       }
     }
 
@@ -170,6 +172,7 @@ const BookingPage = () => {
           customerPhone: formData.phone,
           eventType: formData.eventType,
           zone: formData.zone,
+          tableId: formData.tableId,
           guests: Number(formData.guests),
           package: formData.package,
           date: formData.date,
@@ -215,7 +218,13 @@ const BookingPage = () => {
   const summaryRows = useMemo(
     () => [
       { label: "Event", value: formData.eventType ? getEventTypeLabel(formData.eventType) : "Select event", step: 1 },
-      { label: "Venue", value: formData.zone ? getZoneLabel(formData.zone) : "Select zone", step: 2 },
+      {
+        label: "Venue",
+        value: formData.zone
+          ? `${getZoneLabel(formData.zone)}${formData.tableId ? ` / Table ${formData.tableId}` : ""}`
+          : "Select zone",
+        step: 2,
+      },
       { label: "Guests", value: formData.guests || "Add guests", step: 2 },
       { label: "Package", value: formData.package ? getPackageLabel(formData.package) : "Select package", step: 3 },
       {
@@ -227,7 +236,7 @@ const BookingPage = () => {
         step: 4,
       },
     ],
-    [formData.date, formData.eventType, formData.guests, formData.package, formData.time, formData.zone],
+    [formData.date, formData.eventType, formData.guests, formData.package, formData.tableId, formData.time, formData.zone],
   );
 
   return (
@@ -399,14 +408,37 @@ const BookingPage = () => {
                       Pick the venue zone and expected guest count. Capacities are checked before submission.
                     </p>
 
-                    <SeatingMap />
+                    <SeatingMap
+                      selectedTableId={formData.tableId}
+                      date={formData.date}
+                      time={formData.time}
+                      onSelectTable={(table) =>
+                        setFormData((current) => ({
+                          ...current,
+                          zone: table.zoneId,
+                          tableId: table.id,
+                          tableCapacity: table.capacity,
+                          guests:
+                            current.guests && Number(current.guests) > table.capacity
+                              ? String(table.capacity)
+                              : current.guests,
+                        }))
+                      }
+                    />
 
                     <div className="grid gap-6 md:grid-cols-3">
                       {zones.map((zone) => (
                         <button
                           key={zone.id}
                           type="button"
-                          onClick={() => setFormData((current) => ({ ...current, zone: zone.id }))}
+                          onClick={() =>
+                            setFormData((current) => ({
+                              ...current,
+                              zone: zone.id,
+                              tableId: 0,
+                              tableCapacity: 0,
+                            }))
+                          }
                           className={`overflow-hidden rounded-[2rem] border-2 text-left transition-all ${
                             formData.zone === zone.id
                               ? "border-primary shadow-xl shadow-primary/10"
@@ -449,7 +481,7 @@ const BookingPage = () => {
                             type="number"
                             placeholder="e.g. 50"
                             min="1"
-                            max={selectedZone?.capacity ?? 200}
+                            max={formData.tableCapacity || selectedZone?.capacity || 200}
                             value={formData.guests}
                             onChange={(event) =>
                               setFormData((current) => ({ ...current, guests: event.target.value }))
@@ -742,7 +774,10 @@ const BookingPage = () => {
                       </div>
                       <div className="rounded-[2rem] bg-surface p-5">
                         <p className="text-xs font-bold uppercase tracking-widest text-muted">Venue</p>
-                        <p className="mt-3 font-bold text-dark">{getZoneLabel(formData.zone)}</p>
+                        <p className="mt-3 font-bold text-dark">
+                          {getZoneLabel(formData.zone)}
+                          {formData.tableId ? ` / Table ${formData.tableId}` : ""}
+                        </p>
                       </div>
                       <div className="rounded-[2rem] bg-surface p-5">
                         <p className="text-xs font-bold uppercase tracking-widest text-muted">Guests</p>
@@ -767,6 +802,8 @@ const BookingPage = () => {
                           setFormData({
                             eventType: "",
                             zone: "",
+                            tableId: 0,
+                            tableCapacity: 0,
                             guests: "",
                             package: "",
                             date: "",

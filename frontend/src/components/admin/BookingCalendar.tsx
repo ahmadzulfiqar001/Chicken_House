@@ -10,6 +10,7 @@ type BookingRecord = {
   customerPhone: string;
   eventType: string;
   zone: string;
+  tableId?: number;
   guests: number;
   package: string;
   date: string;

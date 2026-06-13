@@ -32,6 +32,7 @@ type BookingRecord = {
   customerPhone: string;
   eventType: string;
   zone: string;
+  tableId?: number;
   guests: number;
   package: string;
   date: string;
@@ -207,7 +208,10 @@ const BookingManagement = ({ focusBookingId }: { focusBookingId?: string } = {})
                       </div>
                       <div className="rounded-2xl bg-white p-4">
                         <p className="text-xs font-bold uppercase tracking-widest text-muted">Zone</p>
-                        <p className="mt-2 font-bold text-dark">{getZoneLabel(selectedBooking.zone)}</p>
+                        <p className="mt-2 font-bold text-dark">
+                          {getZoneLabel(selectedBooking.zone)}
+                          {selectedBooking.tableId ? ` / Table ${selectedBooking.tableId}` : ""}
+                        </p>
                       </div>
                       <div className="rounded-2xl bg-white p-4">
                         <p className="text-xs font-bold uppercase tracking-widest text-muted">Guests</p>
@@ -394,7 +398,10 @@ const BookingManagement = ({ focusBookingId }: { focusBookingId?: string } = {})
                     <td className="py-6">
                       <div className="space-y-1 text-sm">
                         <p className="font-bold text-dark">{getEventTypeLabel(booking.eventType)}</p>
-                        <p className="text-muted">{getZoneLabel(booking.zone)}</p>
+                        <p className="text-muted">
+                          {getZoneLabel(booking.zone)}
+                          {booking.tableId ? ` / Table ${booking.tableId}` : ""}
+                        </p>
                       </div>
                     </td>
                     <td className="py-6 font-bold text-dark">{booking.guests}</td>

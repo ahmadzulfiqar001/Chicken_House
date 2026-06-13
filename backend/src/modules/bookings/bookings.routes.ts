@@ -9,6 +9,98 @@ const router = express.Router();
 
 const validStatuses = ["Pending", "Confirmed", "Completed", "Cancelled"];
 
+const normalizeSlot = (value: unknown) => String(value ?? "").trim();
+
+const loadConfirmedConflict = async ({
+  zone,
+  tableId,
+  date,
+  time,
+  excludeId = "",
+}: {
+  zone: string;
+  tableId: number;
+  date: string;
+  time: string;
+  excludeId?: string;
+}) => {
+  const match: Record<string, unknown> = {
+    status: "Confirmed",
+    date,
+    time,
+  };
+
+  match.zone = zone;
+
+  if (tableId > 0) {
+    match.$or = [{ tableId }, { tableId: 0 }, { tableId: { $exists: false } }];
+  }
+
+  if (isMongoConfigured()) {
+    return BookingRequestModel.findOne(
+      excludeId ? { ...match, id: { $ne: excludeId } } : match,
+    ).lean();
+  }
+
+  return db.bookings.find(
+    (item) =>
+      item.status === "Confirmed" &&
+      item.date === date &&
+      item.time === time &&
+      (tableId > 0
+        ? Number((item as Record<string, unknown>).tableId ?? 0) === tableId ||
+          (item.zone === zone && !Number((item as Record<string, unknown>).tableId ?? 0))
+        : item.zone === zone) &&
+      (!excludeId || item.id !== excludeId),
+  ) ?? null;
+};
+
+router.get("/availability", async (req, res) => {
+  const date = normalizeSlot(req.query.date);
+  const time = normalizeSlot(req.query.time);
+  const zone = normalizeSlot(req.query.zone);
+
+  const match: Record<string, string> = {
+    status: "Confirmed",
+  };
+
+  if (date && time) {
+    match.date = date;
+    match.time = time;
+  }
+
+  if (zone) {
+    match.zone = zone;
+  }
+
+  const today = new Date().toISOString().slice(0, 10);
+  const confirmedBookings = isMongoConfigured()
+    ? await BookingRequestModel.find(
+        date && time ? match : { ...match, date: { $gte: today } },
+      ).select("id zone tableId date time guests").lean()
+    : db.bookings.filter((item) =>
+        item.status === "Confirmed" &&
+        (date && time ? item.date === date && item.time === time : item.date >= today) &&
+        (!zone || item.zone === zone),
+      );
+
+  const reservations = confirmedBookings.map((booking) => ({
+    id: String(booking.id),
+    zone: String(booking.zone),
+    tableId: Number((booking as Record<string, unknown>).tableId ?? 0),
+    date: String(booking.date),
+    time: String(booking.time),
+    guests: Number(booking.guests ?? 0),
+  }));
+
+  return res.json({
+    date,
+    time,
+    reservedZones: [...new Set(reservations.map((booking) => booking.zone))],
+    reservations,
+  });
+});
+
 // View bookings - requires bookings:view permission
 router.get("/", requirePermission("bookings:view"), async (req, res) => {
   const limit = Number(req.query.limit ?? 0);
@@ -47,6 +139,7 @@ router.post("/", async (req, res) => {
     customerPhone: String(req.body?.customerPhone ?? "").trim(),
     eventType: String(req.body?.eventType ?? "").trim(),
     zone: String(req.body?.zone ?? "").trim(),
+    tableId: Math.max(0, Number(req.body?.tableId ?? 0)),
     guests: Number(req.body?.guests ?? 0),
     package: String(req.body?.package ?? "").trim(),
     date: String(req.body?.date ?? "").trim(),
@@ -69,6 +162,19 @@ router.post("/", async (req, res) => {
 
   if (validationError) {
     return res.status(400).json({ message: validationError });
+  }
+
+  const confirmedConflict = await loadConfirmedConflict({
+    zone: payload.zone,
+    tableId: payload.tableId,
+    date: payload.date,
+    time: payload.time,
+  });
+
+  if (confirmedConflict) {
+    return res.status(409).json({
+      message: "This venue zone is already reserved for the selected date and time.",
+    });
   }
 
   const bookingRecord = {
@@ -99,6 +205,26 @@ router.patch("/:id", requirePermission("bookings:update"), async (req, res) => {
   }
 
   if (isMongoConfigured()) {
+    if (status === "Confirmed") {
+      const currentBooking = await BookingRequestModel.findOne({ id: req.params.id }).lean();
+
+      if (!currentBooking) {
+        return res.status(404).json({ message: "Booking not found." });
+      }
+
+      const zone = normalizeSlot(req.body?.zone ?? currentBooking.zone);
+      const tableId = Math.max(0, Number(req.body?.tableId ?? currentBooking.tableId ?? 0));
+      const date = normalizeSlot(req.body?.date ?? currentBooking.date);
+      const time = normalizeSlot(req.body?.time ?? currentBooking.time);
+      const conflict = await loadConfirmedConflict({ zone, tableId, date, time, excludeId: req.params.id });
+
+      if (conflict) {
+        return res.status(409).json({
+          message: "Another confirmed booking already reserves this zone for the selected date and time.",
+        });
+      }
+    }
+
     const updated = await BookingRequestModel.findOneAndUpdate(
       { id: req.params.id },
       req.body,
@@ -116,6 +242,26 @@ router.patch("/:id", requirePermission("bookings:update"), async (req, res) => {
 
   if (index === -1) {
     return res.status(404).json({ message: "Booking not found." });
+  }
+
+  if (status === "Confirmed") {
+    const nextBooking = {
+      ...db.bookings[index],
+      ...req.body,
+    };
+    const conflict = await loadConfirmedConflict({
+      zone: normalizeSlot(nextBooking.zone),
+      tableId: Math.max(0, Number((nextBooking as Record<string, unknown>).tableId ?? 0)),
+      date: normalizeSlot(nextBooking.date),
+      time: normalizeSlot(nextBooking.time),
+      excludeId: req.params.id,
+    });
+
+    if (conflict) {
+      return res.status(409).json({
+        message: "Another confirmed booking already reserves this zone for the selected date and time.",
+      });
+    }
   }
 
   db.bookings[index] = {
