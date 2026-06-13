@@ -341,7 +341,7 @@ const AccountsModule = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="min-w-0 space-y-6 lg:space-y-8">
       <AnimatePresence>
         {showForm ? (
           <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
@@ -357,7 +357,7 @@ const AccountsModule = () => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.96 }}
               onSubmit={saveTransaction}
-              className="relative w-full max-w-3xl rounded-[2.5rem] bg-white p-8 shadow-2xl"
+              className="relative w-full max-w-3xl rounded-[2rem] bg-white p-5 shadow-2xl sm:p-8"
             >
               <div className="mb-8 flex items-start justify-between gap-4">
                 <div>
@@ -440,31 +440,31 @@ const AccountsModule = () => {
         ) : null}
       </AnimatePresence>
 
-      <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-        <div>
-          <h2 className="text-3xl font-bold text-dark">Sales & Finance</h2>
+      <div className="flex min-w-0 flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+        <div className="min-w-0">
+          <h2 className="text-2xl font-bold text-dark sm:text-3xl">Sales & Finance</h2>
           <p className="text-muted">
             Monitor daily sales, monthly performance, expenses, profit and loss, and transaction activity.
           </p>
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex w-full flex-wrap gap-3 sm:w-auto">
           <button
             onClick={() => void fetchFinanceData()}
-            className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 font-bold text-dark transition hover:border-primary hover:text-primary"
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 font-bold text-dark transition hover:border-primary hover:text-primary sm:flex-none"
           >
             <RefreshCw size={18} className={refreshing ? "animate-spin" : ""} />
             Refresh
           </button>
           <button
             onClick={exportCsv}
-            className="inline-flex items-center gap-2 rounded-xl bg-dark px-5 py-3 font-bold text-white transition hover:bg-primary"
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-dark px-5 py-3 font-bold text-white transition hover:bg-primary sm:flex-none"
           >
             <Download size={18} />
             Export CSV
           </button>
           <button
             onClick={openCreate}
-            className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-bold text-white shadow-lg shadow-primary/20"
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-bold text-white shadow-lg shadow-primary/20 sm:flex-none"
           >
             <Plus size={18} />
             New Transaction
@@ -472,8 +472,8 @@ const AccountsModule = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4 xl:gap-6">
+        <div className="min-w-0 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-green-50 text-green-600">
             <ArrowUpRight size={24} />
           </div>
@@ -484,7 +484,7 @@ const AccountsModule = () => {
           <p className="mt-2 text-sm text-muted">Sales captured from active orders today.</p>
         </div>
 
-        <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+        <div className="min-w-0 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
             <CalendarRange size={24} />
           </div>
@@ -495,7 +495,7 @@ const AccountsModule = () => {
           <p className="mt-2 text-sm text-muted">Current month sales performance.</p>
         </div>
 
-        <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+        <div className="min-w-0 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-red-500">
             <ArrowDownRight size={24} />
           </div>
@@ -506,7 +506,7 @@ const AccountsModule = () => {
           <p className="mt-2 text-sm text-muted">Recorded debit transactions for this month.</p>
         </div>
 
-        <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+        <div className="min-w-0 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
             <Wallet size={24} />
           </div>
@@ -522,8 +522,8 @@ const AccountsModule = () => {
 
       {error ? <p className="text-sm font-medium text-red-500">{error}</p> : null}
 
-      <div className="grid grid-cols-1 gap-8 xl:grid-cols-[1.7fr_1fr]">
-        <div className="rounded-[2.8rem] border border-gray-100 bg-white p-8 shadow-sm">
+      <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.7fr)_minmax(280px,1fr)] xl:gap-8">
+        <div className="min-w-0 rounded-[2rem] border border-gray-100 bg-white p-5 shadow-sm sm:p-6 lg:rounded-[2.8rem] lg:p-8">
           <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <h3 className="text-2xl font-bold text-dark">Sales trend report</h3>
@@ -566,7 +566,7 @@ const AccountsModule = () => {
           </div>
         </div>
 
-        <div className="rounded-[2.8rem] border border-gray-100 bg-white p-8 shadow-sm">
+        <div className="min-w-0 rounded-[2rem] border border-gray-100 bg-white p-5 shadow-sm sm:p-6 lg:rounded-[2.8rem] lg:p-8">
           <div className="mb-8 flex items-center justify-between">
             <div>
               <h3 className="text-2xl font-bold text-dark">Expense breakdown</h3>
@@ -603,16 +603,16 @@ const AccountsModule = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-8 xl:grid-cols-[1.55fr_0.95fr]">
-        <div className="overflow-hidden rounded-[2.8rem] border border-gray-100 bg-white shadow-sm">
-          <div className="flex flex-col gap-4 border-b border-gray-100 p-8 xl:flex-row xl:items-center xl:justify-between">
-            <div>
-              <h3 className="text-2xl font-bold text-dark">Transaction ledger</h3>
+      <div className="grid min-w-0 grid-cols-1 gap-6 2xl:grid-cols-[minmax(0,1fr)_minmax(300px,360px)] 2xl:gap-8">
+        <div className="min-w-0 overflow-hidden rounded-[2rem] border border-gray-100 bg-white shadow-sm lg:rounded-[2.8rem]">
+          <div className="flex flex-col gap-4 border-b border-gray-100 p-5 sm:p-6 xl:flex-row xl:items-center xl:justify-between lg:p-8">
+            <div className="min-w-0">
+              <h3 className="text-xl font-bold text-dark sm:text-2xl">Transaction ledger</h3>
               <p className="text-sm text-muted">Track credits, debits, dates, and finance categories.</p>
             </div>
 
-            <div className="flex flex-col gap-3 md:flex-row">
-              <div className="relative min-w-[260px]">
+            <div className="flex w-full flex-col gap-3 sm:flex-row xl:w-auto">
+              <div className="relative w-full sm:min-w-[220px] md:min-w-[260px]">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={18} />
                 <input
                   type="text"
@@ -625,7 +625,7 @@ const AccountsModule = () => {
               <select
                 value={typeFilter}
                 onChange={(event) => setTypeFilter(event.target.value as "All" | "Credit" | "Debit")}
-                className="rounded-full bg-surface px-5 py-3 outline-none transition focus:bg-white"
+                className="w-full rounded-full bg-surface px-5 py-3 outline-none transition focus:bg-white sm:w-auto"
               >
                 <option value="All">All types</option>
                 <option value="Credit">Credit</option>
@@ -634,28 +634,39 @@ const AccountsModule = () => {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[900px] text-left">
+          <div className="max-w-full overflow-x-auto overscroll-x-contain">
+            <table className="w-full min-w-[1000px] table-fixed text-left">
+              <colgroup>
+                <col className="w-[135px]" />
+                <col className="w-[270px]" />
+                <col className="w-[120px]" />
+                <col className="w-[105px]" />
+                <col className="w-[125px]" />
+                <col className="w-[125px]" />
+                <col className="w-[120px]" />
+              </colgroup>
               <thead>
                 <tr className="bg-surface text-xs font-bold uppercase tracking-widest text-muted">
-                  <th className="px-8 py-4">ID</th>
-                  <th className="px-8 py-4">Source</th>
-                  <th className="px-8 py-4">Category</th>
-                  <th className="px-8 py-4">Type</th>
-                  <th className="px-8 py-4">Amount</th>
-                  <th className="px-8 py-4">Date</th>
-                  <th className="px-8 py-4">Actions</th>
+                  <th className="px-4 py-4 lg:px-6">ID</th>
+                  <th className="px-4 py-4 lg:px-6">Source</th>
+                  <th className="px-4 py-4 lg:px-6">Category</th>
+                  <th className="px-4 py-4 lg:px-6">Type</th>
+                  <th className="px-4 py-4 lg:px-6">Amount</th>
+                  <th className="px-4 py-4 lg:px-6">Date</th>
+                  <th className="sticky right-0 z-20 border-l border-gray-100 bg-surface px-4 py-4 text-right lg:px-6">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {filteredTransactions.map((item) => (
-                  <tr key={item.id} className="hover:bg-surface/40">
-                    <td className="px-8 py-5 font-mono text-sm text-dark">{item.id}</td>
-                    <td className="px-8 py-5">
-                      <span className="block font-bold text-dark">{item.source}</span>
+                  <tr key={item.id} className="group hover:bg-surface/40">
+                    <td className="max-w-[140px] break-all px-4 py-5 font-mono text-xs text-dark lg:px-6 lg:text-sm">
+                      {item.id}
                     </td>
-                    <td className="px-8 py-5 text-sm text-muted">{item.category}</td>
-                    <td className="px-8 py-5">
+                    <td className="px-4 py-5 lg:px-6">
+                      <span className="block max-w-[230px] break-words font-bold text-dark">{item.source}</span>
+                    </td>
+                    <td className="px-4 py-5 text-sm text-muted lg:px-6">{item.category}</td>
+                    <td className="px-4 py-5 lg:px-6">
                       <span
                         className={`rounded-full px-3 py-1 text-xs font-bold ${
                           item.type === "Credit" ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"
@@ -664,16 +675,16 @@ const AccountsModule = () => {
                         {item.type}
                       </span>
                     </td>
-                    <td className="px-8 py-5 font-bold text-dark">{formatCurrency(item.amount)}</td>
-                    <td className="px-8 py-5 text-sm text-muted">
+                    <td className="whitespace-nowrap px-4 py-5 font-bold text-dark lg:px-6">{formatCurrency(item.amount)}</td>
+                    <td className="whitespace-nowrap px-4 py-5 text-sm text-muted lg:px-6">
                       {new Date(item.date).toLocaleDateString("en-PK", {
                         day: "2-digit",
                         month: "short",
                         year: "numeric",
                       })}
                     </td>
-                    <td className="px-8 py-5">
-                      <div className="flex gap-2">
+                    <td className="sticky right-0 z-20 border-l border-gray-100 bg-white px-4 py-5 shadow-[-12px_0_18px_-18px_rgba(0,0,0,0.35)] transition group-hover:bg-surface lg:px-6">
+                      <div className="flex justify-end gap-2">
                         <button
                           onClick={() => openEdit(item)}
                           className="rounded-lg bg-surface-strong p-2 text-dark transition hover:bg-primary hover:text-white"
@@ -698,57 +709,57 @@ const AccountsModule = () => {
           </div>
         </div>
 
-        <div className="space-y-8">
-          <div className="rounded-[2.8rem] border border-gray-100 bg-white p-8 shadow-sm">
+        <div className="grid min-w-0 gap-6 md:grid-cols-2 2xl:grid-cols-1 2xl:gap-8">
+          <div className="min-w-0 rounded-[2rem] border border-gray-100 bg-white p-5 shadow-sm sm:p-6 lg:rounded-[2.8rem] lg:p-8">
             <div className="mb-8 flex items-center justify-between">
-              <div>
-                <h3 className="text-2xl font-bold text-dark">Profit & loss</h3>
+              <div className="min-w-0">
+                <h3 className="text-xl font-bold text-dark sm:text-2xl">Profit & loss</h3>
                 <p className="text-sm text-muted">A quick summary of revenue, costs, and net position.</p>
               </div>
               <LineChart size={22} className="text-primary" />
             </div>
 
             <div className="space-y-5">
-              <div className="flex items-center justify-between rounded-2xl bg-surface px-5 py-4">
+              <div className="flex items-center justify-between gap-4 rounded-2xl bg-surface px-5 py-4">
                 <span className="text-muted">Order revenue</span>
-                <span className="font-bold text-dark">{formatCurrency(summary?.profitLoss.orderRevenue ?? 0)}</span>
+                <span className="text-right font-bold text-dark">{formatCurrency(summary?.profitLoss.orderRevenue ?? 0)}</span>
               </div>
-              <div className="flex items-center justify-between rounded-2xl bg-surface px-5 py-4">
+              <div className="flex items-center justify-between gap-4 rounded-2xl bg-surface px-5 py-4">
                 <span className="text-muted">Other income</span>
-                <span className="font-bold text-dark">{formatCurrency(summary?.profitLoss.otherIncome ?? 0)}</span>
+                <span className="text-right font-bold text-dark">{formatCurrency(summary?.profitLoss.otherIncome ?? 0)}</span>
               </div>
-              <div className="flex items-center justify-between rounded-2xl bg-surface px-5 py-4">
+              <div className="flex items-center justify-between gap-4 rounded-2xl bg-surface px-5 py-4">
                 <span className="text-muted">Total expenses</span>
-                <span className="font-bold text-dark">{formatCurrency(summary?.profitLoss.totalExpenses ?? 0)}</span>
+                <span className="text-right font-bold text-dark">{formatCurrency(summary?.profitLoss.totalExpenses ?? 0)}</span>
               </div>
-              <div className="flex items-center justify-between rounded-2xl bg-primary px-5 py-4 text-white">
+              <div className="flex items-center justify-between gap-4 rounded-2xl bg-primary px-5 py-4 text-white">
                 <span className="font-semibold">Net profit / loss</span>
-                <span className="text-xl font-display font-bold">{formatCurrency(summary?.profitLoss.netProfit ?? 0)}</span>
+                <span className="text-right text-xl font-display font-bold">{formatCurrency(summary?.profitLoss.netProfit ?? 0)}</span>
               </div>
             </div>
           </div>
 
-          <div className="rounded-[2.8rem] border border-gray-100 bg-white p-8 shadow-sm">
+          <div className="min-w-0 rounded-[2rem] border border-gray-100 bg-white p-5 shadow-sm sm:p-6 lg:rounded-[2.8rem] lg:p-8">
             <div className="mb-8 flex items-center justify-between">
-              <div>
-                <h3 className="text-2xl font-bold text-dark">Quick totals</h3>
+              <div className="min-w-0">
+                <h3 className="text-xl font-bold text-dark sm:text-2xl">Quick totals</h3>
                 <p className="text-sm text-muted">Ledger totals from finance entries.</p>
               </div>
               <CreditCard size={22} className="text-primary" />
             </div>
 
             <div className="space-y-5">
-              <div className="flex items-center justify-between rounded-2xl bg-green-50 px-5 py-4">
+              <div className="flex items-center justify-between gap-4 rounded-2xl bg-green-50 px-5 py-4">
                 <span className="text-green-700">Credits recorded</span>
-                <span className="font-bold text-green-700">{formatCurrency(totalCredits)}</span>
+                <span className="text-right font-bold text-green-700">{formatCurrency(totalCredits)}</span>
               </div>
-              <div className="flex items-center justify-between rounded-2xl bg-red-50 px-5 py-4">
+              <div className="flex items-center justify-between gap-4 rounded-2xl bg-red-50 px-5 py-4">
                 <span className="text-red-600">Debits recorded</span>
-                <span className="font-bold text-red-600">{formatCurrency(totalDebits)}</span>
+                <span className="text-right font-bold text-red-600">{formatCurrency(totalDebits)}</span>
               </div>
-              <div className="flex items-center justify-between rounded-2xl bg-surface px-5 py-4">
+              <div className="flex items-center justify-between gap-4 rounded-2xl bg-surface px-5 py-4">
                 <span className="text-muted">Transaction count</span>
-                <span className="font-bold text-dark">{transactions.length}</span>
+                <span className="text-right font-bold text-dark">{transactions.length}</span>
               </div>
             </div>
           </div>

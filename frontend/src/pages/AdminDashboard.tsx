@@ -280,7 +280,7 @@ const AdminDashboard = () => {
   const panelMeta = PANEL_META[currentRole];
 
   return (
-    <div className="min-h-screen bg-surface flex">
+    <div className="min-h-screen bg-surface flex overflow-x-hidden">
       {/* Mobile overlay */}
       {isSidebarOpen && (
         <div
@@ -343,10 +343,10 @@ const AdminDashboard = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 transition-all duration-300 md:ml-[280px]">
+      <main className="min-w-0 flex-1 transition-all duration-300 md:ml-[280px]">
         {/* Top Header */}
         <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 px-4 sm:px-8 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-4">
+          <div className="min-w-0 flex items-center gap-4">
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors text-muted"
@@ -354,10 +354,10 @@ const AdminDashboard = () => {
             >
               <Menu size={24} />
             </button>
-            <h1 className="text-2xl font-bold text-dark capitalize">{activeTab}</h1>
+            <h1 className="truncate text-2xl font-bold text-dark capitalize">{activeTab}</h1>
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="shrink-0 flex items-center gap-3 sm:gap-6">
             <div className="relative hidden md:block">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
               <input
@@ -389,7 +389,7 @@ const AdminDashboard = () => {
         </header>
 
         {/* Dashboard Content */}
-        <div className="p-8">
+        <div className="min-w-0 p-4 sm:p-6 lg:p-8">
           <AnimatePresence mode="wait">
             {activeTab === "dashboard" && (
               <motion.div
@@ -525,6 +525,7 @@ const AdminDashboard = () => {
                 key="accounts"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
+                className="min-w-0"
               >
                 <AccountsModule />
               </motion.div>
