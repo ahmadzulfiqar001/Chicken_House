@@ -30,61 +30,28 @@ type SignupPayload = {
   phone?: string;
 };
 
-type AuthResponse =
+type LoginResponse =
   | { ok: true; user: AuthUser }
   | { ok: false; message: string };
+
+type SignupResponse =
+  | { ok: true; message: string; email: string }
+  | { ok: false; message: string };
+
+type SocialProvider = "google" | "facebook";
 
 type AuthContextType = {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (payload: LoginPayload) => Promise<AuthResponse>;
-  signup: (payload: SignupPayload) => Promise<AuthResponse>;
+  login: (payload: LoginPayload) => Promise<LoginResponse>;
+  signup: (payload: SignupPayload) => Promise<SignupResponse>;
+  socialSignup: (provider: SocialProvider) => Promise<SignupResponse>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
-  demoAccounts: Array<{ role: UserRole; email: string; password: string; label: string }>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-const demoAccounts: AuthContextType["demoAccounts"] = [
-  {
-    role: "admin",
-    email: "admin@chickenhouse.com",
-    password: "admin123",
-    label: "Admin Demo",
-  },
-  {
-    role: "manager",
-    email: "zubair@chickenhouse.com",
-    password: "manager123",
-    label: "Manager Demo",
-  },
-  {
-    role: "hr",
-    email: "hr@chickenhouse.com",
-    password: "hr123",
-    label: "HR Demo",
-  },
-  {
-    role: "rider",
-    email: "bilal@chickenhouse.com",
-    password: "rider123",
-    label: "Rider Demo",
-  },
-  {
-    role: "staff",
-    email: "ammar@chickenhouse.com",
-    password: "staff123",
-    label: "General Staff Demo",
-  },
-  {
-    role: "user",
-    email: "farhan@chickenhouse.com",
-    password: "user123",
-    label: "Customer Demo",
-  },
-];
 
 const extractError = async (response: Response) => {
   try {
@@ -170,8 +137,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       const data = await response.json();
-      setUser(data.user);
-      return { ok: true, user: data.user };
+      return {
+        ok: true,
+        message: String(data.message ?? "Account created successfully. Please sign in to continue."),
+        email: String(data.email ?? payload.email),
+      };
     } catch (error) {
       console.error("Signup failed", error);
       return {
@@ -179,6 +149,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         message: "Unable to create your account right now. Please try again.",
       };
     }
+  };
+
+  const socialSignup: AuthContextType["socialSignup"] = async (provider) => {
+    window.location.assign(`/api/auth/social/${provider}`);
+    return {
+      ok: true,
+      message: "Redirecting to secure sign-up.",
+      email: "",
+    };
   };
 
   const logout = async () => {
@@ -200,9 +179,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isLoading,
       login,
       signup,
+      socialSignup,
       logout,
       refreshUser,
-      demoAccounts,
     }),
     [user, isLoading],
   );

@@ -364,6 +364,14 @@ const StaffWorkspace = () => {
     }
   };
 
+  const acceptTask = async (task: TaskRecord) => {
+    await postAction(
+      `/api/staff-panel/tasks/${task.id}/accept`,
+      { method: "POST" },
+      "Work accepted and moved to your record.",
+    );
+  };
+
   if (loading) {
     return <div className="min-h-screen bg-surface pt-40 text-center text-muted">Loading staff workspace...</div>;
   }
@@ -542,15 +550,31 @@ const StaffWorkspace = () => {
                   <span className="rounded-full bg-surface px-4 py-2 text-xs font-bold text-primary">{summary.tasks.length} items</span>
                 </div>
                 <div className="mt-6 space-y-4">
-                  {summary.tasks.map((task) => (
+                  {summary.tasks.length ? summary.tasks.map((task) => (
                     <div key={task.id} className="rounded-[1.7rem] border border-gray-100 bg-surface/70 px-5 py-4">
-                      <div className="flex items-center justify-between gap-4">
-                        <p className="font-bold text-dark">{task.title}</p>
-                        <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-primary">{task.status}</span>
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                          <p className="font-bold text-dark">{task.title}</p>
+                          <p className="mt-2 text-sm text-muted">{task.subtitle}</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-primary">{task.status}</span>
+                          <button
+                            type="button"
+                            disabled={submitting}
+                            onClick={() => void acceptTask(task)}
+                            className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-white transition hover:bg-primary-strong disabled:opacity-60"
+                          >
+                            Accept
+                          </button>
+                        </div>
                       </div>
-                      <p className="mt-2 text-sm text-muted">{task.subtitle}</p>
                     </div>
-                  ))}
+                  )) : (
+                    <div className="rounded-[1.7rem] border border-dashed border-gray-200 bg-surface/70 px-5 py-8 text-center text-sm text-muted">
+                      No pending assigned work.
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -721,17 +745,31 @@ const StaffWorkspace = () => {
           <div className="rounded-[2.5rem] border border-gray-100 bg-white p-8 shadow-xl shadow-dark/5">
             <h2 className="text-xl font-bold text-dark">{taskLabelByRole[currentRole] ?? "My Tasks"}</h2>
             <div className="mt-6 space-y-4">
-              {summary.tasks.map((task) => (
+              {summary.tasks.length ? summary.tasks.map((task) => (
                 <div key={task.id} className="rounded-[1.6rem] border border-gray-100 px-5 py-4">
-                  <div className="flex items-center justify-between gap-4">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <p className="font-bold text-dark">{task.title}</p>
                       <p className="mt-1 text-sm text-muted">{task.subtitle}</p>
                     </div>
-                    <span className="rounded-full bg-surface px-4 py-2 text-xs font-bold text-primary">{task.status}</span>
+                    <div className="flex items-center gap-3">
+                      <span className="rounded-full bg-surface px-4 py-2 text-xs font-bold text-primary">{task.status}</span>
+                      <button
+                        type="button"
+                        disabled={submitting}
+                        onClick={() => void acceptTask(task)}
+                        className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-white transition hover:bg-primary-strong disabled:opacity-60"
+                      >
+                        Accept
+                      </button>
+                    </div>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="rounded-[1.6rem] border border-dashed border-gray-200 px-5 py-8 text-center text-sm text-muted">
+                  No pending assigned work.
+                </div>
+              )}
             </div>
           </div>
         ) : null}

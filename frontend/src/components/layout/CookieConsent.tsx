@@ -1,50 +1,64 @@
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { Cookie } from "lucide-react";
 import { Link } from "react-router-dom";
+import {
+  acceptCookieConsent,
+  clearCookieConsent,
+  COOKIE_CONSENT_CHANGED_EVENT,
+  hasAcceptedCookieConsent,
+} from "../../lib/cookieConsent";
 
-const CONSENT_KEY = "chicken_house_cookie_consent";
 const OPEN_EVENT = "chicken-house:open-cookie-settings";
 
-/** Re-open the cookie banner from anywhere (e.g. a Footer "Cookie settings" link). */
+/** Re-open the cookie banner from anywhere, such as the footer settings link. */
 export const openCookieSettings = () => {
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event(OPEN_EVENT));
   }
 };
 
-/**
- * Cookie consent banner. Shows once until the visitor accepts or rejects,
- * then remembers the choice in localStorage. Essential cookies (the login
- * session) always remain; this governs optional/analytics cookies.
- */
 const CookieConsent = () => {
   const [visible, setVisible] = useState(false);
+  const [notice, setNotice] = useState("");
 
   useEffect(() => {
-    try {
-      if (!localStorage.getItem(CONSENT_KEY)) {
-        setVisible(true);
-      }
-    } catch {
-      setVisible(true);
-    }
+    setVisible(!hasAcceptedCookieConsent());
   }, []);
 
-  // Allow re-opening the banner later (Footer "Cookie settings" link).
   useEffect(() => {
-    const handler = () => setVisible(true);
+    const handler = () => {
+      setNotice("");
+      setVisible(true);
+    };
+
     window.addEventListener(OPEN_EVENT, handler);
     return () => window.removeEventListener(OPEN_EVENT, handler);
   }, []);
 
+  useEffect(() => {
+    const handler = () => {
+      if (hasAcceptedCookieConsent()) {
+        setVisible(false);
+        setNotice("");
+      }
+    };
+
+    window.addEventListener(COOKIE_CONSENT_CHANGED_EVENT, handler);
+    return () => window.removeEventListener(COOKIE_CONSENT_CHANGED_EVENT, handler);
+  }, []);
+
   const decide = (choice: "accepted" | "rejected") => {
-    try {
-      localStorage.setItem(CONSENT_KEY, choice);
-    } catch {
-      // Storage may be unavailable (private mode) — just hide the banner.
+    if (choice === "accepted") {
+      acceptCookieConsent();
+      setVisible(false);
+      setNotice("");
+      return;
     }
-    setVisible(false);
+
+    clearCookieConsent();
+    setNotice("Please accept cookies to keep account login, cart, and customer panel working.");
+    setVisible(true);
   };
 
   return (
@@ -68,13 +82,13 @@ const CookieConsent = () => {
               <div>
                 <p className="font-bold text-dark">We use cookies</p>
                 <p className="mt-1 text-sm text-muted">
-                  We use essential cookies to keep you signed in and remember your cart, plus optional cookies to
-                  improve your experience. You can accept or reject optional cookies.{" "}
+                  Cookies are required for account login, cart memory, and customer sessions. Accept cookies to continue using account features.{" "}
                   <Link to="/cookies" className="font-bold text-primary hover:underline">
                     Learn more
                   </Link>
                   .
                 </p>
+                {notice ? <p className="mt-2 text-sm font-bold text-primary">{notice}</p> : null}
               </div>
             </div>
             <div className="flex shrink-0 gap-3 sm:ml-auto">

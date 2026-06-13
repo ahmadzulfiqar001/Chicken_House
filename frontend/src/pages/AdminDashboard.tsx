@@ -116,7 +116,7 @@ const AdminDashboard = () => {
   const [notificationTarget, setNotificationTarget] = useState<(NotificationTarget & { nonce: number }) | null>(null);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const currentRole = user?.role ?? "admin";
+  const currentRole = user?.role ?? "user";
   const staffWorkspaceRoles: UserRole[] = ["rider", "staff"];
 
   const sidebarLinks = useMemo(
@@ -172,6 +172,18 @@ const AdminDashboard = () => {
     }
   });
 
+  useRealtime("customers", () => {
+    if (currentRole === "admin" || currentRole === "manager") {
+      void fetchDashboard();
+    }
+  });
+
+  useRealtime("inventory", () => {
+    if (currentRole === "admin" || currentRole === "manager") {
+      void fetchDashboard();
+    }
+  });
+
   const formatRs = (amount) =>
     `Rs. ${Number(amount ?? 0).toLocaleString("en-PK")}`;
 
@@ -194,9 +206,9 @@ const AdminDashboard = () => {
 
   const stats = useMemo(() => {
     return [
-      { name: "Total Sales", value: formatRs(overviewStats.todayRevenue), change: "Today", icon: <DollarSign size={24} />, color: "bg-green-500/10 text-green-500" },
-      { name: "Active Orders", value: String(overviewStats.activeOrders ?? 0), change: "Live", icon: <ShoppingCart size={24} />, color: "bg-blue-500/10 text-blue-500" },
-      { name: "New Customers", value: String(overviewStats.customerAccounts ?? 0), change: "Total", icon: <UserPlus size={24} />, color: "bg-purple-500/10 text-purple-500" },
+      { name: "Total Sales", value: formatRs(overviewStats.totalSales), change: "All", icon: <DollarSign size={24} />, color: "bg-green-500/10 text-green-500" },
+      { name: "Total Orders", value: String(overviewStats.totalOrders ?? 0), change: "Live", icon: <ShoppingCart size={24} />, color: "bg-blue-500/10 text-blue-500" },
+      { name: "New Customers", value: String(overviewStats.newCustomersToday ?? 0), change: "Today", icon: <UserPlus size={24} />, color: "bg-purple-500/10 text-purple-500" },
       { name: "Inventory Alerts", value: String(lowStockCount), change: lowStockCount > 0 ? "Action" : "Stable", icon: <Package size={24} />, color: "bg-red-500/10 text-red-500" },
     ];
   }, [overview]);

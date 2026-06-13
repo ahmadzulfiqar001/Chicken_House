@@ -167,7 +167,14 @@ const buildRoleTasks = async (role: string, staffMemberId: number) => {
   if (role === "rider") {
     const orders = await loadAll("orders");
     return orders
-      .filter((order) => Number(order.assignedStaffId ?? 0) === Number(staffMemberId))
+      .filter((order) => {
+        const assignedStaffId = Number(order.assignedStaffId ?? 0);
+        const isAssigned =
+          assignedStaffId === Number(staffMemberId) ||
+          (!assignedStaffId && String(order.assignedRole ?? "") === "rider");
+        const isOpen = !Number(order.acceptedByStaffId ?? 0);
+        return isAssigned && isOpen && !["Delivered", "Cancelled"].includes(String(order.status ?? ""));
+      })
       .slice(0, 8)
       .map((order) => ({
         id: order.id,
@@ -184,8 +191,9 @@ const buildRoleTasks = async (role: string, staffMemberId: number) => {
         const assignedToCurrent =
           Number(order.assignedStaffId ?? 0) === Number(staffMemberId) ||
           (String(order.assignedRole ?? "") === "staff" && !Number(order.assignedStaffId ?? 0));
+        const isOpen = !Number(order.acceptedByStaffId ?? 0);
 
-        return assignedToCurrent && order.status !== "Delivered" && order.status !== "Cancelled";
+        return assignedToCurrent && isOpen && order.status !== "Delivered" && order.status !== "Cancelled";
       })
       .slice(0, 8)
       .map((order) => ({
@@ -206,6 +214,19 @@ const buildRoleTasks = async (role: string, staffMemberId: number) => {
       status: shift.date,
       subtitle: `${shift.startTime || "--"} - ${shift.endTime || "--"}`,
     }));
+};
+
+const canAcceptOrderTask = (order: Doc, role: string, staffMemberId: number) => {
+  if (!["rider", "staff"].includes(role)) return false;
+
+  const assignedStaffId = Number(order.assignedStaffId ?? 0);
+  const assignedRole = String(order.assignedRole ?? "").toLowerCase();
+  const status = String(order.status ?? "");
+
+  if (["Delivered", "Cancelled"].includes(status)) return false;
+  if (Number(order.acceptedByStaffId ?? 0)) return false;
+
+  return assignedStaffId === staffMemberId || (!assignedStaffId && assignedRole === role);
 };
 
 router.get("/summary", async (req, res) => {
@@ -426,6 +447,48 @@ router.get("/tasks", async (req, res) => {
   if (!context) return;
 
   return res.json(await buildRoleTasks(context.authUser.role, Number(context.staffMember.id)));
+});
+
+router.post("/tasks/:id/accept", async (req, res) => {
+  const context = await ensureStaffAccess(req, res);
+  if (!context) return;
+
+  const staffId = Number(context.staffMember.id);
+  const order = await findOne("orders", { id: req.params.id });
+
+  if (!order) {
+    return res.status(404).json({ message: "Assigned work was not found." });
+  }
+
+  if (!canAcceptOrderTask(order, context.authUser.role, staffId)) {
+    return res.status(403).json({ message: "This work is no longer available for your account." });
+  }
+
+  const now = new Date().toISOString();
+  const patch = {
+    assignedStaffId: staffId,
+    assignedStaffName: String(context.staffMember.name ?? ""),
+    assignedRole: context.authUser.role,
+    acceptedByStaffId: staffId,
+    acceptedByStaffName: String(context.staffMember.name ?? ""),
+    acceptedAt: now,
+    workStatus: "Accepted",
+  };
+
+  await updateDoc("orders", { id: String(order.id) }, patch);
+  await addActivityLog(
+    context.staffMember as Doc,
+    context.authUser.role,
+    "Work accepted",
+    `${context.staffMember.name} accepted ${order.id} for ${order.customer ?? order.items ?? "assigned work"}.`,
+  );
+  emitChange("orders", { operationType: "update", orderId: String(order.id) });
+  emitChange("notifications", { operationType: "update" });
+
+  return res.json({
+    message: "Work accepted and moved to your record.",
+    task: { ...order, ...patch },
+  });
 });
 
 router.get("/requests", async (req, res) => {

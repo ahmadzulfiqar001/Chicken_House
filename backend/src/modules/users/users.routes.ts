@@ -8,6 +8,8 @@ import type { UserRole } from "../../core/permissions";
 const router = express.Router();
 
 const staffRoles: UserRole[] = ["manager", "hr", "rider", "staff"];
+const managedLoginRoles: UserRole[] = ["manager", "hr", "rider", "staff"];
+const primaryAdminEmail = normalizeEmailInput(process.env.PRIMARY_ADMIN_EMAIL ?? "admin@chickenhouse.com");
 
 const roleLabelMap: Record<UserRole, string> = {
   admin: "Admin",
@@ -45,6 +47,9 @@ const buildInitials = (name: string) =>
     .toUpperCase();
 
 const isStaffRole = (role: UserRole) => staffRoles.includes(role);
+const isPrimaryAdminAccount = (account: Record<string, unknown> | null | undefined) =>
+  String(account?.role ?? "") === "admin" &&
+  String(account?.email ?? "").toLowerCase() === primaryAdminEmail;
 
 const toStaffStatus = (status: string) => {
   if (status === "Suspended") return "Inactive";
@@ -174,14 +179,16 @@ const attachLinkedProfile = (user: Record<string, unknown>) => {
 
 router.get("/", requirePermission("users:view"), async (req, res) => {
   if (isMongoConfigured()) {
-    const users = await UserAccountModel.find()
+    const users = await UserAccountModel.find({ role: { $in: ["admin", ...managedLoginRoles] } })
       .select("-passwordHash")
       .sort({ createdAt: -1 })
       .lean();
     return res.json(users);
   }
 
-  const users = db.userAccounts.map((user) => attachLinkedProfile(user));
+  const users = db.userAccounts
+    .filter((user) => ["admin", ...managedLoginRoles].includes(user.role as UserRole))
+    .map((user) => attachLinkedProfile(user));
   return res.json(users);
 });
 
@@ -209,7 +216,7 @@ router.get("/:id", requirePermission("users:view"), async (req, res) => {
 router.post("/", requirePermission("users:create"), async (req, res) => {
   const name = String(req.body?.name ?? "").trim();
   const email = normalizeEmailInput(String(req.body?.email ?? ""));
-  const role = (String(req.body?.role ?? "user") as UserRole) || "user";
+  const role = (String(req.body?.role ?? "staff") as UserRole) || "staff";
   const status = String(req.body?.status ?? "Active");
   const phone = String(req.body?.phone ?? "").trim();
   const password = String(req.body?.password ?? "").trim();
@@ -223,8 +230,10 @@ router.post("/", requirePermission("users:create"), async (req, res) => {
     return res.status(400).json({ message: "Name and email are required" });
   }
 
-  if (!["admin", "manager", "hr", "rider", "staff", "user"].includes(role)) {
-    return res.status(400).json({ message: "Invalid role selected." });
+  if (!managedLoginRoles.includes(role)) {
+    return res.status(400).json({
+      message: "Admin can create only manager, HR, rider, and staff logins. Customer accounts stay private to customers.",
+    });
   }
 
   const existing = isMongoConfigured()
@@ -340,7 +349,7 @@ router.post("/", requirePermission("users:create"), async (req, res) => {
 });
 
 router.patch("/:id", requirePermission("users:update"), async (req, res) => {
-  const allowedRoles: UserRole[] = ["admin", "manager", "hr", "rider", "staff", "user"];
+  const allowedRoles: UserRole[] = managedLoginRoles;
 
   if (isMongoConfigured()) {
     const user = await UserAccountModel.findOne({ id: req.params.id });
@@ -350,10 +359,14 @@ router.patch("/:id", requirePermission("users:update"), async (req, res) => {
     }
 
     if (req.body?.name) user.name = String(req.body.name).trim();
-    if (req.body?.role) {
+    if (isPrimaryAdminAccount(user.toObject())) {
+      if (req.body?.role && String(req.body.role) !== "admin") {
+        return res.status(400).json({ message: "The primary admin role is locked." });
+      }
+    } else if (req.body?.role) {
       const nextRole = String(req.body.role) as UserRole;
       if (!allowedRoles.includes(nextRole)) {
-        return res.status(400).json({ message: "Invalid role selected." });
+        return res.status(400).json({ message: "Only manager, HR, rider, and staff roles can be assigned here." });
       }
       user.role = nextRole;
     }
@@ -372,8 +385,12 @@ router.patch("/:id", requirePermission("users:update"), async (req, res) => {
   }
 
   const nextRole = String(req.body?.role ?? user.role ?? "user") as UserRole;
-  if (!allowedRoles.includes(nextRole)) {
-    return res.status(400).json({ message: "Invalid role selected." });
+  if (isPrimaryAdminAccount(user)) {
+    if (nextRole !== "admin") {
+      return res.status(400).json({ message: "The primary admin role is locked." });
+    }
+  } else if (!allowedRoles.includes(nextRole)) {
+    return res.status(400).json({ message: "Only manager, HR, rider, and staff roles can be assigned here." });
   }
   const nextStatus = String(req.body?.status ?? user.status);
   const nextName = String(req.body?.name ?? user.name).trim() || user.name;
@@ -461,6 +478,11 @@ router.patch("/:id", requirePermission("users:update"), async (req, res) => {
 
 router.delete("/:id", requirePermission("users:delete"), async (req, res) => {
   if (isMongoConfigured()) {
+    const target = await UserAccountModel.findOne({ id: req.params.id }).lean();
+    if (isPrimaryAdminAccount(target as Record<string, unknown> | null)) {
+      return res.status(400).json({ message: "The primary admin account cannot be deleted." });
+    }
+
     const deleted = await UserAccountModel.findOneAndDelete({ id: req.params.id })
       .select("-passwordHash")
       .lean();
@@ -475,6 +497,10 @@ router.delete("/:id", requirePermission("users:delete"), async (req, res) => {
   const index = db.userAccounts.findIndex((entry) => entry.id === req.params.id);
   if (index === -1) {
     return res.status(404).json({ message: "User not found" });
+  }
+
+  if (isPrimaryAdminAccount(db.userAccounts[index])) {
+    return res.status(400).json({ message: "The primary admin account cannot be deleted." });
   }
 
   const [deleted] = db.userAccounts.splice(index, 1);

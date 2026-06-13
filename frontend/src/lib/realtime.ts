@@ -4,7 +4,7 @@ import { io, type Socket } from "socket.io-client";
 /**
  * Shared Socket.IO connection to the backend realtime layer.
  * The server broadcasts "<collection>:change" whenever a watched collection
- * (orders, bookings, inventory, contactMessages, notifications) changes.
+ * (orders, bookings, inventory, customers, contactMessages, notifications) changes.
  */
 let socket: Socket | null = null;
 

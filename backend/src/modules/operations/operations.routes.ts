@@ -41,6 +41,52 @@ const addActivityLog = async ({
   });
 };
 
+const getPakistanDateKey = (date: Date) => {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Karachi",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+};
+
+const getRecordDateKey = (record: Record<string, unknown>) => {
+  const dateValue =
+    String(record.createdAt ?? "") ||
+    String(record.time ?? "") ||
+    String(record.date ?? "") ||
+    String(record.memberSinceDate ?? "");
+
+  if (dateValue) {
+    const parsed = new Date(dateValue);
+    if (!Number.isNaN(parsed.getTime())) {
+      return getPakistanDateKey(parsed);
+    }
+  }
+
+  const idTimestamp = String(record.id ?? "").match(/-(\d{13})-/)?.[1];
+  if (idTimestamp) {
+    const parsed = new Date(Number(idTimestamp));
+    if (!Number.isNaN(parsed.getTime())) {
+      return getPakistanDateKey(parsed);
+    }
+  }
+
+  return "";
+};
+
+const isRevenueOrder = (order: Record<string, unknown>) => {
+  const status = String(order.status ?? "").toLowerCase();
+  return status !== "cancelled" && status !== "rejected";
+};
+
+const getOrderAmount = (order: Record<string, unknown>) => {
+  const amount = Number(order.total ?? order.subtotal ?? 0);
+  return Number.isFinite(amount) ? amount : 0;
+};
+
 router.get("/overview", async (req, res) => {
   const authUser = ensureOperationsAccess(req, res);
   if (!authUser) return;
@@ -57,7 +103,7 @@ router.get("/overview", async (req, res) => {
       loadAll("activityLogs"),
     ]);
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = getPakistanDateKey(new Date());
   const todayAttendance = attendanceAll.filter((record) => record.date === today);
   const presentToday = todayAttendance.filter((record) => ["Present", "Late"].includes(record.status)).length;
   const lateToday = todayAttendance.filter((record) => record.status === "Late").length;
@@ -66,9 +112,12 @@ router.get("/overview", async (req, res) => {
   const pendingRequests = requestsAll.filter((request) => request.status === "Pending");
   const activeOrders = ordersAll.filter((order) => !["Delivered", "Cancelled"].includes(String(order.status)));
   const lowStock = inventoryAll.filter((item) => Number(item.stock ?? 0) <= Number(item.minStock ?? 0) + 5);
-  const todayRevenue = ordersAll
-    .filter((order) => String(order.time ?? "").slice(0, 10) === today && order.status !== "Cancelled")
-    .reduce((sum, order) => sum + Number(order.total ?? 0), 0);
+  const revenueOrders = ordersAll.filter(isRevenueOrder);
+  const totalSales = revenueOrders.reduce((sum, order) => sum + getOrderAmount(order), 0);
+  const todayRevenue = revenueOrders
+    .filter((order) => getRecordDateKey(order) === today)
+    .reduce((sum, order) => sum + getOrderAmount(order), 0);
+  const newCustomersToday = customersAll.filter((customer) => getRecordDateKey(customer) === today).length;
 
   const staffSnapshots = staff.map((member) => {
     const attendance = todayAttendance.find((record) => Number(record.staffId) === Number(member.id));
@@ -144,9 +193,12 @@ router.get("/overview", async (req, res) => {
       absentToday,
       pendingLeaves: pendingLeaves.length,
       pendingRequests: pendingRequests.length,
+      totalOrders: ordersAll.length,
       activeOrders: activeOrders.length,
       lowStockCount: lowStock.length,
+      totalSales,
       todayRevenue,
+      newCustomersToday,
     },
     roleDistribution,
     topPerformers,

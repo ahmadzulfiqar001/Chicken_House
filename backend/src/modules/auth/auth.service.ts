@@ -3,6 +3,7 @@ import type { NextFunction, Request, Response } from "express";
 import { db } from "../../core/db";
 import { AuthSessionModel, CustomerModel, UserAccountModel } from "../../core/models";
 import { isMongoConfigured } from "../../core/mongo";
+import { emitChange } from "../../core/realtime";
 
 const AUTH_COOKIE_NAME = "chicken_house_session";
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7;
@@ -208,14 +209,18 @@ export const requirePermission = (permission: Permission) =>
 export const getRequestAuthUser = (req: Request) =>
   (req as Request & { authUser?: AuthUser }).authUser ?? null;
 
-export const createSessionForUser = async (req: Request, user: AuthUser) => {
+export const createSessionForUser = async (
+  req: Request,
+  user: AuthUser,
+  provider: "email" | "google" | "facebook" = "email",
+) => {
   const accessToken = crypto.randomBytes(32).toString("hex");
   const sessionRecord = {
     id: `SESSION-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     userId: user.id,
     email: normalizeEmail(user.email),
     role: user.role,
-    provider: "email",
+    provider,
     accessTokenHash: hashSessionToken(accessToken),
     refreshTokenHash: "",
     ipAddress: req.ip ?? "",
@@ -394,14 +399,17 @@ export const createCustomerProfile = async ({
     wishlist: [],
     walletTransactions: [],
     activity: ["Customer account created."],
+    createdAt: new Date().toISOString(),
   };
 
   if (isMongoConfigured()) {
     await CustomerModel.create(customerProfile);
+    emitChange("customers", { operationType: "insert", customerId: customerProfile.id });
     return customerProfile.id;
   }
 
   db.customers.push(customerProfile);
+  emitChange("customers", { operationType: "insert", customerId: customerProfile.id });
   return customerProfile.id;
 };
 

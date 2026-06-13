@@ -345,6 +345,7 @@ router.post("/", async (req, res) => {
         wishlist: [],
         walletTransactions: [],
         activity: ["Customer account created from website checkout."],
+        createdAt: new Date().toISOString(),
       });
     }
 
@@ -373,7 +374,7 @@ router.post("/", async (req, res) => {
 
   let existingCustomer = db.customers.find(
     (item) => item.email.toLowerCase() === customerEmail.toLowerCase(),
-  );
+  ) as (typeof db.customers[number] & { createdAt?: string }) | undefined;
 
   if (!existingCustomer) {
     existingCustomer = {
@@ -404,6 +405,7 @@ router.post("/", async (req, res) => {
       wishlist: [],
       walletTransactions: [],
       activity: ["Customer account created from website checkout."],
+      createdAt: new Date().toISOString(),
     };
     db.customers.push(existingCustomer);
   }

@@ -7,6 +7,7 @@ import Features from "./components/marketing/Features";
 import AboutUs from "./components/marketing/AboutUs";
 import Services from "./components/marketing/Services";
 import Footer from "./components/layout/Footer";
+import CookieConsent from "./components/layout/CookieConsent";
 import WhatsAppButton from "./components/whatsapp/WhatsAppButton";
 import WhatsAppBot from "./components/whatsapp/WhatsAppBot";
 import MenuPage from "./pages/Menu";
@@ -105,6 +106,8 @@ function App() {
           <Router>
             <div className="relative min-h-screen">
               <Routes>
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/signup" element={<SignupPage />} />
                 <Route element={<PublicLayout />}>
                   <Route path="/" element={<Home />} />
                   <Route path="/menu" element={<MenuPage />} />
@@ -114,8 +117,6 @@ function App() {
                   <Route path="/gallery" element={<GalleryPage />} />
                   <Route path="/careers" element={<CareerPage />} />
                   <Route path="/contact" element={<ContactPage />} />
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="/signup" element={<SignupPage />} />
                   <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                   <Route path="/reset-password" element={<ResetPasswordPage />} />
                   <Route path="/cart" element={<CartPage />} />
@@ -142,6 +143,7 @@ function App() {
                   }
                 />
               </Routes>
+              <CookieConsent />
             </div>
           </Router>
         </CartProvider>

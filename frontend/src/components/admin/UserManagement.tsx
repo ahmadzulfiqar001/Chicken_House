@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { 
   Users, UserPlus, Shield, Search, RefreshCw, Pencil, Trash2, X, 
-  CheckCircle, XCircle, Clock, Ban
+  CheckCircle, Ban
 } from "lucide-react";
 
 type UserAccount = {
@@ -50,7 +50,7 @@ const emptyForm: UserForm = {
   name: "",
   email: "",
   password: "",
-  role: "user",
+  role: "staff",
   status: "Active",
   phone: "",
   shift: "Morning",
@@ -59,6 +59,10 @@ const emptyForm: UserForm = {
   address: "",
   emergencyContact: "",
 };
+
+const PRIMARY_ADMIN_EMAIL = "admin@chickenhouse.com";
+const isPrimaryAdmin = (user: UserAccount) =>
+  user.role === "admin" && user.email.toLowerCase() === PRIMARY_ADMIN_EMAIL;
 
 const UserManagement = () => {
   const [users, setUsers] = useState<UserAccount[]>([]);
@@ -183,7 +187,6 @@ const UserManagement = () => {
     admins: users.filter(u => u.role === "admin").length,
     managers: users.filter(u => u.role === "manager").length,
     staff: users.filter(u => ["manager", "hr", "rider", "staff"].includes(u.role)).length,
-    customers: users.filter(u => u.role === "user").length,
     active: users.filter(u => u.status === "Active").length,
   };
 
@@ -235,7 +238,7 @@ const UserManagement = () => {
               className="relative w-full max-w-2xl rounded-[2.5rem] bg-white p-8 shadow-2xl"
             >
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-3xl font-bold text-dark">{editing ? "Edit User" : "Add User"}</h3>
+                <h3 className="text-3xl font-bold text-dark">{editing ? "Edit Login" : "Allot Login"}</h3>
                 <button type="button" onClick={() => setShowModal(false)} className="flex h-10 w-10 items-center justify-center rounded-full bg-surface text-muted hover:bg-red-500 hover:text-white transition">
                   <X size={20} />
                 </button>
@@ -244,14 +247,18 @@ const UserManagement = () => {
               <div className="grid gap-5 md:grid-cols-2">
                 <input value={form.name} onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))} className="rounded-2xl bg-surface px-5 py-4 outline-none" placeholder="Full name" required />
                 <input value={form.email} onChange={(e) => setForm(prev => ({ ...prev, email: e.target.value }))} className="rounded-2xl bg-surface px-5 py-4 outline-none" placeholder="Email" type="email" required disabled={!!editing} />
-                <input value={form.password} onChange={(e) => setForm(prev => ({ ...prev, password: e.target.value }))} className="rounded-2xl bg-surface px-5 py-4 outline-none" placeholder={editing ? "Set new password (optional)" : "Temporary password"} type="text" />
-                <select value={form.role} onChange={(e) => setForm(prev => ({ ...prev, role: e.target.value as any }))} className="rounded-2xl bg-surface px-5 py-4 outline-none">
-                  <option value="user">User (Customer)</option>
+                <input value={form.password} onChange={(e) => setForm(prev => ({ ...prev, password: e.target.value }))} className="rounded-2xl bg-surface px-5 py-4 outline-none" placeholder={editing ? "Set new password (optional)" : "Temporary password to allot"} type="text" />
+                <select
+                  value={form.role}
+                  onChange={(e) => setForm(prev => ({ ...prev, role: e.target.value as any }))}
+                  disabled={editing?.role === "admin"}
+                  className="rounded-2xl bg-surface px-5 py-4 outline-none disabled:text-muted"
+                >
+                  {editing?.role === "admin" ? <option value="admin">Primary Admin (locked)</option> : null}
                   <option value="staff">General Staff</option>
                   <option value="rider">Rider</option>
                   <option value="hr">HR / Human Resources</option>
                   <option value="manager">Manager</option>
-                  <option value="admin">Admin</option>
                 </select>
                 <select value={form.status} onChange={(e) => setForm(prev => ({ ...prev, status: e.target.value as any }))} className="rounded-2xl bg-surface px-5 py-4 outline-none">
                   <option value="Active">Active</option>
@@ -282,10 +289,10 @@ const UserManagement = () => {
       </AnimatePresence>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-5">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="rounded-3xl border border-gray-50 bg-white p-6 shadow-xl shadow-dark/5">
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary"><Users size={24} /></div>
-          <p className="mb-1 text-xs font-bold uppercase tracking-widest text-muted">Total Users</p>
+          <p className="mb-1 text-xs font-bold uppercase tracking-widest text-muted">Managed Logins</p>
           <p className="text-2xl font-display font-bold text-dark">{stats.total}</p>
         </motion.div>
 
@@ -307,12 +314,6 @@ const UserManagement = () => {
           <p className="text-2xl font-display font-bold text-dark">{stats.staff}</p>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="rounded-3xl border border-gray-50 bg-white p-6 shadow-xl shadow-dark/5">
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-500/10 text-slate-600"><Clock size={24} /></div>
-          <p className="mb-1 text-xs font-bold uppercase tracking-widest text-muted">Customers</p>
-          <p className="text-2xl font-display font-bold text-dark">{stats.customers}</p>
-        </motion.div>
-
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="rounded-3xl border border-gray-50 bg-white p-6 shadow-xl shadow-dark/5">
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-green-500/10 text-green-500"><CheckCircle size={24} /></div>
           <p className="mb-1 text-xs font-bold uppercase tracking-widest text-muted">Active</p>
@@ -325,7 +326,7 @@ const UserManagement = () => {
         <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
             <h2 className="text-2xl font-bold text-dark">User & Role Management</h2>
-            <p className="mt-1 text-sm text-muted">Create real logins for admin, manager, rider, general staff, and customer accounts.</p>
+            <p className="mt-1 text-sm text-muted">Create allotted logins for manager, HR, rider, and staff. Customer accounts stay private to customers.</p>
           </div>
 
           <div className="flex w-full flex-wrap gap-4 md:w-auto">
@@ -340,14 +341,13 @@ const UserManagement = () => {
               <option value="hr">HR</option>
               <option value="rider">Rider</option>
               <option value="staff">General Staff</option>
-              <option value="user">Customer</option>
             </select>
             <button onClick={fetchUsers} className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-strong text-dark transition hover:bg-primary hover:text-white">
               <RefreshCw size={20} className={loading ? "animate-spin" : ""} />
             </button>
             <button onClick={openCreate} className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-bold text-white shadow-lg shadow-primary/20 hover:bg-primary-strong transition">
               <UserPlus size={20} />
-              Add User
+              Allot Login
             </button>
           </div>
         </div>
@@ -408,9 +408,15 @@ const UserManagement = () => {
                       <button onClick={() => openEdit(user)} className="rounded-lg bg-surface-strong p-2 text-dark transition hover:bg-primary hover:text-white">
                         <Pencil size={16} />
                       </button>
-                      <button onClick={() => deleteUser(user.id)} className="rounded-lg bg-surface-strong p-2 text-dark transition hover:bg-red-500 hover:text-white">
-                        <Trash2 size={16} />
-                      </button>
+                      {isPrimaryAdmin(user) ? (
+                        <button disabled className="rounded-lg bg-surface-strong p-2 text-muted opacity-50" title="Primary admin is locked">
+                          <Ban size={16} />
+                        </button>
+                      ) : (
+                        <button onClick={() => deleteUser(user.id)} className="rounded-lg bg-surface-strong p-2 text-dark transition hover:bg-red-500 hover:text-white">
+                          <Trash2 size={16} />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

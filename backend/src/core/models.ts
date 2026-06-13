@@ -323,6 +323,10 @@ const orderSchema = new Schema(
     assignedStaffId: { type: Number, default: 0, index: true },
     assignedStaffName: { type: String, default: "" },
     assignedRole: { type: String, default: "", index: true },
+    acceptedByStaffId: { type: Number, default: 0, index: true },
+    acceptedByStaffName: { type: String, default: "" },
+    acceptedAt: { type: String, default: "" },
+    workStatus: { type: String, default: "Pending" },
   },
   { versionKey: false },
 );
@@ -388,6 +392,7 @@ const customerSchema = new Schema(
     wishlist: { type: [wishlistItemSchema], default: [] },
     walletTransactions: { type: [walletTransactionSchema], default: [] },
     activity: { type: [String], default: [] },
+    createdAt: { type: String, default: () => new Date().toISOString(), index: true },
   },
   { versionKey: false },
 );
@@ -415,7 +420,7 @@ const userAccountSchema = new Schema(
       default: "user",
       index: true,
     },
-    provider: { type: String, enum: ["email", "google", "demo"], default: "email", index: true },
+    provider: { type: String, enum: ["email", "google", "facebook", "demo"], default: "email", index: true },
     status: { type: String, enum: ["Active", "Suspended", "Pending"], default: "Active", index: true },
     phone: { type: String, default: "" },
     staffMemberId: { type: Number, default: 0, index: true },

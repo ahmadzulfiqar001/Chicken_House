@@ -14,6 +14,7 @@ import {
   BookingRequestModel,
   InventoryModel,
   ContactMessageModel,
+  CustomerModel,
   NotificationModel,
 } from "./models";
 import { isMongoConnected } from "./mongo";
@@ -24,6 +25,7 @@ const WATCHED: Array<{ name: string; model: { watch: (pipeline?: unknown[], opti
   { name: "orders", model: OrderModel as never },
   { name: "bookings", model: BookingRequestModel as never },
   { name: "inventory", model: InventoryModel as never },
+  { name: "customers", model: CustomerModel as never },
   { name: "contactMessages", model: ContactMessageModel as never },
   { name: "notifications", model: NotificationModel as never },
 ];
