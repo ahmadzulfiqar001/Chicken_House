@@ -26,6 +26,8 @@ const emptyForm = {
   salary: "0",
   joinDate: "",
   email: "",
+  allotLogin: false,
+  loginPassword: "",
   phone: "",
   address: "",
   emergencyContact: "",
@@ -89,6 +91,8 @@ const HRManagement = () => {
       salary: String(member.salary ?? 0),
       joinDate: member.joinDate,
       email: member.email ?? "",
+      allotLogin: Boolean(member.userAccountId),
+      loginPassword: "",
       phone: member.phone ?? "",
       address: member.address ?? "",
       emergencyContact: member.emergencyContact ?? "",
@@ -111,6 +115,8 @@ const HRManagement = () => {
         salary: Number(form.salary),
         joinDate: form.joinDate || new Date().toISOString().slice(0, 10),
         email: form.email,
+        allotLogin: form.allotLogin,
+        loginPassword: form.loginPassword,
         phone: form.phone,
         address: form.address,
         emergencyContact: form.emergencyContact,
@@ -129,7 +135,7 @@ const HRManagement = () => {
       setShowForm(false);
     } catch (saveError) {
       console.error(saveError);
-      setError("Staff record could not be saved.");
+      setError(saveError instanceof Error ? saveError.message : "Staff record could not be saved.");
     } finally {
       setSaving(false);
     }
@@ -168,6 +174,7 @@ const HRManagement = () => {
                 <select value={form.role} onChange={(e) => setForm((prev) => ({ ...prev, role: e.target.value }))} className="rounded-2xl bg-surface px-5 py-4 outline-none">
                   <option value="">Select role</option>
                   <option value="Manager / Branch Supervisor">Manager / Branch Supervisor</option>
+                  <option value="HR / Human Resources">HR / Human Resources</option>
                   <option value="Cashier / Counter Staff">Cashier / Counter Staff</option>
                   <option value="Kitchen Staff / Chef">Kitchen Staff / Chef</option>
                   <option value="Rider / Delivery Staff">Rider / Delivery Staff</option>
@@ -186,7 +193,33 @@ const HRManagement = () => {
                 </select>
                 <input value={form.salary} onChange={(e) => setForm((prev) => ({ ...prev, salary: e.target.value }))} className="rounded-2xl bg-surface px-5 py-4 outline-none" placeholder="Salary" type="number" min="0" />
                 <input value={form.joinDate} onChange={(e) => setForm((prev) => ({ ...prev, joinDate: e.target.value }))} className="rounded-2xl bg-surface px-5 py-4 outline-none" type="date" />
-                <input value={form.email} onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))} className="rounded-2xl bg-surface px-5 py-4 outline-none" placeholder="Staff email" type="email" />
+                <input value={form.email} onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))} className="rounded-2xl bg-surface px-5 py-4 outline-none" placeholder="Staff email" type="email" required={form.allotLogin} />
+                <label className="flex items-center gap-3 rounded-2xl bg-surface px-5 py-4 text-sm font-bold text-dark">
+                  <input
+                    type="checkbox"
+                    checked={form.allotLogin}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        allotLogin: e.target.checked,
+                        loginPassword: e.target.checked ? prev.loginPassword : "",
+                      }))
+                    }
+                    disabled={Boolean(editing?.userAccountId)}
+                    className="h-5 w-5 accent-primary disabled:opacity-60"
+                  />
+                  {editing?.userAccountId ? "Login already allotted" : "Allot login access"}
+                </label>
+                <input
+                  value={form.loginPassword}
+                  onChange={(e) => setForm((prev) => ({ ...prev, loginPassword: e.target.value }))}
+                  className="rounded-2xl bg-surface px-5 py-4 outline-none disabled:opacity-50"
+                  placeholder={editing ? "Reset password (optional)" : "Temporary login password"}
+                  type="text"
+                  disabled={!form.allotLogin}
+                  required={form.allotLogin && !editing?.userAccountId}
+                  minLength={6}
+                />
                 <input value={form.phone} onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))} className="rounded-2xl bg-surface px-5 py-4 outline-none" placeholder="Phone number" />
                 <input value={form.department} onChange={(e) => setForm((prev) => ({ ...prev, department: e.target.value }))} className="rounded-2xl bg-surface px-5 py-4 outline-none" placeholder="Department" />
                 <input value={form.emergencyContact} onChange={(e) => setForm((prev) => ({ ...prev, emergencyContact: e.target.value }))} className="rounded-2xl bg-surface px-5 py-4 outline-none" placeholder="Emergency contact" />
@@ -278,6 +311,9 @@ const HRManagement = () => {
                   <td className="py-6">
                     <p className="text-sm text-dark">{member.phone || "No phone"}</p>
                     <p className="text-xs text-muted">{member.email || member.department || "No department"}</p>
+                    <p className={`mt-1 text-xs font-bold ${member.userAccountId ? "text-green-600" : "text-muted"}`}>
+                      {member.userAccountId ? "Login allotted" : "No login"}
+                    </p>
                   </td>
                   <td className="py-6 text-sm text-muted">{member.shift}</td>
                   <td className="py-6">
