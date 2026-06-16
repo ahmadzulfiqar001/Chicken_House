@@ -222,18 +222,21 @@ const Adminstration = [
     role: "CEO",
     text: "Leading with vision, hospitality, and a lifelong commitment to quality.",
     image: ceoPortrait,
+    phone: "0304 5790495",
   },
   {
     name: "Attique-ur-Rehman",
     role: "HR Manager",
     text: "Supporting our people, service culture, and daily team standards.",
     image: attiquePortrait,
+    phone: "0300 6970747",
   },
   {
     name: "Hafiz Hifz-ur-Rehman",
     role: "Admin",
     text: "Ensuring smooth operations with dedication, care, and integrity.",
     image: hifzPortrait,
+    phone: "0345 7493339",
   },
 ];
 
@@ -585,6 +588,16 @@ const AboutPage = () => {
                   {member.role}
                 </span>
                 <p className="mx-auto mt-5 max-w-xs text-base leading-7 text-[#3d2a22]">{member.text}</p>
+                {member.phone && (
+                  <a
+                    href={`tel:${member.phone.replace(/\s+/g, "")}`}
+                    className="mx-auto mt-6 inline-flex items-center gap-2 rounded-full border border-[#ead8bd] bg-[#fff7ea] px-5 py-2 text-base font-bold tracking-wide text-primary shadow-sm transition hover:bg-primary hover:text-white"
+                    aria-label={`Call ${member.name} at ${member.phone}`}
+                  >
+                    <Phone className="h-4 w-4" />
+                    {member.phone}
+                  </a>
+                )}
               </motion.article>
             ))}
           </div>
