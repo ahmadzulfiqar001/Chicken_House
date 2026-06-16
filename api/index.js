@@ -9424,11 +9424,24 @@ function createApp() {
 // ../_chmain_wt/backend/serverless.ts
 var app;
 var ready;
+async function ensureMongo() {
+  if (!process.env.MONGODB_URI) return;
+  if (isMongoConnected()) return;
+  for (let attempt = 0; attempt < 4 && !isMongoConnected(); attempt++) {
+    if (!ready) ready = connectToMongo();
+    try {
+      await ready;
+    } catch {
+    }
+    if (isMongoConnected()) break;
+    ready = void 0;
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+}
 async function handler(req, res) {
   try {
     if (!app) app = createApp();
-    if (!ready) ready = connectToMongo();
-    await ready;
+    await ensureMongo();
     return app(req, res);
   } catch (err) {
     app = void 0;
