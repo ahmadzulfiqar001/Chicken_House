@@ -195,8 +195,15 @@ export const connectToMongo = async () => {
     await mongoose.connect(process.env.MONGODB_URI as string, {
       serverSelectionTimeoutMS: 10000,
     });
-    await syncLegacyMongoData();
-    await seedDatabase();
+    // Run legacy sync + seeding at most once per process/instance. They are
+    // idempotent (only fill empty collections), but on serverless they would
+    // otherwise re-run their count checks on every cold start.
+    const seedFlag = globalThis as typeof globalThis & { __chSeeded__?: boolean };
+    if (!seedFlag.__chSeeded__) {
+      seedFlag.__chSeeded__ = true;
+      await syncLegacyMongoData();
+      await seedDatabase();
+    }
     console.log(`MongoDB connected: ${mongoose.connection.name}`);
     return true;
   } catch (error) {

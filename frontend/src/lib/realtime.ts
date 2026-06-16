@@ -41,7 +41,22 @@ export const useRealtime = (
     const listener = (payload: RealtimeChange) => handlerRef.current(payload);
 
     channels.forEach((name) => sock.on(`${name}:change`, listener));
+
+    // Fallback for hosts without a live WebSocket (e.g. Vercel serverless, where
+    // Socket.IO + change streams can't run): when the socket isn't connected,
+    // poll so consumers still refetch. When the socket IS connected (local dev /
+    // long-running host), this stays idle and live push behaves exactly as before.
+    const POLL_MS = 15000;
+    const poll = setInterval(() => {
+      if (!sock.connected && document.visibilityState === "visible") {
+        channels.forEach((name) =>
+          handlerRef.current({ collection: name, operationType: "poll", documentKey: null }),
+        );
+      }
+    }, POLL_MS);
+
     return () => {
+      clearInterval(poll);
       channels.forEach((name) => sock.off(`${name}:change`, listener));
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
