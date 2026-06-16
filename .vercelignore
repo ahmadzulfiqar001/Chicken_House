@@ -1,0 +1,8 @@
+frontend/dist
+node_modules
+**/*.log
+.idea
+.vscode
+*.swp
+*.tmp
+*.bak
