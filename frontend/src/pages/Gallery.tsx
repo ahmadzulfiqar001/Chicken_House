@@ -198,7 +198,7 @@ const CurveMotionGallerySection = () => (
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.06, duration: 0.5 }}
-              className={`h-40 w-60 shrink-0 snap-center overflow-hidden rounded-[1.35rem] border border-[#f4bd62]/35 bg-black/30 shadow-[0_18px_50px_rgba(0,0,0,0.42),0_0_24px_rgba(244,189,98,0.16)] ${item.mobileClassName}`}
+              className={`h-32 w-48 shrink-0 snap-center overflow-hidden rounded-[1.35rem] border border-[#f4bd62]/35 bg-black/30 shadow-[0_18px_50px_rgba(0,0,0,0.42),0_0_24px_rgba(244,189,98,0.16)] md:h-40 md:w-60 ${item.mobileClassName}`}
             >
               <img src={item.image} alt={item.title} className="h-full w-full object-cover" referrerPolicy="no-referrer" />
             </motion.div>
@@ -416,7 +416,7 @@ const GalleryPage = () => {
             <h2 className="mt-5 font-display text-4xl font-bold leading-tight sm:text-5xl">Explore Our Spaces</h2>
           </div>
 
-          <div className="gallery-scrollbar mt-12 flex snap-x gap-5 overflow-x-auto pb-8">
+          <div className="gallery-scrollbar mt-12 flex snap-x gap-3 overflow-x-auto pb-8 sm:gap-5">
             {spaceCards.map((card, index) => (
               <motion.article
                 key={card.title}
@@ -425,7 +425,7 @@ const GalleryPage = () => {
                 whileHover={{ y: -10 }}
                 transition={{ delay: index * 0.05 }}
                 viewport={{ once: true, margin: "-80px" }}
-                className="group relative h-72 w-[18rem] shrink-0 snap-center overflow-hidden rounded-lg border border-[#d8a82f]/30 bg-white/5 shadow-[0_24px_70px_rgba(0,0,0,0.34)] sm:w-[21rem]"
+                className="group relative h-72 w-[14rem] shrink-0 snap-center overflow-hidden rounded-lg border border-[#d8a82f]/30 bg-white/5 shadow-[0_24px_70px_rgba(0,0,0,0.34)] sm:w-[18rem] md:w-[21rem]"
               >
                 <img src={card.image} alt={card.title} className="h-full w-full object-cover transition duration-700 group-hover:scale-110" referrerPolicy="no-referrer" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/88 via-black/12 to-transparent" />
@@ -455,7 +455,7 @@ const GalleryPage = () => {
                 whileHover={{ y: -12, rotate: index % 2 === 0 ? -1.2 : 1.2 }}
                 transition={{ delay: index * 0.05 }}
                 viewport={{ once: true, margin: "-90px" }}
-                className="group relative h-64 w-56 shrink-0 snap-center overflow-hidden rounded-lg border border-[#d8a82f]/30 bg-black/28 shadow-[0_24px_70px_rgba(0,0,0,0.34)] transition-[width,height,transform] duration-500 hover:h-80 hover:w-64 sm:h-72 sm:w-60 sm:hover:h-96 sm:hover:w-72"
+                className="group relative h-48 w-40 shrink-0 snap-center overflow-hidden rounded-lg border border-[#d8a82f]/30 bg-black/28 shadow-[0_24px_70px_rgba(0,0,0,0.34)] transition-[width,height,transform] duration-500 sm:h-64 sm:w-56 sm:hover:h-80 sm:hover:w-64 md:h-72 md:w-60 md:hover:h-96 md:hover:w-72"
               >
                 <img src={item.image} alt={item.title} className="h-full w-full object-cover transition duration-700 group-hover:scale-110" referrerPolicy="no-referrer" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/88 via-black/10 to-transparent" />
@@ -530,7 +530,7 @@ const GalleryPage = () => {
             <div className="grid gap-4">
               {[cafePlayZoom, cafeSittingPlayArea].map((image, index) => (
                 <div key={image} className={`overflow-hidden border border-[#d8a82f]/22 bg-white/5 ${index === 0 ? "rounded-[3rem_1rem_1rem_1rem]" : "rounded-[1rem_1rem_3rem_1rem]"}`}>
-                  <img src={image} alt="" className="h-48 w-full object-cover md:h-full" />
+                  <img src={image} alt="" className="h-40 w-full object-cover sm:h-48 md:h-full" />
                 </div>
               ))}
             </div>

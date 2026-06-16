@@ -49,7 +49,7 @@ const AboutUs = () => {
             <p className="text-lg leading-relaxed text-muted">
               From dine-in and takeaway to delivery, events, and customer support, the brand is designed to feel professional, welcoming, and ready for real restaurant operations.
             </p>
-            <div className="grid grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
               {pillars.map((pillar) => (
                 <div key={pillar.label} className="space-y-2">
                   <div className="text-primary">{pillar.icon}</div>
@@ -73,7 +73,7 @@ const AboutUs = () => {
               <img
                 src={siteConfig.aboutAmbienceImage}
                 alt="Chicken House restaurant location"
-                className="h-[600px] w-full object-cover"
+                className="h-[300px] sm:h-[400px] md:h-[600px] w-full object-cover"
               />
             </div>
             <div className="absolute -bottom-10 -left-10 -z-10 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />

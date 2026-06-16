@@ -3,7 +3,7 @@ import { Mail, MapPinned, MessageCircle, Phone } from "lucide-react";
 const cafeBrandingImage = new URL("../../assets/source-images/Cafe Images/chick branding.png", import.meta.url).href;
 const cafeFrontImage = new URL("../../assets/source-images/Cafe Images/front.png", import.meta.url).href;
 const cafeIndoorImage = new URL("../../assets/source-images/Cafe Images/indor sitting.png", import.meta.url).href;
-const cafeLocationImage = new URL("../../assets/source-images/Cafe Images/location 1.jpg", import.meta.url).href;
+const cafeLocationImage = new URL("../../assets/source-images/Image1.jpeg", import.meta.url).href;
 const cafeLiveKitchenVideo = new URL("../../assets/source-images/Cafe Images/live kitchen.mp4", import.meta.url).href;
 
 export const siteConfig = {

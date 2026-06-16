@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { motion } from "motion/react";
-import { AlertCircle, ArrowRight, CheckCircle2, Chrome, Lock, Mail } from "lucide-react";
+import { AlertCircle, ArrowRight, CheckCircle2, Lock, Mail } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import PageMeta from "../components/layout/PageMeta";
 import { useAuth, UserRole } from "../context/AuthContext";
@@ -19,7 +19,7 @@ const LoginPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, socialSignup } = useAuth();
+  const { login } = useAuth();
 
   const locationState = location.state as LoginLocationState | null;
   const signupSuccess = locationState?.signupSuccess ?? "";
@@ -58,15 +58,6 @@ const LoginPage = () => {
     }
 
     routeByRole(result.user.role);
-  };
-
-  const handleSocialSignup = async (provider: "google" | "facebook") => {
-    setError("");
-    const result = await socialSignup(provider);
-
-    if (result.ok === false) {
-      console.warn(result.message);
-    }
   };
 
   return (
@@ -110,13 +101,6 @@ const LoginPage = () => {
           <div className="relative z-10 flex flex-1 flex-col justify-center py-10">
             <div className="max-w-sm">
               <div className="flex items-center gap-5 border-y border-white/10 py-6">
-                <div className="flex h-24 w-32 shrink-0 items-center justify-center rounded-2xl border border-accent/35 bg-white/[0.07] p-2 shadow-[0_18px_45px_rgba(0,0,0,0.32)]">
-                  <img
-                    src="/logo.jpg"
-                    alt="Chicken House logo"
-                    className="h-full w-full rounded-xl object-cover"
-                  />
-                </div>
                 <div>
                   <p className="text-xs font-bold uppercase tracking-[0.28em] text-orange-300">
                     A Symbol Of
@@ -193,25 +177,6 @@ const LoginPage = () => {
                 <span>{error}</span>
               </div>
             )}
-
-            <div className="mt-8 grid gap-3 sm:grid-cols-2">
-              <button
-                type="button"
-                onClick={() => void handleSocialSignup("google")}
-                className="flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-bold text-dark transition hover:bg-surface"
-              >
-                <Chrome size={17} />
-                Google
-              </button>
-              <button
-                type="button"
-                onClick={() => void handleSocialSignup("facebook")}
-                className="flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-bold text-dark transition hover:bg-surface"
-              >
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#1877f2] text-xs font-bold text-white">f</span>
-                Facebook
-              </button>
-            </div>
 
             <form onSubmit={handleSubmit} className="mt-8 space-y-5" autoComplete="off">
               <div className="pointer-events-none absolute h-0 w-0 overflow-hidden opacity-0" aria-hidden="true">

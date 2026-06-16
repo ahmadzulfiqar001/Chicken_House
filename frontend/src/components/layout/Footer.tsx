@@ -147,7 +147,7 @@ const Footer = () => {
                   <li key={link.name}>
                     <Link
                       to={link.href}
-                      className="group flex items-center gap-4 font-anton text-3xl uppercase transition-colors hover:text-accent"
+                      className="group flex items-center gap-4 font-anton text-lg sm:text-2xl md:text-3xl uppercase transition-colors hover:text-accent"
                     >
                       {link.name}
                       <ArrowUpRight

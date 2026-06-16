@@ -132,7 +132,7 @@ const ChatbotInboxModule = () => {
         </motion.div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-[360px_1fr] gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-[1fr_2fr] gap-8">
         <div className="bg-white rounded-[3rem] p-6 shadow-xl shadow-dark/5 border border-gray-50">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -188,7 +188,7 @@ const ChatbotInboxModule = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-[3rem] p-8 shadow-xl shadow-dark/5 border border-gray-50 min-h-[780px]">
+        <div className="bg-white rounded-[3rem] p-8 shadow-xl shadow-dark/5 border border-gray-50 min-h-[400px] md:min-h-[780px]">
           {selectedConversation ? (
             <>
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 pb-6 border-b border-gray-100 mb-8">
@@ -220,7 +220,7 @@ const ChatbotInboxModule = () => {
                     }`}
                   >
                     <div
-                      className={`max-w-[78%] rounded-[2rem] px-5 py-4 shadow-sm ${
+                      className={`max-w-[85%] sm:max-w-[78%] rounded-[2rem] px-5 py-4 shadow-sm ${
                         message.role === "customer"
                           ? "bg-surface text-dark rounded-tl-md"
                           : message.role === "assistant"

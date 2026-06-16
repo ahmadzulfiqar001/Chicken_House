@@ -177,24 +177,24 @@ const EcommerceModule = () => {
           <table className="w-full text-left">
             <thead>
               <tr className="bg-surface text-muted text-xs font-bold uppercase tracking-widest">
-                <th className="px-8 py-4">Order ID</th>
-                <th className="px-8 py-4">Customer</th>
-                <th className="px-8 py-4">Items</th>
-                <th className="px-8 py-4">Total</th>
-                <th className="px-8 py-4">Status</th>
-                <th className="px-8 py-4">Payment</th>
-                <th className="px-8 py-4">Time</th>
-                <th className="px-8 py-4">Actions</th>
+                <th className="px-4 py-4 sm:px-8">Order ID</th>
+                <th className="px-4 py-4 sm:px-8">Customer</th>
+                <th className="px-4 py-4 sm:px-8">Items</th>
+                <th className="px-4 py-4 sm:px-8">Total</th>
+                <th className="px-4 py-4 sm:px-8">Status</th>
+                <th className="px-4 py-4 sm:px-8">Payment</th>
+                <th className="px-4 py-4 sm:px-8">Time</th>
+                <th className="px-4 py-4 sm:px-8">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {filteredOrders.map((order) => (
                 <tr key={order.id} className="hover:bg-surface/50 transition-colors">
-                  <td className="px-8 py-6 font-mono text-sm">{order.id}</td>
-                  <td className="px-8 py-6 font-bold text-dark">{order.customer}</td>
-                  <td className="px-8 py-6 text-sm text-muted">{order.items}</td>
-                  <td className="px-8 py-6 font-bold text-primary">{formatCurrency(order.total)}</td>
-                  <td className="px-8 py-6">
+                  <td className="px-4 py-6 font-mono text-sm sm:px-8">{order.id}</td>
+                  <td className="px-4 py-6 font-bold text-dark sm:px-8">{order.customer}</td>
+                  <td className="px-4 py-6 text-sm text-muted sm:px-8">{order.items}</td>
+                  <td className="px-4 py-6 font-bold text-primary sm:px-8">{formatCurrency(order.total)}</td>
+                  <td className="px-4 py-6 sm:px-8">
                     <span className={`px-3 py-1 rounded-lg text-xs font-bold ${
                       order.status === 'Delivered' ? 'bg-green-50 text-green-500' :
                       order.status === 'Preparing' || order.status === 'Confirmed' ? 'bg-blue-50 text-blue-500' :
@@ -203,9 +203,9 @@ const EcommerceModule = () => {
                       {order.status}
                     </span>
                   </td>
-                  <td className="px-8 py-6 text-sm text-muted">{order.paymentMethod || "N/A"}</td>
-                  <td className="px-8 py-6 text-sm text-muted">{order.time ? new Date(order.time).toLocaleString("en-PK") : "-"}</td>
-                  <td className="px-8 py-6">
+                  <td className="px-4 py-6 text-sm text-muted max-w-xs truncate sm:px-8">{order.paymentMethod || "N/A"}</td>
+                  <td className="px-4 py-6 text-sm text-muted max-w-xs truncate sm:px-8">{order.time ? new Date(order.time).toLocaleString("en-PK") : "-"}</td>
+                  <td className="px-4 py-6 sm:px-8">
                     <button onClick={() => navigate(`/track?orderId=${order.id}`)} className="text-primary font-bold hover:underline">Track Order</button>
                   </td>
                 </tr>

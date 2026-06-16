@@ -372,7 +372,7 @@ const RiderModule = () => {
                 </div>
               </div>
 
-              <div className="mt-8 grid grid-cols-2 gap-5">
+              <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                   <p className="text-muted text-xs font-bold uppercase tracking-widest mb-1">Phone</p>
                   {selected.phone ? (

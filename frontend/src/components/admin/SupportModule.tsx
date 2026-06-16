@@ -156,7 +156,7 @@ const SupportModule = ({ focusTicketId }: { focusTicketId?: string } = {}) => {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: 20 }}
               onSubmit={submitReply}
-              className="relative w-full max-w-2xl rounded-[2.5rem] bg-white p-8 shadow-2xl"
+              className="relative w-full max-w-full sm:max-w-2xl rounded-[2.5rem] bg-white p-8 shadow-2xl"
             >
               <h3 className="text-3xl font-bold text-dark">Reply to {replyTarget.name}</h3>
               <p className="mt-2 text-sm text-muted">{replyTarget.subject || "Support request"}</p>
@@ -206,7 +206,7 @@ const SupportModule = ({ focusTicketId }: { focusTicketId?: string } = {}) => {
               initial={{ opacity: 0, scale: 0.96, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: 20 }}
-              className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-[3rem] bg-white shadow-2xl"
+              className="relative w-full max-w-full sm:max-w-2xl lg:max-w-3xl max-h-[90vh] overflow-y-auto rounded-[3rem] bg-white shadow-2xl"
             >
               <div className="flex items-center justify-between border-b border-gray-100 p-8">
                 <div>
@@ -262,7 +262,7 @@ const SupportModule = ({ focusTicketId }: { focusTicketId?: string } = {}) => {
                   ) : null}
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div className="grid grid-cols-2 gap-4 sm:gap-3 md:grid-cols-4">
                   <button
                     onClick={() => openReply(selected)}
                     className="rounded-2xl bg-primary px-4 py-4 font-bold text-white transition hover:bg-primary-dark"

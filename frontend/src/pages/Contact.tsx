@@ -207,7 +207,7 @@ const ContactPage = () => {
                   className="h-full w-full object-cover"
                 />
               </div>
-              <div className="mt-4 max-w-xs rounded-[2rem] border border-white/70 bg-white/95 p-5 shadow-2xl shadow-dark/10 backdrop-blur-xl sm:absolute sm:-bottom-7 sm:left-6 sm:mt-0">
+              <div className="mt-4 max-w-[90vw] rounded-[2rem] border border-white/70 bg-white/95 p-5 shadow-2xl shadow-dark/10 backdrop-blur-xl sm:absolute sm:-bottom-7 sm:left-6 sm:mt-0 sm:max-w-xs">
                 <p className="text-xs font-bold uppercase tracking-[0.28em] text-primary">Landmark Reference</p>
                 <p className="mt-3 text-sm leading-7 text-dark">
                   Near Mitchell&apos;s Fair Price Shop on GT Road, with quick directions available through Google Maps
@@ -252,7 +252,7 @@ const ContactPage = () => {
               initial={{ opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
-              className="rounded-[3rem] border border-gray-100 bg-white p-8 shadow-[0_30px_90px_rgba(27,18,14,0.08)] md:p-10"
+              className="rounded-[3rem] border border-gray-100 bg-white px-5 py-6 shadow-[0_30px_90px_rgba(27,18,14,0.08)] sm:px-8 sm:py-8 md:p-10"
             >
               <div className="mb-8 flex items-start justify-between gap-6">
                 <div>
@@ -435,7 +435,7 @@ const ContactPage = () => {
             className="mt-8 overflow-hidden rounded-[3rem] border border-gray-100 bg-white shadow-[0_30px_90px_rgba(27,18,14,0.08)]"
           >
             <div className="grid lg:grid-cols-[1.55fr_0.75fr]">
-              <div className="relative min-h-[22rem] lg:min-h-[28rem]">
+              <div className="relative min-h-[16rem] sm:min-h-[22rem] md:min-h-[28rem] lg:min-h-[28rem]">
                 {!mapLoaded ? (
                   <div className="absolute inset-0 flex animate-pulse items-center justify-center bg-[linear-gradient(135deg,#f9f5ef,#f2e6d8,#efe4d2)] text-sm font-bold uppercase tracking-[0.24em] text-muted">
                     Loading map

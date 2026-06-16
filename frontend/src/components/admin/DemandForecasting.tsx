@@ -227,7 +227,7 @@ const DemandForecasting = () => {
               <p className="italic">No {metricLabel.toLowerCase()} recorded in the last 7 days yet.</p>
             </div>
           ) : (
-            <div className="h-[340px] w-full">
+            <div className="h-[240px] md:h-[340px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />

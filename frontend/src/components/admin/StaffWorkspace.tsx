@@ -410,7 +410,7 @@ const StaffWorkspace = () => {
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-[18rem] flex-col overflow-y-auto border-r border-white/10 bg-dark px-5 py-6 text-white shadow-2xl transition-transform duration-300 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-[16rem] max-w-[80vw] flex-col overflow-y-auto border-r border-white/10 bg-dark px-5 py-6 text-white shadow-2xl transition-transform duration-300 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0`}
       >
@@ -463,7 +463,7 @@ const StaffWorkspace = () => {
         </button>
       </aside>
 
-      <main className="ml-0 md:ml-[18rem] flex-1 p-4 md:p-8">
+      <main className="ml-0 md:ml-[16rem] flex-1 min-w-0 p-4 md:p-8">
         {snackbar ? (
           <div className="fixed right-6 top-6 z-[70] max-w-sm rounded-[1.5rem] border border-white/70 bg-white px-5 py-4 shadow-2xl shadow-dark/15">
             <p className={`text-sm font-bold ${snackbar.tone === "success" ? "text-green-700" : "text-red-700"}`}>
@@ -553,11 +553,11 @@ const StaffWorkspace = () => {
                   {summary.tasks.length ? summary.tasks.map((task) => (
                     <div key={task.id} className="rounded-[1.7rem] border border-gray-100 bg-surface/70 px-5 py-4">
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
+                        <div className="min-w-0">
                           <p className="font-bold text-dark">{task.title}</p>
                           <p className="mt-2 text-sm text-muted">{task.subtitle}</p>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-shrink-0 items-center gap-3">
                           <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-primary">{task.status}</span>
                           <button
                             type="button"
@@ -748,11 +748,11 @@ const StaffWorkspace = () => {
               {summary.tasks.length ? summary.tasks.map((task) => (
                 <div key={task.id} className="rounded-[1.6rem] border border-gray-100 px-5 py-4">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
+                    <div className="min-w-0">
                       <p className="font-bold text-dark">{task.title}</p>
                       <p className="mt-1 text-sm text-muted">{task.subtitle}</p>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-shrink-0 items-center gap-3">
                       <span className="rounded-full bg-surface px-4 py-2 text-xs font-bold text-primary">{task.status}</span>
                       <button
                         type="button"

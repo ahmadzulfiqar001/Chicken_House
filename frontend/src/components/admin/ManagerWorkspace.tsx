@@ -301,7 +301,7 @@ const ManagerWorkspace = () => {
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-[19rem] flex-col overflow-y-auto border-r border-white/10 bg-dark px-5 py-6 text-white shadow-2xl transition-transform duration-300 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-[16rem] sm:w-[19rem] flex-col overflow-y-auto border-r border-white/10 bg-dark px-5 py-6 text-white shadow-2xl transition-transform duration-300 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0`}
       >
@@ -517,7 +517,29 @@ const ManagerWorkspace = () => {
         {activeTab === "team" ? (
           <div className="rounded-[2.5rem] border border-gray-100 bg-white p-8 shadow-xl shadow-dark/5">
             <h2 className="text-xl font-bold text-dark">Team Progress Matrix</h2>
-            <div className="mt-6 overflow-x-auto">
+            <div className="mt-6 flex flex-col gap-4 md:hidden">
+              {overview.staffSnapshots.map((member) => (
+                <div key={member.id} className="rounded-[1.6rem] border border-gray-100 bg-surface/70 px-4 py-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-bold text-dark">{member.name}</p>
+                      <p className="text-xs text-muted">{member.department}</p>
+                      <p className="mt-1 text-sm text-dark">{member.role}</p>
+                    </div>
+                    <span className="shrink-0 rounded-full bg-white px-3 py-1 text-xs font-bold text-primary">
+                      {member.performanceScore.toFixed(1)} / 5
+                    </span>
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-sm text-muted">
+                    <p>Attendance: <span className="text-dark">{member.attendanceStatus}</span></p>
+                    <p>Orders: <span className="text-dark">{member.assignedOrders}</span></p>
+                    <p>Leaves: <span className="text-dark">{member.pendingLeaves}</span></p>
+                    <p>Requests: <span className="text-dark">{member.pendingRequests}</span></p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-6 hidden overflow-x-auto md:block">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-100 text-left text-xs font-bold uppercase tracking-[0.22em] text-muted">

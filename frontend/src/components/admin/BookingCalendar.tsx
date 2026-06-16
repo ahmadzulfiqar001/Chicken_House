@@ -132,7 +132,7 @@ const BookingCalendar = ({ bookings, onBookingClick }: BookingCalendarProps) => 
       {/* Calendar Grid */}
       <div className="rounded-3xl border border-gray-100 bg-white p-4 sm:p-6 shadow-lg overflow-x-auto">
         {/* Day Headers */}
-        <div className="grid grid-cols-7 gap-2 mb-4 min-w-[700px]">
+        <div className="grid grid-cols-7 gap-2 mb-4 sm:min-w-[700px]">
           {dayNames.map(day => (
             <div key={day} className="text-center text-xs font-bold uppercase tracking-widest text-muted py-2">
               {day}
@@ -141,7 +141,7 @@ const BookingCalendar = ({ bookings, onBookingClick }: BookingCalendarProps) => 
         </div>
 
         {/* Calendar Days */}
-        <div className="grid grid-cols-7 gap-2 min-w-[700px]">
+        <div className="grid grid-cols-7 gap-2 sm:min-w-[700px]">
           {calendarDays.map((dayInfo, index) => {
             const dateKey = formatDateKey(dayInfo.date);
             const dayBookings = bookingsByDate[dateKey] || [];
@@ -153,7 +153,7 @@ const BookingCalendar = ({ bookings, onBookingClick }: BookingCalendarProps) => 
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.005 }}
-                className={`min-h-[120px] rounded-2xl border-2 p-3 transition-all ${
+                className={`min-h-[100px] sm:min-h-[120px] rounded-2xl border-2 p-3 transition-all ${
                   dayInfo.isCurrentMonth
                     ? isCurrentDay
                       ? "border-primary bg-primary/5"
