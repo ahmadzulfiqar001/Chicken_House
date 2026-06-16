@@ -1,33 +1,35 @@
-// Vercel serverless entry. Imports are LAZY (inside the handler) so that:
-//  (1) api/index.ts itself always loads cleanly (no top-level cross-dir import
-//      that could fail to resolve in Vercel's bundled ESM runtime), and
-//  (2) any init error (module load, Mongo connect, etc.) is CAUGHT and surfaced
-//      in the response instead of an opaque FUNCTION_INVOCATION_FAILED.
-// No Socket.IO / change streams / Vite here — realtime uses the client polling
+// Source for the Vercel serverless function. This file is BUNDLED (esbuild) into a
+// single self-contained `api/index.js` at build time — see `build:api` in package.json.
+//
+// Why bundle: Vercel transpiles each .ts to .js but keeps extensionless relative
+// imports, which Node's native ESM loader can't resolve at runtime
+// (ERR_MODULE_NOT_FOUND: Cannot find module '/var/task/backend/src/app'). Bundling
+// inlines the whole backend into one file, so there are no relative imports left;
+// only bare node_modules imports remain (kept external, resolved from node_modules).
+//
+// No Socket.IO / change streams / Vite here — realtime uses the client-side polling
 // fallback in frontend/src/lib/realtime.ts.
+
+import { createApp } from "./src/app";
+import { connectToMongo } from "./src/core/mongo";
 
 type Handler = (req: unknown, res: unknown) => void;
 
+let app: Handler | undefined;
 // Cached across warm invocations; concurrent cold-start callers await the same promise.
-let appPromise: Promise<Handler> | undefined;
-
-async function buildApp(): Promise<Handler> {
-  const { createApp } = await import("../backend/src/app");
-  const { connectToMongo } = await import("../backend/src/core/mongo");
-  const app = createApp() as unknown as Handler;
-  await connectToMongo();
-  return app;
-}
+let ready: Promise<unknown> | undefined;
 
 export default async function handler(req: unknown, res: unknown) {
   try {
-    if (!appPromise) appPromise = buildApp();
-    const app = await appPromise;
+    if (!app) app = createApp() as unknown as Handler;
+    if (!ready) ready = connectToMongo();
+    await ready;
     // Do NOT read req.body/query/cookies before Express — express.json({verify})
     // must read the stream first to capture rawBody for the WhatsApp HMAC check.
     return app(req, res);
   } catch (err) {
-    appPromise = undefined; // let the next request retry a cold init
+    app = undefined;
+    ready = undefined; // let the next request retry a cold init
     const e = err as { message?: string; stack?: string };
     const r = res as {
       statusCode?: number;
