@@ -88,7 +88,7 @@ const titleBlock = (eyebrow: string, title: string, text: string) => (
 
 const imageCard = (title: string, text: string, src: string) => (
   <div className="overflow-hidden rounded-[2.3rem] border border-white/10 bg-white/5">
-    <img src={src} alt={title} className="h-72 w-full object-cover" referrerPolicy="no-referrer" />
+    <img src={src} alt={title} className="h-48 w-full object-cover sm:h-56 md:h-72" referrerPolicy="no-referrer" />
     <div className="p-6">
       <h3 className="text-2xl font-bold">{title}</h3>
       <p className="mt-3 text-sm leading-7 text-white/62">{text}</p>
@@ -109,13 +109,13 @@ const ServicesPage = () => {
           </video>
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(10,5,4,0.96),rgba(10,5,4,0.72),rgba(10,5,4,0.55))]" />
         </motion.div>
-        <div className="relative z-10 mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-[1.08fr_0.92fr]">
+        <div className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 gap-12 px-6 lg:grid-cols-[1.08fr_0.92fr]">
           <div>
             <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-5 py-3 backdrop-blur-xl">
               <Sparkles size={15} className="text-orange-400" />
               <span className="text-xs font-bold uppercase tracking-[0.34em] text-orange-300">Full Service Experience</span>
             </div>
-            <h1 className="mt-8 max-w-4xl font-display text-6xl leading-[0.95] font-black tracking-tight md:text-8xl">
+            <h1 className="mt-8 max-w-4xl font-display text-4xl leading-[0.95] font-black tracking-tight sm:text-5xl md:text-6xl lg:text-8xl">
               SERVICES THAT FEEL
               <span className="block text-orange-500">ALIVE, RICH, AND READY.</span>
             </h1>
@@ -129,7 +129,7 @@ const ServicesPage = () => {
           </div>
           <div className="hidden rounded-[2.8rem] border border-white/10 bg-white/5 p-4 backdrop-blur-xl lg:block">
             <div className="overflow-hidden rounded-[2.2rem]">
-              <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1400&q=80" alt="Chicken House preview" className="h-[35rem] w-full object-cover" referrerPolicy="no-referrer" />
+              <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1400&q=80" alt="Chicken House preview" className="h-[24rem] w-full object-cover sm:h-[28rem] md:h-[35rem]" referrerPolicy="no-referrer" />
             </div>
             <div className="mt-4 grid grid-cols-2 gap-4">
               <div className="rounded-[1.6rem] bg-[#140a07] p-5"><p className="text-xs font-bold uppercase tracking-[0.28em] text-orange-400">Dine-In</p><p className="mt-2 text-sm leading-7 text-white/70">Lighting, seating, and family comfort in one polished experience.</p></div>

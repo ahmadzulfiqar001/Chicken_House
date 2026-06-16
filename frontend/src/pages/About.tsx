@@ -42,7 +42,7 @@ const cafeCookingArea = new URL("../../assets/source-images/Cafe Images/cooking 
 const cafeFront = new URL("../../assets/source-images/Cafe Images/front.png", import.meta.url).href;
 const cafeIndoorSitting = new URL("../../assets/source-images/Cafe Images/indor sitting.png", import.meta.url).href;
 const cafeSittingPlayArea = new URL("../../assets/source-images/Cafe Images/sitting with play area.png", import.meta.url).href;
-const cafeLocationWide = new URL("../../assets/source-images/Cafe Images/location 1.jpg", import.meta.url).href;
+const aboutKitchenImage = new URL("../../assets/source-images/image2.jpeg", import.meta.url).href;
 
 const heroStats = [
   { icon: Trophy, value: "20+", label: "Years of taste" },
@@ -348,8 +348,8 @@ const AboutPage = () => {
           </motion.span>
         ))}
 
-        <div className="relative mx-auto grid max-w-7xl gap-10 px-6 pb-40 pt-14 sm:px-8 sm:pb-44 sm:pt-16 lg:grid-cols-[0.86fr_1.14fr] lg:px-10 lg:pb-48 lg:pt-24">
-          <div className="w-full max-w-[calc(100vw-3rem)] min-w-0 sm:max-w-none">
+        <div className="relative mx-auto grid max-w-7xl gap-10 px-6 pb-40 pt-14 sm:px-8 sm:pb-44 sm:pt-16 md:grid-cols-2 lg:grid-cols-[0.86fr_1.14fr] lg:px-10 lg:pb-48 lg:pt-24">
+          <div className="w-full min-w-0">
             <motion.div
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
@@ -432,7 +432,7 @@ const AboutPage = () => {
                 <img
                   src={cafeSittingPlayArea}
                   alt="Chicken House family seating and play area"
-                  className="relative h-36 w-52 sm:h-48 sm:w-72 rounded-2xl border-4 border-white object-cover shadow-[0_20px_60px_rgba(0,0,0,0.3)]"
+                  className="relative h-24 w-40 max-w-[90vw] sm:h-48 sm:w-72 sm:max-w-none rounded-2xl border-4 border-white object-cover shadow-[0_20px_60px_rgba(0,0,0,0.3)]"
                 />
               </div>
             </motion.div>
@@ -448,7 +448,7 @@ const AboutPage = () => {
                 <img
                   src={cafeCookingArea}
                   alt="Chicken House cooking area"
-                  className="relative h-36 w-52 sm:h-48 sm:w-72 rounded-2xl border-4 border-white object-cover shadow-[0_20px_60px_rgba(0,0,0,0.3)]"
+                  className="relative h-24 w-40 max-w-[90vw] sm:h-48 sm:w-72 sm:max-w-none rounded-2xl border-4 border-white object-cover shadow-[0_20px_60px_rgba(0,0,0,0.3)]"
                 />
               </div>
             </motion.div>
@@ -463,11 +463,11 @@ const AboutPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 + index * 0.06 }}
               whileHover={{ y: -6 }}
-              className="rounded-lg border-2 border-[#d8a82f]/60 bg-white/95 p-4 text-center shadow-2xl shadow-[#8d4f36]/20 backdrop-blur-md"
+              className="rounded-lg border-2 border-[#d8a82f]/60 bg-white/95 p-3 text-center shadow-2xl shadow-[#8d4f36]/20 backdrop-blur-md sm:p-4"
             >
               <item.icon size={25} className="mx-auto text-primary" />
               <p className="mt-3 text-xl font-display font-bold text-dark">{item.value}</p>
-              <p className="mt-1 text-xs text-muted">{item.label}</p>
+              <p className="mt-1 text-[11px] text-muted sm:text-xs">{item.label}</p>
             </motion.div>
           ))}
         </div>
@@ -799,8 +799,8 @@ const AboutPage = () => {
               className="overflow-hidden rounded-lg border border-[#eadcc6] bg-dark shadow-xl shadow-dark/15"
             >
               <img
-                src={cafeLocationWide}
-                alt="Chicken House location and kitchen trust"
+                src={aboutKitchenImage}
+                alt="Chicken House kitchen and dining experience"
                 className="h-full min-h-[300px] w-full object-cover"
               />
             </motion.div>
@@ -886,7 +886,7 @@ const AboutPage = () => {
                   viewport={{ once: true, margin: "-80px" }}
                   onClick={() => setActiveBadge(index)}
                   onMouseEnter={() => setActiveBadge(index)}
-                  className={`min-h-56 rounded-lg border p-5 text-left shadow-xl shadow-black/20 transition ${
+                  className={`min-h-[14rem] sm:min-h-56 rounded-lg border p-5 text-left shadow-xl shadow-black/20 transition ${
                     activeBadge === index
                       ? "border-accent bg-white text-dark"
                       : "border-white/12 bg-white/6 text-white hover:border-accent/60"

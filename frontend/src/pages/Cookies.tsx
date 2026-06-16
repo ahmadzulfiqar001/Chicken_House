@@ -9,7 +9,7 @@ const CookiesPage = () => {
       />
       <section className="pb-24">
         <div className="mx-auto max-w-4xl rounded-[3rem] border border-gray-100 bg-white p-10 shadow-xl shadow-dark/5">
-          <h1 className="text-4xl font-display font-bold text-dark">Cookie Notice</h1>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-dark">Cookie Notice</h1>
           <div className="mt-8 space-y-5 text-sm leading-8 text-muted">
             <p>Chicken House uses basic browser storage and session cookies to support sign-in, cart persistence, and smoother customer navigation.</p>
             <p>These cookies help keep your session active, remember menu selections, and support customer actions like checkout and order tracking.</p>

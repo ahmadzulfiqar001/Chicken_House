@@ -945,7 +945,7 @@ const OrderManagement = ({ focusOrderId }: { focusOrderId?: string } = {}) => {
           </div>
 
           <div className="flex w-full flex-wrap gap-4 xl:w-auto">
-            <div className="relative min-w-[18rem] flex-1">
+            <div className="relative sm:min-w-[18rem] min-w-0 flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={18} />
               <input
                 type="text"

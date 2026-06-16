@@ -539,7 +539,7 @@ const CheckoutPage = () => {
                 <div className="rounded-[3rem] border border-gray-100 bg-white p-8 shadow-xl shadow-dark/5 md:p-10">
                   <h2 className="text-2xl font-bold text-dark">Delivery & payment</h2>
 
-                  <div className="mt-8 grid grid-cols-2 gap-4">
+                  <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {orderTypes.map((type) => (
                       <button
                         key={type}

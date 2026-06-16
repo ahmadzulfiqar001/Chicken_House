@@ -9,7 +9,7 @@ const PrivacyPolicyPage = () => {
       />
       <section className="pb-24">
         <div className="mx-auto max-w-4xl rounded-[3rem] border border-gray-100 bg-white p-10 shadow-xl shadow-dark/5">
-          <h1 className="text-4xl font-display font-bold text-dark">Privacy Policy</h1>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-dark">Privacy Policy</h1>
           <div className="mt-8 space-y-5 text-sm leading-8 text-muted">
             <p>Chicken House collects only the information needed to process orders, table bookings, contact inquiries, and customer account activity.</p>
             <p>Basic details may include your name, email, phone number, delivery address, order history, and booking requests. This information is used only for customer service and restaurant operations.</p>

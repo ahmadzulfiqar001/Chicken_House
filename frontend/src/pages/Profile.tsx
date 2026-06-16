@@ -589,7 +589,7 @@ const ProfilePage = () => {
                           <Star size={20} className="text-white/80" />
                           <p className="text-xs font-bold uppercase tracking-[0.3em] text-white/80">Reward Points Balance</p>
                         </div>
-                        <p className="text-6xl font-display font-bold mt-2">{(customer?.loyaltyPoints ?? 0).toLocaleString()}</p>
+                        <p className="text-4xl md:text-5xl lg:text-6xl font-display font-bold mt-2">{(customer?.loyaltyPoints ?? 0).toLocaleString()}</p>
                         <p className="text-white/70 text-sm mt-2">points available to redeem</p>
                         <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-white/20 px-5 py-2 text-sm font-bold">
                           <Zap size={14} />

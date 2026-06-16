@@ -23,7 +23,7 @@ const NotFoundPage = () => {
               <Compass size={34} />
             </div>
             <p className="mt-6 text-xs font-bold uppercase tracking-[0.32em] text-primary">404</p>
-            <h1 className="mt-5 text-5xl font-display font-bold text-dark">This page is not available.</h1>
+            <h1 className="mt-5 text-3xl sm:text-4xl md:text-5xl font-display font-bold text-dark">This page is not available.</h1>
             <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-muted">
               The link may be outdated, or the page may have moved. Use the quick routes below to continue browsing
               Chicken House without losing your place.
