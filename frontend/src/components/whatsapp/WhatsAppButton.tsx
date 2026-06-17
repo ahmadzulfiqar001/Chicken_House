@@ -21,7 +21,7 @@ const WhatsAppButton = () => {
     <motion.div
       initial={{ scale: 0.9, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
-      className="fixed bottom-4 left-4 z-50 sm:bottom-8 sm:left-6"
+      className="fixed bottom-4 right-4 z-50 sm:bottom-8 sm:right-6"
     >
       <motion.button
         whileHover={{ scale: 1.08 }}
