@@ -158,7 +158,7 @@ const WhatsAppBot = () => {
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.92 }}
         onClick={() => setIsOpen((prev) => !prev)}
-        className="fixed bottom-28 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full border-4 border-white bg-primary text-white shadow-2xl shadow-primary/40 sm:bottom-32 sm:right-6 sm:h-16 sm:w-16"
+        className="fixed bottom-4 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full border-4 border-white bg-primary text-white shadow-2xl shadow-primary/40 sm:bottom-8 sm:right-6 sm:h-16 sm:w-16"
         aria-label="Open Chicken House chatbot"
       >
         <Bot size={26} />
@@ -171,7 +171,7 @@ const WhatsAppBot = () => {
             initial={{ opacity: 0, y: 80, scale: 0.7, transformOrigin: "bottom right" }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 80, scale: 0.7 }}
-            className="fixed bottom-28 right-4 z-[60] flex h-[min(38rem,calc(100dvh-9rem))] w-[92vw] max-w-[430px] flex-col overflow-hidden rounded-[2.5rem] border border-white/10 bg-white shadow-2xl shadow-black/20 sm:bottom-32 sm:right-6 sm:h-[min(42rem,calc(100dvh-10rem))]"
+            className="fixed bottom-4 right-4 z-[60] flex h-[min(38rem,calc(100dvh-9rem))] w-[92vw] max-w-[430px] flex-col overflow-hidden rounded-[2.5rem] border border-white/10 bg-white shadow-2xl shadow-black/20 sm:bottom-8 sm:right-6 sm:h-[min(42rem,calc(100dvh-10rem))]"
           >
             <div className="relative overflow-hidden bg-primary p-6 text-white">
               <div className="relative z-10 flex items-start justify-between gap-4">

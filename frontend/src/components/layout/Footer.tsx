@@ -226,7 +226,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="flex flex-col items-center justify-between gap-8 border-t border-white/10 pt-10 md:flex-row">
+        <div className="flex flex-col items-center gap-6 border-t border-white/10 pt-10 text-center">
           <div className="flex items-center gap-4">
             <span className="h-2 w-2 rounded-full bg-accent animate-pulse" />
             <p className="font-mono text-[10px] uppercase tracking-widest text-white/40">

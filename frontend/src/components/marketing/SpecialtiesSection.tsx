@@ -76,9 +76,9 @@ const SpecialtiesSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.2, duration: 0.8 }}
-              className="bg-dark rounded-3xl border border-white/10 p-6 group hover:bg-white transition-all duration-700 preserve-3d hover:rotate-y-10 hover:shadow-2xl"
+              className="bg-dark rounded-3xl border border-white/10 p-5 group hover:bg-white transition-all duration-700 preserve-3d hover:rotate-y-10 hover:shadow-2xl"
             >
-              <div className="flex justify-between items-start mb-6">
+              <div className="flex justify-between items-start mb-4">
                 <span className="font-mono text-xs text-white/40 group-hover:text-dark/40 uppercase tracking-widest">
                   {item.id} // {item.type}
                 </span>
@@ -90,7 +90,7 @@ const SpecialtiesSection = () => {
                 </motion.div>
               </div>
 
-              <div className="relative aspect-[4/3] mb-6 overflow-hidden rounded-2xl group-hover:shadow-xl transition-all duration-700">
+              <div className="relative aspect-video mb-4 overflow-hidden rounded-2xl group-hover:shadow-xl transition-all duration-700">
                 <img 
                   src={item.image} 
                   alt={item.name} 
@@ -115,16 +115,16 @@ const SpecialtiesSection = () => {
                 </div>
               </div>
 
-              <div className="space-y-5">
-                <h3 className="text-3xl font-anton uppercase leading-none group-hover:text-dark transition-colors">
+              <div className="space-y-4">
+                <h3 className="text-2xl font-anton uppercase leading-none group-hover:text-dark transition-colors">
                   {item.name}
                 </h3>
-                
-                <p className="text-white/40 group-hover:text-dark/60 text-sm font-light leading-relaxed">
+
+                <p className="text-white/40 group-hover:text-dark/60 text-sm font-light leading-relaxed line-clamp-2">
                   {item.description}
                 </p>
 
-                <div className="grid grid-cols-3 gap-4 border-t border-white/10 group-hover:border-dark/10 pt-5">
+                <div className="grid grid-cols-3 gap-4 border-t border-white/10 group-hover:border-dark/10 pt-4">
                   {Object.entries(item.specs).map(([key, value]) => (
                     <div key={key}>
                       <span className="block font-mono text-[10px] text-white/20 group-hover:text-dark/20 uppercase tracking-widest mb-1">
@@ -137,7 +137,7 @@ const SpecialtiesSection = () => {
                   ))}
                 </div>
 
-                <div className="flex justify-between items-end pt-5">
+                <div className="flex justify-between items-end pt-4">
                   <div className="flex items-center gap-2 group-hover:text-dark">
                     <Star size={16} fill="currentColor" className="text-accent" />
                     <span className="font-bold">4.9</span>

@@ -9,14 +9,30 @@ const Navbar = () => {
   const { cartItems } = useCart();
   const { user, isAuthenticated, logout } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [compact, setCompact] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+    let lastY = window.scrollY;
+    let ticking = false;
+    const update = () => {
+      const y = window.scrollY;
+      setIsScrolled(y > 50);
+      // Direction-aware: shrink ("close") on scroll down, widen on scroll up.
+      if (y < 80) setCompact(false);
+      else if (y > lastY + 4) setCompact(true);
+      else if (y < lastY - 4) setCompact(false);
+      lastY = y;
+      ticking = false;
     };
-    window.addEventListener("scroll", handleScroll);
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(update);
+        ticking = true;
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -55,14 +71,18 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${
-        isScrolled 
-          ? "py-4 px-4" 
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out ${
+        isScrolled
+          ? compact
+            ? "py-2 px-3"
+            : "py-4 px-4"
           : "py-8 px-8"
       }`}
     >
-      <div 
-        className={`max-w-[1800px] mx-auto transition-all duration-700 rounded-full border ${navbarShellClass}`}
+      <div
+        className={`mx-auto transition-all duration-500 ease-out rounded-full border ${navbarShellClass} ${
+          compact ? "max-w-[1080px] scale-[0.97]" : "max-w-[1800px] scale-100"
+        }`}
       >
         <div className="flex justify-between items-center">
           {/* Logo */}
