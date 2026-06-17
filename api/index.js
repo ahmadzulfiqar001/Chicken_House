@@ -1,20 +1,20 @@
-// ../_chmain_wt/backend/src/app.ts
+// backend/src/app.ts
 import "express-async-errors";
 import express29 from "express";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 
-// ../_chmain_wt/backend/src/modules/orders/orders.routes.ts
+// backend/src/modules/orders/orders.routes.ts
 import express from "express";
 import crypto4 from "crypto";
 
-// ../_chmain_wt/backend/src/modules/auth/auth.service.ts
+// backend/src/modules/auth/auth.service.ts
 import crypto2 from "crypto";
 
-// ../_chmain_wt/backend/src/core/db.ts
+// backend/src/core/db.ts
 import crypto from "crypto";
 
-// ../_chmain_wt/backend/src/core/catalog.ts
+// backend/src/core/catalog.ts
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -602,7 +602,7 @@ var getVariantFactor = (label) => {
   return 1;
 };
 
-// ../_chmain_wt/backend/src/core/db.ts
+// backend/src/core/db.ts
 var clone = (value) => JSON.parse(JSON.stringify(value));
 var isoHoursAgo = (hours) => new Date(Date.now() - hours * 60 * 60 * 1e3).toISOString();
 var isoDaysAgo = (days, extraHours = 0) => new Date(Date.now() - (days * 24 + extraHours) * 60 * 60 * 1e3).toISOString();
@@ -1194,7 +1194,7 @@ if (!globalThis.__chickenHouseDb__) {
   globalThis.__chickenHouseDb__ = db;
 }
 
-// ../_chmain_wt/backend/src/core/models.ts
+// backend/src/core/models.ts
 import mongoose, { Schema } from "mongoose";
 var socialLinkSchema = new Schema(
   {
@@ -1209,7 +1209,7 @@ var businessHourSchema = new Schema(
   {
     day: { type: String, required: true },
     open: { type: String, default: "11:00" },
-    close: { type: String, default: "23:59" },
+    close: { type: String, default: "00:00" },
     isClosed: { type: Boolean, default: false }
   },
   { _id: false }
@@ -2013,11 +2013,11 @@ var NewsletterSubscriberModel = mongoose.models.NewsletterSubscriber || mongoose
 var JobOpeningModel = mongoose.models.JobOpening || mongoose.model("JobOpening", jobOpeningSchema, "jobOpenings");
 var JobApplicationModel = mongoose.models.JobApplication || mongoose.model("JobApplication", jobApplicationSchema, "jobApplications");
 
-// ../_chmain_wt/backend/src/core/mongo.ts
+// backend/src/core/mongo.ts
 import dotenv from "dotenv";
 import mongoose3 from "mongoose";
 
-// ../_chmain_wt/backend/src/core/legacy-mongo-sync.ts
+// backend/src/core/legacy-mongo-sync.ts
 import mongoose2 from "mongoose";
 var LEGACY_COLLECTIONS = [
   "categories",
@@ -2119,7 +2119,7 @@ var buildInventoryUsage = (recipe, ingredientMap) => {
 var buildBusinessHours = (openingHours) => asRecordArray(openingHours).map((entry, index) => ({
   day: asString(entry.day ?? entry.label ?? entry.name ?? entry.weekday) || `Day ${index + 1}`,
   open: asString(entry.open ?? entry.opensAt ?? entry.start ?? entry.from, "11:00"),
-  close: asString(entry.close ?? entry.closesAt ?? entry.end ?? entry.to, "23:00"),
+  close: asString(entry.close ?? entry.closesAt ?? entry.end ?? entry.to, "00:00"),
   isClosed: asBoolean(entry.isClosed ?? entry.closed, false)
 }));
 var buildSocialLinks = (socialLinks) => asRecordArray(socialLinks).map((entry, index) => ({
@@ -2355,7 +2355,7 @@ var syncLegacyMongoData = async () => {
   }
 };
 
-// ../_chmain_wt/backend/src/core/mongo.ts
+// backend/src/core/mongo.ts
 var jobOpeningSeed = [
   { id: "JOB-chef", title: "Chef / Cook", department: "Kitchen", type: "Full-time", location: "Renala Khurd", description: "Prepare BBQ, karahi, and fast-food items to Chicken House standards.", requirements: ["2+ years kitchen experience", "Knowledge of desi & fast food", "Hygiene & food safety"], salaryRange: "Rs. 40,000 - 70,000", status: "Open", createdAt: (/* @__PURE__ */ new Date()).toISOString() },
   { id: "JOB-rider", title: "Delivery Rider", department: "Delivery", type: "Full-time", location: "Renala Khurd / Okara", description: "Deliver orders quickly and safely across the service area.", requirements: ["Own bike + valid license", "Knows local routes", "Smartphone"], salaryRange: "Rs. 30,000 + fuel", status: "Open", createdAt: (/* @__PURE__ */ new Date()).toISOString() },
@@ -2415,13 +2415,13 @@ var seedDatabase = async () => {
         city: "Renala Khurd",
         mapEmbedUrl: "",
         businessHours: [
-          { day: "Monday", open: "11:00", close: "23:00", isClosed: false },
-          { day: "Tuesday", open: "11:00", close: "23:00", isClosed: false },
-          { day: "Wednesday", open: "11:00", close: "23:00", isClosed: false },
-          { day: "Thursday", open: "11:00", close: "23:00", isClosed: false },
-          { day: "Friday", open: "11:00", close: "23:59", isClosed: false },
-          { day: "Saturday", open: "11:00", close: "23:59", isClosed: false },
-          { day: "Sunday", open: "11:00", close: "23:00", isClosed: false }
+          { day: "Monday", open: "11:00", close: "00:00", isClosed: false },
+          { day: "Tuesday", open: "11:00", close: "00:00", isClosed: false },
+          { day: "Wednesday", open: "11:00", close: "00:00", isClosed: false },
+          { day: "Thursday", open: "11:00", close: "00:00", isClosed: false },
+          { day: "Friday", open: "11:00", close: "00:00", isClosed: false },
+          { day: "Saturday", open: "11:00", close: "00:00", isClosed: false },
+          { day: "Sunday", open: "11:00", close: "00:00", isClosed: false }
         ],
         socialLinks: [
           { platform: "facebook", label: "Facebook", url: "", handle: "" },
@@ -2456,13 +2456,13 @@ var seedDatabase = async () => {
         landmark: "Mitchell's Fruit Farm",
         coordinates: { lat: 0, lng: 0 },
         timings: [
-          { day: "Monday", open: "11:00", close: "23:00", isClosed: false },
-          { day: "Tuesday", open: "11:00", close: "23:00", isClosed: false },
-          { day: "Wednesday", open: "11:00", close: "23:00", isClosed: false },
-          { day: "Thursday", open: "11:00", close: "23:00", isClosed: false },
-          { day: "Friday", open: "11:00", close: "23:59", isClosed: false },
-          { day: "Saturday", open: "11:00", close: "23:59", isClosed: false },
-          { day: "Sunday", open: "11:00", close: "23:00", isClosed: false }
+          { day: "Monday", open: "11:00", close: "00:00", isClosed: false },
+          { day: "Tuesday", open: "11:00", close: "00:00", isClosed: false },
+          { day: "Wednesday", open: "11:00", close: "00:00", isClosed: false },
+          { day: "Thursday", open: "11:00", close: "00:00", isClosed: false },
+          { day: "Friday", open: "11:00", close: "00:00", isClosed: false },
+          { day: "Saturday", open: "11:00", close: "00:00", isClosed: false },
+          { day: "Sunday", open: "11:00", close: "00:00", isClosed: false }
         ],
         amenities: ["Family Seating", "Takeaway", "Delivery"],
         parkingAvailable: true,
@@ -2521,7 +2521,7 @@ var connectToMongo = async () => {
   }
 };
 
-// ../_chmain_wt/backend/src/core/realtime.ts
+// backend/src/core/realtime.ts
 import { Server as IOServer } from "socket.io";
 var io = null;
 var WATCHED = [
@@ -2538,7 +2538,7 @@ var emitChange = (collection, payload = {}) => {
   io.emit(`${collection}:change`, { collection, ...payload });
 };
 
-// ../_chmain_wt/backend/src/core/permissions.ts
+// backend/src/core/permissions.ts
 var ROLE_PERMISSIONS = {
   admin: [
     // Full access to everything
@@ -2625,7 +2625,7 @@ var hasPermission = (role, permission) => {
   return ROLE_PERMISSIONS[role]?.includes(permission) ?? false;
 };
 
-// ../_chmain_wt/backend/src/modules/auth/auth.service.ts
+// backend/src/modules/auth/auth.service.ts
 var AUTH_COOKIE_NAME = "chicken_house_session";
 var SESSION_TTL_MS = 1e3 * 60 * 60 * 24 * 7;
 var PASSWORD_RESET_TTL_MS = 1e3 * 60 * 60;
@@ -2925,7 +2925,7 @@ var createCustomerProfile = async ({
 var normalizeAccountPayload = (user) => sanitizeUser(user);
 var normalizeEmailInput = normalizeEmail;
 
-// ../_chmain_wt/backend/src/modules/menu/menu.service.ts
+// backend/src/modules/menu/menu.service.ts
 var round = (value) => Number(value.toFixed(2));
 var getInventoryItem = (name) => db.inventory.find((item) => item.name === name);
 var getInventoryItems = async () => {
@@ -3084,7 +3084,7 @@ var reserveInventoryForOrder = async (details = []) => {
   return { ok: true, deductions: Object.fromEntries(deductions) };
 };
 
-// ../_chmain_wt/backend/src/modules/orders/orders.pricing.ts
+// backend/src/modules/orders/orders.pricing.ts
 var normalize = (value) => value.trim().toLowerCase();
 var calculateDeliveryFee = ({
   orderType,
@@ -3145,7 +3145,7 @@ var validateOrderPayload = ({
   return "";
 };
 
-// ../_chmain_wt/backend/src/modules/whatsapp/whatsapp.service.ts
+// backend/src/modules/whatsapp/whatsapp.service.ts
 import crypto3 from "crypto";
 var GRAPH_API_VERSION = "v22.0";
 var warnedNoSecret = false;
@@ -3228,7 +3228,7 @@ var sendWhatsAppMessages = async (to, messages) => {
   return results;
 };
 
-// ../_chmain_wt/backend/src/modules/notifications/notify.service.ts
+// backend/src/modules/notifications/notify.service.ts
 var isResendConfigured = () => Boolean(process.env.RESEND_API_KEY?.trim());
 var escapeHtml = (value) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 var sendEmail = async (to, subject, text) => {
@@ -3303,7 +3303,7 @@ ${message}` }]);
   return result;
 };
 
-// ../_chmain_wt/backend/src/modules/orders/orders.routes.ts
+// backend/src/modules/orders/orders.routes.ts
 var router = express.Router();
 var validStatuses = ["Pending", "Confirmed", "Preparing", "Out for Delivery", "Delivered", "Cancelled"];
 var staffOrderRoles = /* @__PURE__ */ new Set(["staff", "rider"]);
@@ -3810,10 +3810,10 @@ router.delete("/:id", requirePermission("orders:delete"), async (req, res) => {
 });
 var orders_routes_default = router;
 
-// ../_chmain_wt/backend/src/modules/inventory/inventory.routes.ts
+// backend/src/modules/inventory/inventory.routes.ts
 import express2 from "express";
 
-// ../_chmain_wt/backend/src/modules/inventory/inventory.reporting.ts
+// backend/src/modules/inventory/inventory.reporting.ts
 var round2 = (value) => Number(value.toFixed(2));
 var isWithinLastDays = (value, days) => {
   if (!value) {
@@ -3906,7 +3906,7 @@ var getVendorPaymentStatus = (billAmount, amountPaid, discountCut) => {
   return "Unpaid";
 };
 
-// ../_chmain_wt/backend/src/modules/inventory/inventory.routes.ts
+// backend/src/modules/inventory/inventory.routes.ts
 var router2 = express2.Router();
 var normalizeInventoryPayload = (body) => {
   const name = String(body.name ?? "").trim();
@@ -4189,7 +4189,7 @@ router2.delete("/:id", requirePermission("inventory:delete"), async (req, res) =
 });
 var inventory_routes_default = router2;
 
-// ../_chmain_wt/backend/src/modules/hr/hr.routes.ts
+// backend/src/modules/hr/hr.routes.ts
 import express3 from "express";
 var router3 = express3.Router();
 var buildInitials = (name) => name.split(" ").map((part) => part.trim()[0] ?? "").join("").slice(0, 2).toUpperCase();
@@ -4458,7 +4458,7 @@ router3.delete("/:id", requirePermission("hr:delete"), async (req, res) => {
 });
 var hr_routes_default = router3;
 
-// ../_chmain_wt/backend/src/modules/hr/attendance.routes.ts
+// backend/src/modules/hr/attendance.routes.ts
 import express4 from "express";
 var router4 = express4.Router();
 router4.get("/", requirePermission("hr:view"), async (req, res) => {
@@ -4608,7 +4608,7 @@ router4.delete("/:id", requirePermission("hr:delete"), async (req, res) => {
 });
 var attendance_routes_default = router4;
 
-// ../_chmain_wt/backend/src/modules/hr/leaves.routes.ts
+// backend/src/modules/hr/leaves.routes.ts
 import express5 from "express";
 var router5 = express5.Router();
 router5.get("/", requirePermission("hr:view"), async (req, res) => {
@@ -4719,7 +4719,7 @@ router5.delete("/:id", requirePermission("hr:delete"), async (req, res) => {
 });
 var leaves_routes_default = router5;
 
-// ../_chmain_wt/backend/src/modules/hr/payroll.routes.ts
+// backend/src/modules/hr/payroll.routes.ts
 import express6 from "express";
 var router6 = express6.Router();
 router6.get("/", requirePermission("hr:view"), async (req, res) => {
@@ -4881,7 +4881,7 @@ router6.delete("/:id", requirePermission("hr:delete"), async (req, res) => {
 });
 var payroll_routes_default = router6;
 
-// ../_chmain_wt/backend/src/modules/hr/shifts.routes.ts
+// backend/src/modules/hr/shifts.routes.ts
 import express7 from "express";
 var router7 = express7.Router();
 router7.get("/", requirePermission("hr:view"), async (req, res) => {
@@ -4981,7 +4981,7 @@ router7.delete("/:id", requirePermission("hr:delete"), async (req, res) => {
 });
 var shifts_routes_default = router7;
 
-// ../_chmain_wt/backend/src/modules/hr/performance.routes.ts
+// backend/src/modules/hr/performance.routes.ts
 import express8 from "express";
 var router8 = express8.Router();
 router8.get("/", requirePermission("hr:view"), async (req, res) => {
@@ -5090,10 +5090,10 @@ router8.delete("/:id", requirePermission("hr:delete"), async (req, res) => {
 });
 var performance_routes_default = router8;
 
-// ../_chmain_wt/backend/src/modules/finance/finance.routes.ts
+// backend/src/modules/finance/finance.routes.ts
 import express9 from "express";
 
-// ../_chmain_wt/backend/src/modules/finance/finance.reporting.ts
+// backend/src/modules/finance/finance.reporting.ts
 var round3 = (value) => Number(value.toFixed(2));
 var isValidDate = (value) => {
   if (!value) {
@@ -5267,7 +5267,7 @@ var buildFinanceSummary = (transactions, orders) => {
   };
 };
 
-// ../_chmain_wt/backend/src/modules/finance/finance.routes.ts
+// backend/src/modules/finance/finance.routes.ts
 var router9 = express9.Router();
 var normalizeFinancePayload = (body) => {
   const type = String(body.type ?? "").trim();
@@ -5374,7 +5374,7 @@ router9.delete("/:id", requirePermission("finance:delete"), async (req, res) => 
 });
 var finance_routes_default = router9;
 
-// ../_chmain_wt/backend/src/modules/menu/menu.routes.ts
+// backend/src/modules/menu/menu.routes.ts
 import express10 from "express";
 var router10 = express10.Router();
 var normalizeVariants = (variants, fallbackPrice) => {
@@ -5511,7 +5511,7 @@ router10.delete("/:id", requirePermission("menu:delete"), async (req, res) => {
 });
 var menu_routes_default = router10;
 
-// ../_chmain_wt/backend/src/modules/auth/auth.routes.ts
+// backend/src/modules/auth/auth.routes.ts
 import crypto5 from "crypto";
 import express11 from "express";
 var router11 = express11.Router();
@@ -5958,10 +5958,10 @@ router11.post("/logout", async (req, res) => {
 });
 var auth_routes_default = router11;
 
-// ../_chmain_wt/backend/src/modules/assistant/assistant.routes.ts
+// backend/src/modules/assistant/assistant.routes.ts
 import express12 from "express";
 
-// ../_chmain_wt/backend/src/modules/assistant/groq-service.ts
+// backend/src/modules/assistant/groq-service.ts
 import Groq from "groq-sdk";
 var GROQ_MODEL = process.env.GROQ_MODEL?.trim() || "openai/gpt-oss-20b";
 var isGroqConfigured = () => Boolean(process.env.GROQ_API_KEY?.trim());
@@ -6014,7 +6014,7 @@ var generateGroqReply = async (rawMessage, menuItems) => {
   };
 };
 
-// ../_chmain_wt/backend/src/modules/assistant/assistant.engine.ts
+// backend/src/modules/assistant/assistant.engine.ts
 var LOCATION_TEXT = "Chicken House is located near Mitchell's Fair Price Shop, GT Road, Renala Khurd, Okara, Punjab, Pakistan.";
 var HOURS_TEXT = "We are open 7 days a week from 11:00 AM to 12:00 AM.";
 var WHATSAPP_TEXT = "For WhatsApp, call or chat at +92 345 7493339.";
@@ -6459,7 +6459,7 @@ var logAssistantConversation = async ({
 };
 var getAssistantConversations = async () => getAssistantSessions();
 
-// ../_chmain_wt/backend/src/modules/assistant/assistant.routes.ts
+// backend/src/modules/assistant/assistant.routes.ts
 var router12 = express12.Router();
 router12.get("/welcome", async (req, res) => {
   res.json(await getChickenHouseWelcomePack());
@@ -6489,7 +6489,7 @@ router12.post("/chat", async (req, res) => {
 });
 var assistant_routes_default = router12;
 
-// ../_chmain_wt/backend/src/modules/whatsapp/whatsapp.routes.ts
+// backend/src/modules/whatsapp/whatsapp.routes.ts
 import express13 from "express";
 var router13 = express13.Router();
 var mapAssistantMessagesToWhatsApp = (reply) => reply.messages.map((message) => {
@@ -6566,7 +6566,7 @@ router13.get("/status", (req, res) => {
 });
 var whatsapp_routes_default = router13;
 
-// ../_chmain_wt/backend/src/modules/customer/customer.routes.ts
+// backend/src/modules/customer/customer.routes.ts
 import express14 from "express";
 var router14 = express14.Router();
 var buildCustomerSeed = (email, name, phone) => ({
@@ -6880,10 +6880,10 @@ router14.post("/redeem", async (req, res) => {
 });
 var customer_routes_default = router14;
 
-// ../_chmain_wt/backend/src/modules/bookings/bookings.routes.ts
+// backend/src/modules/bookings/bookings.routes.ts
 import express15 from "express";
 
-// ../_chmain_wt/backend/src/modules/bookings/bookings.helpers.ts
+// backend/src/modules/bookings/bookings.helpers.ts
 var packageRates = {
   silver: 1500,
   gold: 2500,
@@ -6940,7 +6940,7 @@ var validateBookingPayload = ({
   return "";
 };
 
-// ../_chmain_wt/backend/src/modules/bookings/bookings.routes.ts
+// backend/src/modules/bookings/bookings.routes.ts
 var router15 = express15.Router();
 var validStatuses2 = ["Pending", "Confirmed", "Completed", "Cancelled"];
 var normalizeSlot = (value) => String(value ?? "").trim();
@@ -7143,7 +7143,7 @@ router15.patch("/:id", requirePermission("bookings:update"), async (req, res) =>
 });
 var bookings_routes_default = router15;
 
-// ../_chmain_wt/backend/src/modules/contact/contact.routes.ts
+// backend/src/modules/contact/contact.routes.ts
 import express16 from "express";
 var router16 = express16.Router();
 router16.get("/", requirePermission("users:view"), async (_req, res) => {
@@ -7220,7 +7220,7 @@ router16.patch("/:id", requireRole(["admin", "manager"]), async (req, res) => {
 });
 var contact_routes_default = router16;
 
-// ../_chmain_wt/backend/src/modules/users/users.routes.ts
+// backend/src/modules/users/users.routes.ts
 import express17 from "express";
 var router17 = express17.Router();
 var staffRoles = ["manager", "hr", "rider", "staff"];
@@ -7714,10 +7714,10 @@ router17.delete("/:id", requirePermission("users:delete"), async (req, res) => {
 });
 var users_routes_default = router17;
 
-// ../_chmain_wt/backend/src/modules/hr/staff-panel.routes.ts
+// backend/src/modules/hr/staff-panel.routes.ts
 import express18 from "express";
 
-// ../_chmain_wt/backend/src/core/store.ts
+// backend/src/core/store.ts
 var MODELS = {
   attendance: AttendanceModel,
   leaveRequests: LeaveRequestModel,
@@ -7793,7 +7793,7 @@ var removeDoc = async (name, match) => {
   return true;
 };
 
-// ../_chmain_wt/backend/src/modules/hr/staff-panel.routes.ts
+// backend/src/modules/hr/staff-panel.routes.ts
 var router18 = express18.Router();
 router18.use(requireAuth);
 var staffOnlyRoles = /* @__PURE__ */ new Set(["manager", "rider", "staff"]);
@@ -8260,7 +8260,7 @@ router18.patch("/profile", async (req, res) => {
 });
 var staff_panel_routes_default = router18;
 
-// ../_chmain_wt/backend/src/modules/operations/operations.routes.ts
+// backend/src/modules/operations/operations.routes.ts
 import express19 from "express";
 var router19 = express19.Router();
 router19.use(requireAuth);
@@ -8501,7 +8501,7 @@ router19.patch("/requests/:id/status", async (req, res) => {
 });
 var operations_routes_default = router19;
 
-// ../_chmain_wt/backend/src/modules/reviews/reviews.routes.ts
+// backend/src/modules/reviews/reviews.routes.ts
 import express20 from "express";
 var router20 = express20.Router();
 router20.get("/", async (req, res) => {
@@ -8562,7 +8562,7 @@ router20.delete("/:id", requireRole(["admin"]), async (req, res) => {
 });
 var reviews_routes_default = router20;
 
-// ../_chmain_wt/backend/src/modules/branches/branches.routes.ts
+// backend/src/modules/branches/branches.routes.ts
 import express21 from "express";
 var router21 = express21.Router();
 var slugify3 = (value) => value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || `branch-${Date.now()}`;
@@ -8622,7 +8622,7 @@ router21.delete("/:id", requireRole(["admin"]), async (req, res) => {
 });
 var branches_routes_default = router21;
 
-// ../_chmain_wt/backend/src/modules/promotions/promotions.routes.ts
+// backend/src/modules/promotions/promotions.routes.ts
 import express22 from "express";
 var router22 = express22.Router();
 var slugify4 = (value) => value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || `promo-${Date.now()}`;
@@ -8689,7 +8689,7 @@ router22.delete("/:id", requireRole(["admin"]), async (req, res) => {
 });
 var promotions_routes_default = router22;
 
-// ../_chmain_wt/backend/src/modules/notifications/notifications.routes.ts
+// backend/src/modules/notifications/notifications.routes.ts
 import express23 from "express";
 var router23 = express23.Router();
 var AUDIENCES = ["all", "customers", "admins", "staff"];
@@ -8998,7 +8998,7 @@ router23.delete("/:id", requireRole(["admin"]), async (req, res) => {
 });
 var notifications_routes_default = router23;
 
-// ../_chmain_wt/backend/src/modules/riders/riders.routes.ts
+// backend/src/modules/riders/riders.routes.ts
 import express24 from "express";
 var router24 = express24.Router();
 var STATUSES2 = ["Available", "On Delivery", "Offline"];
@@ -9053,7 +9053,7 @@ router24.delete("/:id", requireRole(["admin"]), async (req, res) => {
 });
 var riders_routes_default = router24;
 
-// ../_chmain_wt/backend/src/modules/settings/settings.routes.ts
+// backend/src/modules/settings/settings.routes.ts
 import express25 from "express";
 var router25 = express25.Router();
 var DEFAULT_KEY = "default";
@@ -9127,7 +9127,7 @@ router25.put("/", requirePermission("system:settings"), async (req, res) => {
 });
 var settings_routes_default = router25;
 
-// ../_chmain_wt/backend/src/modules/security/security.routes.ts
+// backend/src/modules/security/security.routes.ts
 import express26 from "express";
 var router26 = express26.Router();
 router26.get("/", requireRole(["admin"]), async (_req, res) => {
@@ -9165,7 +9165,7 @@ router26.get("/", requireRole(["admin"]), async (_req, res) => {
 });
 var security_routes_default = router26;
 
-// ../_chmain_wt/backend/src/modules/newsletter/newsletter.routes.ts
+// backend/src/modules/newsletter/newsletter.routes.ts
 import express27 from "express";
 var router27 = express27.Router();
 var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -9196,7 +9196,7 @@ router27.get("/", requireRole(["admin", "manager"]), async (_req, res) => {
 });
 var newsletter_routes_default = router27;
 
-// ../_chmain_wt/backend/src/modules/careers/careers.routes.ts
+// backend/src/modules/careers/careers.routes.ts
 import express28 from "express";
 var router28 = express28.Router();
 var adminOrManager2 = requireRole(["admin", "manager"]);
@@ -9341,7 +9341,7 @@ router28.delete("/applications/:id", requireRole(["admin"]), async (req, res) =>
 });
 var careers_routes_default = router28;
 
-// ../_chmain_wt/backend/src/app.ts
+// backend/src/app.ts
 function createApp() {
   const app2 = express29();
   const isProd = process.env.NODE_ENV === "production";
@@ -9421,7 +9421,7 @@ function createApp() {
   return app2;
 }
 
-// ../_chmain_wt/backend/serverless.ts
+// backend/serverless.ts
 var app;
 var ready;
 async function ensureMongo() {

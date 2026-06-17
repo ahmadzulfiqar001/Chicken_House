@@ -14,7 +14,7 @@ const businessHourSchema = new Schema(
   {
     day: { type: String, required: true },
     open: { type: String, default: "11:00" },
-    close: { type: String, default: "23:59" },
+    close: { type: String, default: "00:00" },
     isClosed: { type: Boolean, default: false },
   },
   { _id: false },

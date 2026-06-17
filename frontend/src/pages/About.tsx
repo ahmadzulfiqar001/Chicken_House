@@ -421,27 +421,11 @@ const AboutPage = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-dark/60 via-transparent to-white/5" />
             </div>
 
-            {/* Floating Image - Top Right (Sitting with Play Area) */}
-            <motion.div
-              animate={{ y: [0, -12, 0] }}
-              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute right-[-1rem] top-6 sm:right-[-2rem] sm:top-8 z-20"
-            >
-              <div className="relative">
-                <div className="absolute inset-[-3px] rounded-2xl bg-white blur-sm"></div>
-                <img
-                  src={cafeSittingPlayArea}
-                  alt="Chicken House family seating and play area"
-                  className="relative h-24 w-40 max-w-[90vw] sm:h-48 sm:w-72 sm:max-w-none rounded-2xl border-4 border-white object-cover shadow-[0_20px_60px_rgba(0,0,0,0.3)]"
-                />
-              </div>
-            </motion.div>
-
             {/* Floating Image - Bottom Left (Cooking Area) */}
             <motion.div
               animate={{ y: [0, 12, 0] }}
               transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute bottom-6 left-[-1rem] sm:bottom-8 sm:left-[-2rem] z-20"
+              className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 z-20"
             >
               <div className="relative">
                 <div className="absolute inset-[-3px] rounded-2xl bg-white blur-sm"></div>

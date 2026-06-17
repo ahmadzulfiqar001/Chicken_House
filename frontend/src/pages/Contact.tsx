@@ -207,11 +207,10 @@ const ContactPage = () => {
                   className="h-full w-full object-cover"
                 />
               </div>
-              <div className="mt-4 max-w-[90vw] rounded-[2rem] border border-white/70 bg-white/95 p-5 shadow-2xl shadow-dark/10 backdrop-blur-xl sm:absolute sm:-bottom-7 sm:left-6 sm:mt-0 sm:max-w-xs">
+              <div className="mt-4 max-w-[90vw] rounded-[2rem] border-2 border-primary/20 bg-white p-5 shadow-2xl shadow-dark/10 backdrop-blur-xl sm:absolute sm:-bottom-7 sm:left-6 sm:mt-0 sm:max-w-xs">
                 <p className="text-xs font-bold uppercase tracking-[0.28em] text-primary">Landmark Reference</p>
                 <p className="mt-3 text-sm leading-7 text-dark">
-                  Near Mitchell&apos;s Fair Price Shop on GT Road, with quick directions available through Google Maps
-                  and WhatsApp.
+                  Near Mitchell&apos;s Fair Price Shop, GT Road, Renala Khurd.
                 </p>
               </div>
             </motion.div>
