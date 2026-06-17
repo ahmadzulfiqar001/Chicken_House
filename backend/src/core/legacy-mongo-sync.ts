@@ -157,7 +157,7 @@ const buildBusinessHours = (openingHours: unknown) =>
       asString(entry.day ?? entry.label ?? entry.name ?? entry.weekday) ||
       `Day ${index + 1}`,
     open: asString(entry.open ?? entry.opensAt ?? entry.start ?? entry.from, "11:00"),
-    close: asString(entry.close ?? entry.closesAt ?? entry.end ?? entry.to, "23:00"),
+    close: asString(entry.close ?? entry.closesAt ?? entry.end ?? entry.to, "00:00"),
     isClosed: asBoolean(entry.isClosed ?? entry.closed, false),
   }));
 
