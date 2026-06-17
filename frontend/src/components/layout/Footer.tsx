@@ -28,12 +28,6 @@ const Footer = () => {
     { name: "Contact", href: "/contact" },
   ];
 
-  const legalLinks = [
-    { name: "Terms", href: "/terms" },
-    { name: "Privacy", href: "/privacy" },
-    { name: "Cookies", href: "/cookies" },
-  ];
-
   const highlights = [
     {
       icon: <Flame size={18} />,
@@ -232,17 +226,6 @@ const Footer = () => {
             <p className="font-mono text-[10px] uppercase tracking-widest text-white/40">
               Copyright 2026 ChickenHouse. All rights reserved.
             </p>
-          </div>
-          <div className="flex items-center gap-12">
-            {legalLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.href}
-                className="font-mono text-[10px] uppercase tracking-widest text-white/20 transition-colors hover:text-white"
-              >
-                {link.name}
-              </Link>
-            ))}
           </div>
         </div>
       </div>

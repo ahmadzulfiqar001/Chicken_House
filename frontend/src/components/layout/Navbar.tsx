@@ -9,30 +9,14 @@ const Navbar = () => {
   const { cartItems } = useCart();
   const { user, isAuthenticated, logout } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
-  const [compact, setCompact] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
-    let lastY = window.scrollY;
-    let ticking = false;
-    const update = () => {
-      const y = window.scrollY;
-      setIsScrolled(y > 50);
-      // Direction-aware: shrink ("close") on scroll down, widen on scroll up.
-      if (y < 80) setCompact(false);
-      else if (y > lastY + 4) setCompact(true);
-      else if (y < lastY - 4) setCompact(false);
-      lastY = y;
-      ticking = false;
-    };
     const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(update);
-        ticking = true;
-      }
+      setIsScrolled(window.scrollY > 50);
     };
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -71,18 +55,14 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out ${
-        isScrolled
-          ? compact
-            ? "py-2 px-3"
-            : "py-4 px-4"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${
+        isScrolled 
+          ? "py-4 px-4" 
           : "py-8 px-8"
       }`}
     >
-      <div
-        className={`mx-auto transition-all duration-500 ease-out rounded-full border ${navbarShellClass} ${
-          compact ? "max-w-[1080px] scale-[0.97]" : "max-w-[1800px] scale-100"
-        }`}
+      <div 
+        className={`max-w-[1800px] mx-auto transition-all duration-700 rounded-full border ${navbarShellClass}`}
       >
         <div className="flex justify-between items-center">
           {/* Logo */}
@@ -194,7 +174,7 @@ const Navbar = () => {
             initial={{ opacity: 0, y: -20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            className="lg:hidden fixed inset-x-4 top-24 z-40 overflow-hidden rounded-[3rem] border border-white/15 bg-[linear-gradient(180deg,rgba(18,12,8,0.96),rgba(73,28,14,0.93),rgba(145,62,20,0.88))] shadow-2xl backdrop-blur-2xl"
+            className="lg:hidden fixed inset-x-4 top-24 z-[70] overflow-hidden rounded-[3rem] border border-white/15 bg-[linear-gradient(180deg,rgba(18,12,8,0.96),rgba(73,28,14,0.93),rgba(145,62,20,0.88))] shadow-2xl backdrop-blur-2xl"
           >
             <div className="max-h-[calc(100vh-7rem)] overflow-y-auto p-10 space-y-8 sm:p-12">
               {navLinks.map((link) => (

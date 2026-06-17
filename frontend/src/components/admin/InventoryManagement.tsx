@@ -1076,7 +1076,7 @@ const InventoryManagement = ({ focusItemId }: { focusItemId?: string } = {}) => 
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            <div className="relative min-w-[260px]">
+            <div className="relative w-full sm:min-w-[260px]">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={18} />
               <input
                 type="text"
@@ -1181,7 +1181,7 @@ const InventoryManagement = ({ focusItemId }: { focusItemId?: string } = {}) => 
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            <div className="relative min-w-[260px]">
+            <div className="relative w-full sm:min-w-[260px]">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={18} />
               <input
                 type="text"
