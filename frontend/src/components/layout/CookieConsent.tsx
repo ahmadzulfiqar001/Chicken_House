@@ -4,9 +4,9 @@ import { Cookie } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   acceptCookieConsent,
-  clearCookieConsent,
+  rejectCookieConsent,
   COOKIE_CONSENT_CHANGED_EVENT,
-  hasAcceptedCookieConsent,
+  hasDecidedCookieConsent,
 } from "../../lib/cookieConsent";
 
 const OPEN_EVENT = "chicken-house:open-cookie-settings";
@@ -20,15 +20,13 @@ export const openCookieSettings = () => {
 
 const CookieConsent = () => {
   const [visible, setVisible] = useState(false);
-  const [notice, setNotice] = useState("");
 
   useEffect(() => {
-    setVisible(!hasAcceptedCookieConsent());
+    setVisible(!hasDecidedCookieConsent());
   }, []);
 
   useEffect(() => {
     const handler = () => {
-      setNotice("");
       setVisible(true);
     };
 
@@ -38,9 +36,8 @@ const CookieConsent = () => {
 
   useEffect(() => {
     const handler = () => {
-      if (hasAcceptedCookieConsent()) {
+      if (hasDecidedCookieConsent()) {
         setVisible(false);
-        setNotice("");
       }
     };
 
@@ -51,14 +48,10 @@ const CookieConsent = () => {
   const decide = (choice: "accepted" | "rejected") => {
     if (choice === "accepted") {
       acceptCookieConsent();
-      setVisible(false);
-      setNotice("");
-      return;
+    } else {
+      rejectCookieConsent();
     }
-
-    clearCookieConsent();
-    setNotice("Please accept cookies to keep account login, cart, and customer panel working.");
-    setVisible(true);
+    setVisible(false);
   };
 
   return (
@@ -82,13 +75,12 @@ const CookieConsent = () => {
               <div>
                 <p className="font-bold text-dark">We use cookies</p>
                 <p className="mt-1 text-sm text-muted">
-                  Cookies are required for account login, cart memory, and customer sessions. Accept cookies to continue using account features.{" "}
+                  Cookies enable account login, cart memory, and customer sessions. Accept to use these features, or reject and keep browsing.{" "}
                   <Link to="/cookies" className="font-bold text-primary hover:underline">
                     Learn more
                   </Link>
                   .
                 </p>
-                {notice ? <p className="mt-2 text-sm font-bold text-primary">{notice}</p> : null}
               </div>
             </div>
             <div className="flex shrink-0 gap-3 sm:ml-auto">

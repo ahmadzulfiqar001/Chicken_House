@@ -23,6 +23,30 @@ export const acceptCookieConsent = () => {
   window.dispatchEvent(new Event(COOKIE_CONSENT_CHANGED_EVENT));
 };
 
+export const rejectCookieConsent = () => {
+  if (typeof window === "undefined") return;
+
+  try {
+    localStorage.setItem(COOKIE_CONSENT_KEY, "rejected");
+  } catch {
+    // If storage is unavailable, the banner will ask again next visit.
+  }
+
+  window.dispatchEvent(new Event(COOKIE_CONSENT_CHANGED_EVENT));
+};
+
+/** True once the visitor has made any choice (accepted OR rejected). */
+export const hasDecidedCookieConsent = () => {
+  if (typeof window === "undefined") return false;
+
+  try {
+    const value = localStorage.getItem(COOKIE_CONSENT_KEY);
+    return value === "accepted" || value === "rejected";
+  } catch {
+    return false;
+  }
+};
+
 export const clearCookieConsent = () => {
   if (typeof window === "undefined") return;
 
