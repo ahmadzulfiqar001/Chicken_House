@@ -68,7 +68,7 @@ const SpecialtiesSection = () => {
           </Link>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-[1px] bg-white/10 border border-white/10 perspective-1000">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 perspective-1000">
           {specialties.map((item, index) => (
             <motion.div
               key={item.id}
@@ -76,21 +76,21 @@ const SpecialtiesSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.2, duration: 0.8 }}
-              className="bg-dark p-12 group hover:bg-white transition-all duration-700 preserve-3d hover:rotate-y-10 hover:shadow-2xl"
+              className="bg-dark rounded-3xl border border-white/10 p-6 group hover:bg-white transition-all duration-700 preserve-3d hover:rotate-y-10 hover:shadow-2xl"
             >
-              <div className="flex justify-between items-start mb-12">
+              <div className="flex justify-between items-start mb-6">
                 <span className="font-mono text-xs text-white/40 group-hover:text-dark/40 uppercase tracking-widest">
                   {item.id} // {item.type}
                 </span>
                 <motion.div 
                   whileHover={{ rotate: 45 }}
-                  className="w-12 h-12 rounded-full border border-white/10 group-hover:border-dark/10 flex items-center justify-center"
+                  className="w-10 h-10 rounded-full border border-white/10 group-hover:border-dark/10 flex items-center justify-center"
                 >
                   <ChevronRight size={20} className="group-hover:text-dark" />
                 </motion.div>
               </div>
 
-              <div className="relative aspect-square mb-12 overflow-hidden rounded-3xl group-hover:shadow-xl transition-all duration-700">
+              <div className="relative aspect-[4/3] mb-6 overflow-hidden rounded-2xl group-hover:shadow-xl transition-all duration-700">
                 <img 
                   src={item.image} 
                   alt={item.name} 
@@ -115,16 +115,16 @@ const SpecialtiesSection = () => {
                 </div>
               </div>
 
-              <div className="space-y-8">
-                <h3 className="text-5xl font-anton uppercase leading-none group-hover:text-dark transition-colors">
+              <div className="space-y-5">
+                <h3 className="text-3xl font-anton uppercase leading-none group-hover:text-dark transition-colors">
                   {item.name}
                 </h3>
                 
-                <p className="text-white/40 group-hover:text-dark/60 text-lg font-light leading-relaxed">
+                <p className="text-white/40 group-hover:text-dark/60 text-sm font-light leading-relaxed">
                   {item.description}
                 </p>
 
-                <div className="grid grid-cols-3 gap-4 border-t border-white/10 group-hover:border-dark/10 pt-8">
+                <div className="grid grid-cols-3 gap-4 border-t border-white/10 group-hover:border-dark/10 pt-5">
                   {Object.entries(item.specs).map(([key, value]) => (
                     <div key={key}>
                       <span className="block font-mono text-[10px] text-white/20 group-hover:text-dark/20 uppercase tracking-widest mb-1">
@@ -137,7 +137,7 @@ const SpecialtiesSection = () => {
                   ))}
                 </div>
 
-                <div className="flex justify-between items-end pt-8">
+                <div className="flex justify-between items-end pt-5">
                   <div className="flex items-center gap-2 group-hover:text-dark">
                     <Star size={16} fill="currentColor" className="text-accent" />
                     <span className="font-bold">4.9</span>
@@ -146,7 +146,7 @@ const SpecialtiesSection = () => {
                     <span className="block font-mono text-[10px] text-white/20 group-hover:text-dark/20 uppercase tracking-widest mb-1">
                       Price (PKR)
                     </span>
-                    <span className="text-3xl font-anton text-accent group-hover:text-primary transition-colors">
+                    <span className="text-2xl font-anton text-accent group-hover:text-primary transition-colors">
                       {item.price}
                     </span>
                   </div>

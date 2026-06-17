@@ -38,7 +38,6 @@ import StatsSection from "./components/marketing/StatsSection";
 import ChefsSection from "./components/marketing/ChefsSection";
 import ReservationSection from "./components/marketing/ReservationSection";
 import NewsletterSection from "./components/marketing/NewsletterSection";
-import RecommendationsSection from "./components/marketing/RecommendationsSection";
 import PageMeta from "./components/layout/PageMeta";
 
 import { CartProvider } from "./context/CartContext";
@@ -63,7 +62,6 @@ const Home = () => (
     <SpecialtiesSection />
     <AboutUs />
     <MenuPreview />
-    <RecommendationsSection />
     <BestSellersSection />
     <StatsSection />
     <ChefsSection />
