@@ -12,6 +12,101 @@ const APPLICATION_STATUSES = ["Pending", "Reviewing", "Approved", "Rejected"];
 const byNewest = (a: Record<string, any>, b: Record<string, any>, key: string) =>
   Date.parse(String(b[key] ?? 0)) - Date.parse(String(a[key] ?? 0));
 
+const inferStaffRole = (jobTitle: string) => {
+  const normalizedTitle = jobTitle.toLowerCase();
+  if (normalizedTitle.includes("manager") || normalizedTitle.includes("supervisor")) {
+    return "Manager / Branch Supervisor";
+  }
+  if (normalizedTitle.includes("human resources") || normalizedTitle.includes("hr")) {
+    return "HR / Human Resources";
+  }
+  if (normalizedTitle.includes("cashier") || normalizedTitle.includes("counter")) {
+    return "Cashier / Counter Staff";
+  }
+  if (normalizedTitle.includes("chef") || normalizedTitle.includes("cook") || normalizedTitle.includes("kitchen")) {
+    return "Kitchen Staff / Chef";
+  }
+  if (normalizedTitle.includes("rider") || normalizedTitle.includes("delivery")) {
+    return "Rider / Delivery Staff";
+  }
+  if (normalizedTitle.includes("inventory") || normalizedTitle.includes("store")) {
+    return "Inventory Staff";
+  }
+  return "General Staff";
+};
+
+const inferDepartment = (jobTitle: string) => {
+  const normalizedTitle = jobTitle.toLowerCase();
+  if (normalizedTitle.includes("manager") || normalizedTitle.includes("supervisor")) return "Management";
+  if (normalizedTitle.includes("human resources") || normalizedTitle.includes("hr")) return "Human Resources";
+  if (normalizedTitle.includes("cashier") || normalizedTitle.includes("counter") || normalizedTitle.includes("server")) {
+    return "Front of House";
+  }
+  if (normalizedTitle.includes("chef") || normalizedTitle.includes("cook") || normalizedTitle.includes("kitchen")) return "Kitchen";
+  if (normalizedTitle.includes("rider") || normalizedTitle.includes("delivery")) return "Delivery";
+  if (normalizedTitle.includes("inventory") || normalizedTitle.includes("store")) return "Inventory";
+  return "Operations";
+};
+
+const nextStaffId = async () => {
+  const staff = await loadAll("staff");
+  return staff.reduce((max, member) => Math.max(max, Number(member.id) || 0), 0) + 1;
+};
+
+const ensureApprovedApplicationStaff = async (application: Record<string, any>, hiredAt: string) => {
+  const existingByApplication = await findOne("staff", { careerApplicationId: application.id });
+  if (existingByApplication) return existingByApplication;
+
+  const email = String(application.email ?? "").trim().toLowerCase();
+  const existingByEmail = email
+    ? (await loadAll("staff")).find((member) => String(member.email ?? "").trim().toLowerCase() === email) ?? null
+    : null;
+
+  if (existingByEmail) {
+    await updateDoc("staff", { id: existingByEmail.id }, {
+      careerApplicationId: application.id,
+      experience: String(application.experience ?? ""),
+      resumeUrl: String(application.resumeUrl ?? ""),
+      coverLetter: String(application.coverLetter ?? ""),
+    });
+    return {
+      ...existingByEmail,
+      careerApplicationId: application.id,
+      experience: String(application.experience ?? ""),
+      resumeUrl: String(application.resumeUrl ?? ""),
+      coverLetter: String(application.coverLetter ?? ""),
+    };
+  }
+
+  const opening = application.jobId ? await findOne("jobOpenings", { id: application.jobId }) : null;
+  const jobTitle = String(application.jobTitle ?? opening?.title ?? "General Application");
+  const department = String(opening?.department ?? "").trim() || inferDepartment(jobTitle);
+  const staffRecord = {
+    id: await nextStaffId(),
+    name: String(application.name ?? "").trim(),
+    role: inferStaffRole(jobTitle),
+    status: "Active",
+    shift: "Morning",
+    salary: 0,
+    joinDate: hiredAt.slice(0, 10),
+    email,
+    phone: String(application.phone ?? ""),
+    address: "",
+    emergencyContact: "",
+    userAccountId: "",
+    department,
+    leaveBalance: 20,
+    performanceScore: 0,
+    careerApplicationId: String(application.id ?? ""),
+    experience: String(application.experience ?? ""),
+    resumeUrl: String(application.resumeUrl ?? ""),
+    coverLetter: String(application.coverLetter ?? ""),
+  };
+
+  await insertDoc("staff", staffRecord);
+  return staffRecord;
+};
+
 /* -------------------------------------------------------------------------- */
 /* Job openings                                                               */
 /* -------------------------------------------------------------------------- */
@@ -151,6 +246,13 @@ router.patch("/applications/:id", adminOrManager, async (req, res) => {
     patch.reviewedAt = now;
   }
 
+  let hiredStaff: Record<string, unknown> | null = null;
+  if (status === "Approved") {
+    hiredStaff = await ensureApprovedApplicationStaff(application, now);
+    patch.hiredStaffId = Number(hiredStaff.id ?? 0);
+    patch.hiredAt = String(application.hiredAt ?? "") || now;
+  }
+
   await updateDoc("jobApplications", { id: req.params.id }, patch);
 
   // Email the applicant on a final decision.
@@ -174,7 +276,7 @@ router.patch("/applications/:id", adminOrManager, async (req, res) => {
     });
   }
 
-  return res.json({ ...application, ...patch, emailResult });
+  return res.json({ ...application, ...patch, hiredStaff, emailResult });
 });
 
 router.delete("/applications/:id", requireRole(["admin"]), async (req, res) => {

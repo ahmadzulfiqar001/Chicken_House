@@ -29,8 +29,13 @@ const Services = () => {
     },
     {
       icon: <Clock size={32} />,
-      title: "24/7 Support",
-      description: "Our customer service team is always here to help with your orders and queries.",
+      title: "Opening Hours",
+      description: (
+        <>
+          <span className="block">Mon-Sun: 11:00 AM - 12:00 AM</span>
+          <span className="mt-2 block">Delivery: 11:30 AM - 11:30 PM</span>
+        </>
+      ),
       color: "bg-pink-50 text-pink-600"
     },
     {

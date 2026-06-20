@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { motion } from "motion/react";
-import { AlertCircle, ArrowRight, Chrome, Lock, Mail, Phone, User } from "lucide-react";
+import { AlertCircle, ArrowRight, Lock, Mail, Phone, User } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import PageMeta from "../components/layout/PageMeta";
 import { useAuth } from "../context/AuthContext";
@@ -13,7 +13,7 @@ const SignupPage = () => {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
-  const { signup, socialSignup } = useAuth();
+  const { signup } = useAuth();
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -45,15 +45,6 @@ const SignupPage = () => {
         signupSuccess: result.message,
       },
     });
-  };
-
-  const handleSocialSignup = async (provider: "google" | "facebook") => {
-    setError("");
-    const result = await socialSignup(provider);
-
-    if (result.ok === false) {
-      console.warn(result.message);
-    }
   };
 
   return (
@@ -97,25 +88,6 @@ const SignupPage = () => {
                 <span>{error}</span>
               </div>
             )}
-
-            <div className="mt-8 grid gap-3 sm:grid-cols-2">
-              <button
-                type="button"
-                onClick={() => void handleSocialSignup("google")}
-                className="flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-bold text-dark transition hover:bg-surface"
-              >
-                <Chrome size={17} />
-                Sign up with Google
-              </button>
-              <button
-                type="button"
-                onClick={() => void handleSocialSignup("facebook")}
-                className="flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-bold text-dark transition hover:bg-surface"
-              >
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#1877f2] text-xs font-bold text-white">f</span>
-                Sign up with Facebook
-              </button>
-            </div>
 
             <form onSubmit={handleSubmit} className="mt-8 space-y-5" autoComplete="off">
               <div className="pointer-events-none absolute h-0 w-0 overflow-hidden opacity-0" aria-hidden="true">

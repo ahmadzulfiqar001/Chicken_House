@@ -66,6 +66,7 @@ const GROUPED_SNACK_CARD_NAMES = new Set([
   "5 PCS Wings",
   "10 PCS Wings",
 ]);
+const MENU_ACTIVE_SCROLL_OFFSET = 150;
 const SIDEBAR_CATEGORY_BUTTON_HEIGHT = 44;
 const SIDEBAR_CATEGORY_BUTTON_GAP = 8;
 
@@ -471,26 +472,48 @@ const MenuPage = () => {
   useEffect(() => {
     if (!categories.length) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveCategory(entry.target.getAttribute("data-category") ?? "");
+    let frameId = 0;
+
+    const updateActiveCategory = () => {
+      const pageBottom =
+        window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
+      let nextCategory = categories[0] ?? "";
+
+      if (pageBottom) {
+        nextCategory = categories[categories.length - 1] ?? nextCategory;
+      } else {
+        for (const category of categories) {
+          const element = categoryRefs.current[category];
+
+          if (!element) continue;
+
+          if (element.getBoundingClientRect().top <= MENU_ACTIVE_SCROLL_OFFSET) {
+            nextCategory = category;
+          } else {
+            break;
           }
-        });
-      },
-      {
-        root: null,
-        rootMargin: "-120px 0px -65% 0px",
-        threshold: 0,
-      },
-    );
+        }
+      }
 
-    Object.values(categoryRefs.current).forEach((element) => {
-      if (element) observer.observe(element as Element);
-    });
+      setActiveCategory((currentCategory) =>
+        currentCategory === nextCategory ? currentCategory : nextCategory,
+      );
+    };
 
-    return () => observer.disconnect();
+    const requestActiveCategoryUpdate = () => {
+      window.cancelAnimationFrame(frameId);
+      frameId = window.requestAnimationFrame(updateActiveCategory);
+    };
+
+    updateActiveCategory();
+    window.addEventListener("scroll", requestActiveCategoryUpdate, { passive: true });
+    window.addEventListener("resize", requestActiveCategoryUpdate);
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      window.removeEventListener("scroll", requestActiveCategoryUpdate);
+      window.removeEventListener("resize", requestActiveCategoryUpdate);
+    };
   }, [categories]);
 
   useEffect(() => {
@@ -526,13 +549,10 @@ const MenuPage = () => {
 
     if (!element) return;
 
-    const offset = 100;
-    const bodyRect = document.body.getBoundingClientRect().top;
-    const elementRect = element.getBoundingClientRect().top;
-    const position = elementRect - bodyRect - offset;
+    setActiveCategory(category);
 
-    window.scrollTo({
-      top: position,
+    element.scrollIntoView({
+      block: "start",
       behavior: "smooth",
     });
   };
@@ -847,7 +867,6 @@ const MenuPage = () => {
                     categoryRefs.current[category] = element;
                   }}
                   className="scroll-mt-32"
-                  style={{ contentVisibility: "auto", containIntrinsicSize: "1px 1400px" }}
                 >
                   <div className="mb-8 flex items-center gap-4 sm:mb-10 sm:gap-6">
                     <h2 className="text-3xl font-display font-bold text-dark sm:text-4xl">{category}</h2>
