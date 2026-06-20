@@ -348,7 +348,7 @@ const AboutPage = () => {
           </motion.span>
         ))}
 
-        <div className="relative mx-auto grid max-w-7xl gap-10 px-6 pb-40 pt-14 sm:px-8 sm:pb-44 sm:pt-16 md:grid-cols-2 lg:grid-cols-[0.86fr_1.14fr] lg:px-10 lg:pb-48 lg:pt-24">
+        <div className="relative mx-auto grid max-w-7xl gap-10 px-6 pb-8 pt-14 sm:px-8 sm:pb-44 sm:pt-16 md:grid-cols-2 lg:grid-cols-[0.86fr_1.14fr] lg:px-10 lg:pb-48 lg:pt-24">
           <div className="w-full min-w-0">
             <motion.div
               initial={{ opacity: 0, y: 18 }}
@@ -439,7 +439,7 @@ const AboutPage = () => {
           </motion.div>
         </div>
 
-        <div className="relative z-10 mx-auto -mt-32 grid max-w-5xl gap-3 px-4 pb-10 sm:grid-cols-2 sm:px-6 sm:pb-14 lg:-mt-36 lg:grid-cols-4">
+        <div className="relative z-10 mx-auto mt-4 grid max-w-5xl gap-3 px-4 pb-10 sm:-mt-32 sm:grid-cols-2 sm:px-6 sm:pb-14 lg:-mt-36 lg:grid-cols-4">
           {heroStats.map((item, index) => (
             <motion.div
               key={item.label}
@@ -538,7 +538,7 @@ const AboutPage = () => {
               <span className="text-xs font-black uppercase tracking-[0.34em]">Chicken House</span>
               <span className="h-px flex-1 bg-primary/50" />
             </div>
-            <h2 className="mt-5 font-display text-5xl font-black leading-tight text-dark sm:text-6xl lg:text-7xl">
+            <h2 className="mt-5 whitespace-nowrap font-display text-[clamp(2rem,10vw,3rem)] font-black leading-tight text-dark sm:text-6xl lg:text-7xl">
               Administration
             </h2>
             <div className="mx-auto mt-4 h-px max-w-sm bg-gradient-to-r from-transparent via-accent to-transparent" />

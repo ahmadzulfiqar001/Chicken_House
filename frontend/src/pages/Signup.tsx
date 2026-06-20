@@ -48,7 +48,7 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[linear-gradient(135deg,#fffdf8_0%,#fff3dc_50%,#1d0f09_50%,#3d170c_100%)] px-4 py-10">
+    <div className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-[linear-gradient(135deg,#fff7ec_0_48%,rgba(181,101,29,0.7)_48%_100%)] px-4 py-10 lg:bg-[linear-gradient(135deg,#fffdf8_0%,#fff3dc_50%,#1d0f09_50%,#3d170c_100%)]">
       <PageMeta
         title="Create Account | Chicken House"
         description="Create your Chicken House customer account."
@@ -57,10 +57,10 @@ const SignupPage = () => {
       <motion.section
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
-        className="grid w-full max-w-5xl overflow-hidden rounded-lg border border-black/10 bg-white shadow-[0_28px_90px_rgba(20,10,6,0.22)] lg:grid-cols-[1.08fr_0.92fr]"
+        className="relative z-10 grid w-full max-w-5xl overflow-hidden rounded-lg border border-black/10 bg-white shadow-[0_28px_90px_rgba(20,10,6,0.22)] lg:grid-cols-[1.08fr_0.92fr]"
       >
         <div className="p-6 sm:p-10">
-          <div className="mx-auto max-w-xl">
+          <div className="mx-auto max-w-md md:max-w-xl">
             <div className="mb-8 flex items-center gap-4">
               <img
                 src="/logo.jpg"
@@ -71,11 +71,14 @@ const SignupPage = () => {
                 <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
                   Chicken House
                 </p>
-                <p className="font-display text-xl font-bold text-dark">Customer Signup</p>
+                <p className="font-display text-xl font-bold text-dark">Access Portal</p>
               </div>
             </div>
 
-            <h1 className="text-3xl font-display font-bold text-dark">
+            <p className="text-xs font-bold uppercase tracking-[0.28em] text-primary">
+              Customer Signup
+            </p>
+            <h1 className="mt-3 text-3xl font-display font-bold text-dark">
               Create customer account
             </h1>
             <p className="mt-3 text-sm leading-7 text-muted">

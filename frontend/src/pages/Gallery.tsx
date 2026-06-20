@@ -191,14 +191,14 @@ const CurveMotionGallerySection = () => (
 
     <div className="relative mx-auto flex min-h-[calc(100vh-9rem)] max-w-[110rem] items-center justify-center">
       <div className="relative w-full">
-        <div className="-mx-4 mb-12 flex snap-x gap-4 overflow-x-auto px-4 pb-5 md:hidden">
-          {heroOrbitImages.map((item, index) => (
+        <div className="mb-8 grid grid-cols-2 gap-3 rounded-[1.8rem] border border-[#f4bd62]/18 bg-white/[0.045] p-2 shadow-[0_22px_80px_rgba(0,0,0,0.34)] backdrop-blur-sm md:hidden">
+          {heroOrbitImages.slice(0, 2).map((item, index) => (
             <motion.div
               key={item.title}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.06, duration: 0.5 }}
-              className={`h-32 w-48 shrink-0 snap-center overflow-hidden rounded-[1.35rem] border border-[#f4bd62]/35 bg-black/30 shadow-[0_18px_50px_rgba(0,0,0,0.42),0_0_24px_rgba(244,189,98,0.16)] md:h-40 md:w-60 ${item.mobileClassName}`}
+              className="h-32 overflow-hidden rounded-[1.25rem] border border-[#f4bd62]/30 bg-black/30 shadow-[0_14px_38px_rgba(0,0,0,0.36)]"
             >
               <img src={item.image} alt={item.title} className="h-full w-full object-cover" referrerPolicy="no-referrer" />
             </motion.div>
@@ -259,30 +259,30 @@ const CurveMotionGallerySection = () => (
           transition={{ duration: 0.74, ease: "easeOut" }}
           className="relative z-10 mx-auto flex max-w-3xl flex-col items-center text-center md:pt-[21rem] lg:pt-[22rem]"
         >
-          <div className="inline-flex items-center gap-4">
-            <span className="text-xs font-black uppercase tracking-[0.38em] text-[#f4bd62]">Our Gallery</span>
+          <div className="inline-flex items-center gap-3 sm:gap-4">
+            <span className="text-[11px] font-black uppercase tracking-[0.28em] text-[#f4bd62] sm:text-xs sm:tracking-[0.38em]">Our Gallery</span>
             <span className="h-px w-16 bg-gradient-to-r from-transparent via-[#f4bd62] to-transparent sm:w-24" />
             <Sparkles size={15} className="text-[#f4bd62]" />
           </div>
 
-          <h1 className="mt-7 font-display text-5xl font-black leading-[0.92] tracking-normal text-white sm:text-7xl xl:text-8xl">
+          <h1 className="mt-6 font-display text-[clamp(3rem,14vw,4.25rem)] font-black leading-[0.94] tracking-normal text-white sm:mt-7 sm:text-7xl xl:text-8xl">
             <span className="block">
               A <span className="text-[#e5b85f]">Virtual</span>
             </span>
             <span className="block">Look Inside</span>
           </h1>
 
-          <div className="mt-7 flex items-center gap-3 text-[#d8a82f]">
+          <div className="mt-6 flex items-center gap-3 text-[#d8a82f] sm:mt-7">
             <span className="h-px w-20 bg-gradient-to-r from-transparent to-[#d8a82f]" />
             <Sparkles size={18} />
             <span className="h-px w-20 bg-gradient-to-l from-transparent to-[#d8a82f]" />
           </div>
 
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <div className="mt-7 flex flex-wrap justify-center gap-2 sm:mt-8 sm:gap-3">
             {heroFeatureItems.map(({ label, icon: Icon }) => (
               <span
                 key={label}
-                className="inline-flex items-center gap-2 rounded-full border border-amber-200/15 bg-white/[0.06] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-white/70 backdrop-blur"
+                className="inline-flex items-center gap-2 rounded-full border border-amber-200/15 bg-white/[0.06] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-white/70 backdrop-blur sm:px-4 sm:text-[11px] sm:tracking-[0.22em]"
               >
                 <Icon size={14} className="text-[#f4bd62]" />
                 {label}
@@ -290,17 +290,17 @@ const CurveMotionGallerySection = () => (
             ))}
           </div>
 
-          <div className="mt-9 flex flex-wrap justify-center gap-4">
+          <div className="mt-8 flex w-full max-w-xs flex-col justify-center gap-3 sm:mt-9 sm:max-w-none sm:flex-row sm:flex-wrap sm:gap-4">
             <a
               href="#gallery-grid"
-              className="group inline-flex items-center gap-3 rounded-full border border-[#f4bd62]/85 bg-[#f4bd62] px-7 py-4 font-bold text-[#120805] shadow-[0_0_34px_rgba(245,158,11,0.22)] transition hover:-translate-y-1 hover:bg-[#ffd98a]"
+              className="group inline-flex items-center justify-center gap-3 rounded-full border border-[#f4bd62]/85 bg-[#f4bd62] px-6 py-3 text-sm font-bold text-[#120805] shadow-[0_0_34px_rgba(245,158,11,0.22)] transition hover:-translate-y-1 hover:bg-[#ffd98a] sm:px-7 sm:py-4 sm:text-base"
             >
               Explore Gallery
               <ChevronRight size={18} className="transition group-hover:translate-x-1" />
             </a>
             <Link
               to="/booking"
-              className="inline-flex items-center gap-3 rounded-full border border-[#f4bd62]/45 bg-black/25 px-7 py-4 font-bold text-[#ffd98a] shadow-[0_0_28px_rgba(245,158,11,0.12)] backdrop-blur-md transition hover:-translate-y-1 hover:border-[#f4bd62] hover:bg-white/10 hover:text-white"
+              className="inline-flex items-center justify-center gap-3 rounded-full border border-[#f4bd62]/45 bg-black/25 px-6 py-3 text-sm font-bold text-[#ffd98a] shadow-[0_0_28px_rgba(245,158,11,0.12)] backdrop-blur-md transition hover:-translate-y-1 hover:border-[#f4bd62] hover:bg-white/10 hover:text-white sm:px-7 sm:py-4 sm:text-base"
             >
               <CalendarDays size={18} />
               Book a Table

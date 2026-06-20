@@ -52,7 +52,7 @@ const ChefsSection = () => {
                 <img 
                   src={chef.image} 
                   alt={chef.description} 
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 grayscale group-hover:grayscale-0"
+                  className="w-full h-full object-cover transition-all duration-1000 md:grayscale md:group-hover:scale-110 md:group-hover:grayscale-0"
                 />
 
                 {/* Experience Badge */}

@@ -1032,30 +1032,30 @@ const MenuPage = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 80 }}
               transition={{ type: "spring", stiffness: 220, damping: 24 }}
-              className="absolute right-0 top-0 h-full w-full max-w-md overflow-y-auto bg-white p-5 shadow-2xl sm:p-8"
+              className="absolute inset-x-0 bottom-0 max-h-[58dvh] w-full overflow-y-auto rounded-t-[2rem] bg-white p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-2xl sm:inset-y-0 sm:left-auto sm:right-0 sm:h-full sm:max-h-none sm:max-w-md sm:rounded-none sm:p-8"
             >
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start justify-between gap-3 sm:gap-4">
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.24em] text-muted">Menu Filters</p>
-                  <h2 className="mt-2 text-2xl font-bold text-dark">Search, sort, and refine quickly</h2>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted sm:text-xs sm:tracking-[0.24em]">Menu Filters</p>
+                  <h2 className="mt-1 max-w-[14rem] text-lg font-bold leading-tight text-dark sm:mt-2 sm:max-w-none sm:text-2xl">Search, sort, and refine quickly</h2>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowFilters(false)}
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-surface text-dark transition-all hover:bg-surface-strong"
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface text-dark transition-all hover:bg-surface-strong sm:h-11 sm:w-11"
                   aria-label="Close filters"
                 >
                   <XCircle size={22} />
                 </button>
               </div>
 
-              <div className="mt-6 rounded-[1.8rem] bg-surface p-4">
+              <div className="mt-4 rounded-[1.3rem] bg-surface p-3 sm:mt-6 sm:rounded-[1.8rem] sm:p-4">
                 <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted">Results</p>
-                <p className="mt-2 text-3xl font-display font-bold text-primary">{filteredItems.length}</p>
+                <p className="mt-1 text-2xl font-display font-bold text-primary sm:mt-2 sm:text-3xl">{filteredItems.length}</p>
               </div>
 
-              <div className="mt-6 relative">
-                <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-muted" size={18} />
+              <div className="relative mt-4 sm:mt-6">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted sm:left-5" size={18} />
                 <input
                   type="text"
                   placeholder="Search items, categories, flavors..."
@@ -1065,11 +1065,11 @@ const MenuPage = () => {
                       setSearchQuery(event.target.value);
                     })
                   }
-                  className="w-full rounded-[1.7rem] border border-transparent bg-surface px-12 py-4 text-[15px] outline-none transition-all focus:border-primary focus:bg-white"
+                  className="w-full rounded-[1.25rem] border border-transparent bg-surface px-11 py-3 text-sm outline-none transition-all focus:border-primary focus:bg-white sm:rounded-[1.7rem] sm:px-12 sm:py-4 sm:text-[15px]"
                 />
               </div>
 
-              <div className="mt-6 grid grid-cols-2 gap-3">
+              <div className="mt-4 grid grid-cols-2 gap-2 sm:mt-6 sm:gap-3">
                 {[
                   { value: "all", label: "All items" },
                   { value: "available", label: "Available now" },
@@ -1080,7 +1080,7 @@ const MenuPage = () => {
                     key={filter.value}
                     type="button"
                     onClick={() => setStatusFilter(filter.value as typeof statusFilter)}
-                    className={`rounded-[1.5rem] px-4 py-4 text-sm font-bold transition-all duration-300 ${
+                    className={`rounded-[1.15rem] px-3 py-3 text-xs font-bold transition-all duration-300 sm:rounded-[1.5rem] sm:px-4 sm:py-4 sm:text-sm ${
                       statusFilter === filter.value
                         ? "bg-primary text-white shadow-xl shadow-primary/25"
                         : "bg-surface text-dark hover:-translate-y-0.5 hover:bg-surface-strong"
@@ -1091,14 +1091,14 @@ const MenuPage = () => {
                 ))}
               </div>
 
-              <div className="mt-6">
+              <div className="mt-4 sm:mt-6">
                 <label className="mb-2 block text-xs font-bold uppercase tracking-[0.24em] text-muted">
                   Sort
                 </label>
                 <select
                   value={sortBy}
                   onChange={(event) => setSortBy(event.target.value as typeof sortBy)}
-                  className="w-full rounded-[1.6rem] border border-transparent bg-surface px-5 py-4 outline-none transition-all focus:border-primary focus:bg-white"
+                  className="w-full rounded-[1.25rem] border border-transparent bg-surface px-4 py-3 text-sm outline-none transition-all focus:border-primary focus:bg-white sm:rounded-[1.6rem] sm:px-5 sm:py-4 sm:text-base"
                 >
                   <option value="featured">Featured first</option>
                   <option value="price-low">Price: Low to High</option>
@@ -1107,9 +1107,9 @@ const MenuPage = () => {
                 </select>
               </div>
 
-              <div className="mt-6 rounded-[1.9rem] border border-[#f0e3cb] bg-surface px-5 py-4 text-sm text-muted">
-                <div className="flex items-start gap-3">
-                  <Sparkles size={18} className="mt-0.5 text-primary" />
+              <div className="mt-4 rounded-[1.35rem] border border-[#f0e3cb] bg-surface px-4 py-3 text-xs text-muted sm:mt-6 sm:rounded-[1.9rem] sm:px-5 sm:py-4 sm:text-sm">
+                <div className="flex items-start gap-2 sm:gap-3">
+                  <Sparkles size={18} className="mt-0.5 shrink-0 text-primary" />
                   <p>
                     Menu loads from cache first, then refreshes in the background so the main page stays responsive.
                   </p>
