@@ -44,10 +44,10 @@ const Navbar = () => {
 
   const isHome = location.pathname === "/";
   const navbarShellClass = isScrolled
-    ? "bg-[linear-gradient(135deg,rgba(20,10,6,0.96),rgba(78,24,11,0.92),rgba(173,70,22,0.86))] border-white/20 shadow-[0_22px_70px_rgba(16,8,5,0.45)] px-8 py-3 backdrop-blur-2xl"
+    ? "bg-[linear-gradient(135deg,rgba(20,10,6,0.96),rgba(78,24,11,0.92),rgba(173,70,22,0.86))] border-white/20 shadow-[0_22px_70px_rgba(16,8,5,0.45)] px-7 py-3.5 backdrop-blur-2xl sm:px-8"
     : isHome
-      ? "bg-[linear-gradient(135deg,rgba(18,12,8,0.78),rgba(89,35,15,0.7),rgba(199,88,17,0.52))] border-white/10 shadow-[0_18px_55px_rgba(16,8,5,0.3)] px-6 py-3 backdrop-blur-xl"
-      : "bg-[linear-gradient(135deg,rgba(20,10,6,0.92),rgba(88,30,13,0.82),rgba(173,70,22,0.72))] border-white/15 shadow-[0_18px_55px_rgba(16,8,5,0.28)] px-8 py-3 backdrop-blur-xl";
+      ? "bg-[linear-gradient(135deg,rgba(18,12,8,0.78),rgba(89,35,15,0.7),rgba(199,88,17,0.52))] border-white/10 shadow-[0_18px_55px_rgba(16,8,5,0.3)] px-6 py-3.5 backdrop-blur-xl sm:px-7"
+      : "bg-[linear-gradient(135deg,rgba(20,10,6,0.92),rgba(88,30,13,0.82),rgba(173,70,22,0.72))] border-white/15 shadow-[0_18px_55px_rgba(16,8,5,0.28)] px-7 py-3.5 backdrop-blur-xl sm:px-8";
 
   const isBackofficeUser = user ? user.role !== "user" : false;
   const panelHref = isBackofficeUser ? "/admin" : "/profile";
@@ -76,24 +76,24 @@ const Navbar = () => {
                 <img
                   src="/logo.jpg"
                   alt="Chicken House"
-                  className="h-12 w-12 object-cover"
+                  className="h-12 w-12 object-cover lg:h-14 lg:w-14"
                 />
               </div>
-              <span className="hidden font-anton text-2xl uppercase tracking-normal text-white drop-shadow-[0_0_7px_rgba(255,214,132,0.24)] md:block lg:text-3xl">
+              <span className="hidden font-anton text-2xl uppercase tracking-normal text-white drop-shadow-[0_0_7px_rgba(255,214,132,0.24)] md:block lg:text-[2rem]">
                 Chicken House
               </span>
             </motion.div>
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden xl:flex items-center gap-4 2xl:gap-6">
+          <div className="hidden xl:flex items-center gap-5 2xl:gap-7">
             {navLinks.map((link) => {
               const isActive = location.pathname === link.href;
               return (
                 <Link
                   key={link.name}
                   to={link.href}
-                  className={`font-mono text-[11px] font-bold uppercase tracking-normal transition-all duration-500 relative group px-3 py-2 rounded-full 2xl:px-4 ${
+                  className={`font-mono text-[12px] font-bold uppercase tracking-normal transition-all duration-500 relative group rounded-full px-4 py-2.5 2xl:px-5 2xl:text-[13px] ${
                     isActive 
                       ? "text-dark bg-accent shadow-[0_12px_30px_rgba(255,171,73,0.35)]" 
                       : "text-white/88 hover:text-white hover:bg-white/12"
@@ -114,9 +114,9 @@ const Navbar = () => {
               <motion.button
                 whileHover={{ scale: 1.1, y: -2 }}
                 whileTap={{ scale: 0.9 }}
-                className="p-3 rounded-full transition-all duration-500 border border-white/15 bg-white/8 text-white hover:border-accent hover:bg-accent/10 hover:text-accent relative"
+                className="relative rounded-full border border-white/15 bg-white/8 p-3 text-white transition-all duration-500 hover:border-accent hover:bg-accent/10 hover:text-accent lg:p-3.5"
               >
-                <ShoppingCart size={20} />
+                <ShoppingCart size={21} />
                 {cartItems.length > 0 && (
                   <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-lg">
                     {cartItems.reduce((acc, item) => acc + item.quantity, 0)}
@@ -130,7 +130,7 @@ const Navbar = () => {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="px-6 py-3 rounded-full bg-accent text-dark font-bold text-sm uppercase tracking-widest hover:bg-white transition-all duration-500"
+                    className="rounded-full bg-accent px-6 py-3.5 text-sm font-bold uppercase tracking-widest text-dark transition-all duration-500 hover:bg-white"
                   >
                     {panelLabel}
                   </motion.button>
@@ -139,7 +139,7 @@ const Navbar = () => {
                   onClick={() => {
                     void logout();
                   }}
-                  className="px-5 py-3 rounded-full border border-white/15 bg-white/8 text-white text-sm font-bold uppercase tracking-widest hover:bg-white/12 transition-all duration-500"
+                  className="rounded-full border border-white/15 bg-white/8 px-5 py-3.5 text-sm font-bold uppercase tracking-widest text-white transition-all duration-500 hover:bg-white/12"
                 >
                   Logout
                 </button>
@@ -149,7 +149,7 @@ const Navbar = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-8 py-3 rounded-full bg-accent text-dark font-bold text-sm uppercase tracking-widest hover:bg-white transition-all duration-500"
+                  className="rounded-full bg-accent px-8 py-3.5 text-sm font-bold uppercase tracking-widest text-dark transition-all duration-500 hover:bg-white"
                 >
                   Login
                 </motion.button>

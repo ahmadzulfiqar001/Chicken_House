@@ -66,9 +66,24 @@ const GROUPED_SNACK_CARD_NAMES = new Set([
   "5 PCS Wings",
   "10 PCS Wings",
 ]);
-const MENU_ACTIVE_SCROLL_OFFSET = 150;
+const DESKTOP_MENU_SCROLL_OFFSET = 150;
+const MOBILE_MENU_SCROLL_OFFSET = 174;
+const TABLET_MENU_SCROLL_OFFSET = 188;
+const MENU_ACTIVE_SCROLL_BUFFER = 16;
 const SIDEBAR_CATEGORY_BUTTON_HEIGHT = 44;
 const SIDEBAR_CATEGORY_BUTTON_GAP = 8;
+
+const getMenuScrollOffset = () => {
+  if (typeof window === "undefined") return DESKTOP_MENU_SCROLL_OFFSET;
+
+  if (window.matchMedia("(min-width: 1280px)").matches) {
+    return DESKTOP_MENU_SCROLL_OFFSET;
+  }
+
+  return window.matchMedia("(min-width: 640px)").matches
+    ? TABLET_MENU_SCROLL_OFFSET
+    : MOBILE_MENU_SCROLL_OFFSET;
+};
 
 const fallbackKarahiImage = new URL("../../assets/source-images/Continental/Chicken Makhni Karahi.jpg", import.meta.url).href;
 const fallbackBiryaniImage = new URL("../../assets/source-images/Rice & Biryani/Special Chicken Biryani.png", import.meta.url).href;
@@ -265,12 +280,12 @@ const MenuImage = ({ item, className }: { item: MenuItem; className?: string }) 
 };
 
 const LoadingCard = () => (
-  <div className="overflow-hidden rounded-[2.5rem] border border-gray-100 bg-white shadow-xl shadow-dark/5">
-    <div className="h-64 animate-pulse bg-surface" />
-    <div className="space-y-4 p-8">
+  <div className="overflow-hidden rounded-[2rem] border border-gray-100 bg-white shadow-xl shadow-dark/5">
+    <div className="h-48 animate-pulse bg-surface sm:h-52" />
+    <div className="space-y-4 p-5">
       <div className="h-3 w-24 animate-pulse rounded-full bg-surface" />
       <div className="h-8 w-2/3 animate-pulse rounded-full bg-surface" />
-      <div className="h-16 animate-pulse rounded-[1.5rem] bg-surface" />
+      <div className="h-12 animate-pulse rounded-[1.5rem] bg-surface" />
       <div className="flex gap-3">
         <div className="h-10 w-24 animate-pulse rounded-full bg-surface" />
         <div className="h-10 w-24 animate-pulse rounded-full bg-surface" />
@@ -305,6 +320,9 @@ const MenuPage = () => {
   });
   const categoryRefs = useRef<Record<string, HTMLElement | null>>({});
   const categoryRailRef = useRef<HTMLDivElement | null>(null);
+  const mobileCategoryRailRef = useRef<HTMLDivElement | null>(null);
+  const mobileCategoryButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const scrollAnimationFrameRef = useRef<number | null>(null);
   const deferredSearchQuery = useDeferredValue(searchQuery);
 
   useEffect(() => {
@@ -478,6 +496,7 @@ const MenuPage = () => {
       const pageBottom =
         window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
       let nextCategory = categories[0] ?? "";
+      const activeScrollOffset = getMenuScrollOffset() + MENU_ACTIVE_SCROLL_BUFFER;
 
       if (pageBottom) {
         nextCategory = categories[categories.length - 1] ?? nextCategory;
@@ -487,7 +506,7 @@ const MenuPage = () => {
 
           if (!element) continue;
 
-          if (element.getBoundingClientRect().top <= MENU_ACTIVE_SCROLL_OFFSET) {
+          if (element.getBoundingClientRect().top <= activeScrollOffset) {
             nextCategory = category;
           } else {
             break;
@@ -551,10 +570,42 @@ const MenuPage = () => {
 
     setActiveCategory(category);
 
-    element.scrollIntoView({
-      block: "start",
-      behavior: "smooth",
-    });
+    const sectionTop = element.getBoundingClientRect().top + window.scrollY;
+    const targetTop = Math.max(sectionTop - getMenuScrollOffset(), 0);
+
+    if (scrollAnimationFrameRef.current) {
+      window.cancelAnimationFrame(scrollAnimationFrameRef.current);
+      scrollAnimationFrameRef.current = null;
+    }
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      window.scrollTo(0, targetTop);
+      return;
+    }
+
+    const startTop = window.scrollY;
+    const distance = targetTop - startTop;
+    const duration = Math.min(850, Math.max(360, Math.abs(distance) / 34));
+    let startTime = 0;
+
+    const animateScroll = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+
+      const elapsed = timestamp - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easedProgress = 1 - Math.pow(1 - progress, 3);
+
+      window.scrollTo(0, startTop + distance * easedProgress);
+
+      if (progress < 1) {
+        scrollAnimationFrameRef.current = window.requestAnimationFrame(animateScroll);
+        return;
+      }
+
+      scrollAnimationFrameRef.current = null;
+    };
+
+    scrollAnimationFrameRef.current = window.requestAnimationFrame(animateScroll);
   };
 
   const toggleExtra = (value: string) => {
@@ -639,6 +690,31 @@ const MenuPage = () => {
     }
   }, [activeCategoryIndex, activeIndicatorOffset]);
 
+  useEffect(() => {
+    const rail = mobileCategoryRailRef.current;
+    const button = activeCategory ? mobileCategoryButtonRefs.current[activeCategory] : null;
+
+    if (!rail || !button) return;
+
+    const railRect = rail.getBoundingClientRect();
+    const buttonRect = button.getBoundingClientRect();
+    const targetLeft =
+      rail.scrollLeft +
+      buttonRect.left -
+      railRect.left -
+      (rail.clientWidth - button.offsetWidth) / 2;
+
+    rail.scrollTo({ left: Math.max(targetLeft, 0), behavior: "smooth" });
+  }, [activeCategory]);
+
+  useEffect(() => {
+    return () => {
+      if (scrollAnimationFrameRef.current) {
+        window.cancelAnimationFrame(scrollAnimationFrameRef.current);
+      }
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-paper">
       <PageMeta
@@ -649,7 +725,7 @@ const MenuPage = () => {
         <div className="pointer-events-none absolute inset-x-0 top-0 h-[24rem] bg-[radial-gradient(circle_at_top_left,rgba(127,18,21,0.18),transparent_48%),radial-gradient(circle_at_top_right,rgba(216,168,47,0.16),transparent_38%)]" />
         <div className="pointer-events-none absolute left-[18%] top-[22rem] h-64 w-64 rounded-full bg-primary/7 blur-3xl" />
         <div className="pointer-events-none absolute right-[8%] top-[34rem] h-72 w-72 rounded-full bg-accent/10 blur-3xl" />
-      <div className="mx-auto max-w-[106rem] px-3 pb-24 pt-32 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[106rem] px-3 pb-24 pt-48 sm:px-6 sm:pt-52 lg:px-8 xl:pt-32">
         <div className="grid gap-6 xl:grid-cols-[28rem_minmax(0,1fr)] xl:gap-8">
           <aside className="hidden xl:sticky xl:top-28 xl:block xl:min-w-0 xl:self-start">
             <div className="space-y-4">
@@ -787,7 +863,7 @@ const MenuPage = () => {
             <button
               type="button"
               onClick={() => setShowFilters(true)}
-              className="fixed bottom-28 right-4 z-40 inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-2xl shadow-primary/25 transition-all duration-300 hover:scale-105 hover:bg-primary-strong sm:bottom-auto sm:right-5 sm:top-28"
+              className="fixed bottom-28 right-4 z-40 inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-2xl shadow-primary/25 transition-all duration-300 hover:scale-105 hover:bg-primary-strong sm:bottom-8 sm:right-6 xl:bottom-auto xl:right-5 xl:top-28"
               aria-label="Open menu filters"
             >
               <SlidersHorizontal size={22} />
@@ -795,7 +871,54 @@ const MenuPage = () => {
           </div>
 
           {!loading && categories.length ? (
-            <div className="sticky top-24 z-20 -mt-4 sm:top-28">
+            <div className="fixed inset-x-3 top-24 z-30 xl:hidden sm:inset-x-6 sm:top-28">
+              <div className="overflow-hidden rounded-[1.6rem] border border-[#eadcc8] bg-white/95 shadow-xl shadow-dark/5 backdrop-blur-sm">
+                <div
+                  ref={mobileCategoryRailRef}
+                  className="menu-category-tabs flex max-w-full gap-2 overflow-x-auto px-2 py-2"
+                >
+                  {categories.map((category, index) => {
+                    const isActive = activeCategory === category;
+
+                    return (
+                      <button
+                        key={`mobile-${category}`}
+                        ref={(element) => {
+                          mobileCategoryButtonRefs.current[category] = element;
+                        }}
+                        type="button"
+                        onClick={() => scrollToCategory(category)}
+                        className={`flex h-11 shrink-0 items-center gap-2 rounded-[1.15rem] border px-3 text-sm font-bold transition-all duration-300 ${
+                          isActive
+                            ? "border-primary bg-primary text-white shadow-lg shadow-primary/20"
+                            : "border-[#f1e2c9] bg-surface/80 text-dark hover:border-primary/25 hover:bg-white"
+                        }`}
+                      >
+                        <span
+                          className={`inline-flex h-6 min-w-6 items-center justify-center rounded-full px-1 text-[10px] ${
+                            isActive ? "bg-white/18 text-white" : "bg-white text-primary"
+                          }`}
+                        >
+                          {index + 1}
+                        </span>
+                        <span className="max-w-[9.5rem] truncate">{category}</span>
+                        <span
+                          className={`inline-flex h-6 min-w-7 items-center justify-center rounded-full px-2 text-[10px] ${
+                            isActive ? "bg-white/15 text-white" : "bg-white text-muted"
+                          }`}
+                        >
+                          {categoryItemCounts.get(category) ?? 0}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          ) : null}
+
+          {!loading && categories.length ? (
+            <div className="sticky top-28 z-20 -mt-4 hidden xl:block">
               <div className="inline-flex max-w-full flex-wrap items-center gap-2 rounded-full border border-[#eadcc8] bg-white/95 px-4 py-3 shadow-xl shadow-dark/5 backdrop-blur-sm sm:gap-3 sm:px-5">
                 <span className="rounded-full bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-white">
                   Now Viewing
@@ -816,7 +939,7 @@ const MenuPage = () => {
           ) : null}
 
           {loading ? (
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-3">
               {Array.from({ length: 6 }).map((_, index) => (
                 <LoadingCard key={`loading-${index}`} />
               ))}
@@ -876,23 +999,23 @@ const MenuPage = () => {
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 xl:gap-8">
+                  <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:gap-6">
                     {groupedSnackItems.length ? (
-                      <article className="group overflow-hidden rounded-[2.8rem] border border-gray-100 bg-white shadow-2xl shadow-dark/6 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/10">
-                        <div className="relative h-64 overflow-hidden sm:h-80 md:h-[24rem]">
+                      <article className="group overflow-hidden rounded-[2rem] border border-gray-100 bg-white shadow-xl shadow-dark/5 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-primary/10">
+                        <div className="relative h-52 overflow-hidden sm:h-56 md:h-60">
                           <MenuImage item={groupedSnackItems[0]} className="h-full" />
                           <div className="absolute inset-0 bg-gradient-to-t from-dark/75 via-dark/10 to-transparent opacity-70" />
-                          <div className="absolute left-6 top-6 rounded-full bg-accent px-4 py-2 text-[10px] font-bold uppercase tracking-[0.28em] text-dark shadow-lg">
+                          <div className="absolute left-4 top-4 rounded-full bg-accent px-3 py-2 text-[10px] font-bold uppercase tracking-[0.28em] text-dark shadow-lg">
                             Snack Favorites
                           </div>
-                          <div className="absolute bottom-6 left-6 max-w-sm">
+                          <div className="absolute bottom-4 left-4 max-w-sm pr-4">
                             <p className="text-xs font-bold uppercase tracking-[0.24em] text-white/70">One hero card</p>
-                            <h3 className="mt-2 text-3xl font-bold leading-tight text-white">Nuggets & Wings Quick Picks</h3>
+                            <h3 className="mt-2 text-2xl font-bold leading-tight text-white">Nuggets & Wings Quick Picks</h3>
                           </div>
                         </div>
 
-                        <div className="space-y-5 p-5 sm:p-7">
-                          <p className="text-sm leading-relaxed text-muted">
+                        <div className="space-y-4 p-4 sm:p-5">
+                          <p className="menu-card-description text-sm leading-relaxed text-muted">
                             All the quick-bite counts are grouped in one tempting panel, with each option ready to open for selection.
                           </p>
 
@@ -926,38 +1049,38 @@ const MenuPage = () => {
                     {standardCategoryItems.map((item) => (
                       <article
                         key={item.id}
-                        className="group flex flex-col overflow-hidden rounded-[2.8rem] border border-gray-100 bg-white shadow-xl shadow-dark/5 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/10"
+                        className="group flex flex-col overflow-hidden rounded-[2rem] border border-gray-100 bg-white shadow-xl shadow-dark/5 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-primary/10"
                       >
-                        <div className="relative h-64 overflow-hidden sm:h-80 md:h-[22rem] xl:h-[21rem] 2xl:h-[23rem]">
+                        <div className="relative h-48 overflow-hidden sm:h-52 md:h-56 xl:h-52 2xl:h-56">
                           <MenuImage item={item} className="h-full" />
                           <div className="absolute inset-0 bg-gradient-to-t from-dark/75 via-dark/10 to-transparent opacity-55 transition-opacity duration-500 group-hover:opacity-80" />
 
-                          <div className="absolute left-6 top-6 flex flex-col gap-2">
+                          <div className="absolute left-4 top-4 flex flex-col gap-2">
                             {item.recommended ? (
-                              <span className="rounded-xl bg-accent px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-dark shadow-lg">
+                              <span className="rounded-xl bg-accent px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-dark shadow-lg">
                                 Recommended
                               </span>
                             ) : null}
                             <span
-                              className={`rounded-xl px-4 py-2 text-[10px] font-bold uppercase tracking-widest shadow-lg ${getStatusClasses(item)}`}
+                              className={`rounded-xl px-3 py-2 text-[10px] font-bold uppercase tracking-widest shadow-lg ${getStatusClasses(item)}`}
                             >
                               {item.status !== "Active" ? item.status : item.stockStatus}
                             </span>
                           </div>
 
-                          <div className="absolute bottom-6 left-6 inline-flex items-center gap-2 rounded-2xl bg-white/95 px-4 py-2 font-bold text-dark shadow-lg backdrop-blur-sm">
+                          <div className="absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-2xl bg-white/95 px-3 py-2 text-sm font-bold text-dark shadow-lg backdrop-blur-sm">
                             <Star size={16} fill="#d8a82f" className="text-accent" />
                             {item.rating.toFixed(1)}
                           </div>
                         </div>
 
-                        <div className="flex flex-1 flex-col gap-5 p-5 sm:p-6">
-                          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="flex flex-1 flex-col gap-4 p-4 sm:p-5">
+                          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                             <div className="min-w-0">
-                              <p className="mb-2 text-xs font-bold uppercase tracking-widest text-muted">
+                              <p className="mb-1.5 text-xs font-bold uppercase tracking-widest text-muted">
                                 {item.subcategory}
                               </p>
-                              <h3 className="text-2xl font-bold text-dark transition-colors group-hover:text-primary">
+                              <h3 className="text-xl font-bold text-dark transition-colors group-hover:text-primary">
                                 {item.name}
                               </h3>
                             </div>
@@ -965,19 +1088,19 @@ const MenuPage = () => {
                               <span className="block text-xs uppercase tracking-widest text-muted">
                                 Starting
                               </span>
-                              <span className="text-2xl font-display font-bold text-primary">
+                              <span className="text-xl font-display font-bold text-primary">
                                 Rs. {item.startingPrice}
                               </span>
                             </span>
                           </div>
 
-                          <p className="text-sm leading-relaxed text-muted">{item.description}</p>
+                          <p className="menu-card-description text-sm leading-relaxed text-muted">{item.description}</p>
 
-                          <div className="grid gap-3 sm:grid-cols-2">
+                          <div className="grid gap-2 sm:grid-cols-2">
                             {item.variants.map((variant) => (
                               <span
                                 key={`${item.id}-${variant.label}`}
-                                className="rounded-[1.4rem] border border-[#f0e3cb] bg-surface/75 px-4 py-3 text-xs font-bold text-dark"
+                                className="rounded-[1.1rem] border border-[#f0e3cb] bg-surface/75 px-3 py-2.5 text-xs font-bold text-dark"
                               >
                                 <span className="block text-[10px] uppercase tracking-[0.18em] text-muted">
                                   {variant.label}
@@ -993,7 +1116,7 @@ const MenuPage = () => {
                             type="button"
                             onClick={() => setSelectedItem(item)}
                             disabled={!item.available}
-                            className={`flex w-full items-center justify-center gap-2 rounded-[1.6rem] py-4 font-bold transition-all duration-300 ${
+                            className={`flex w-full items-center justify-center gap-2 rounded-[1.25rem] py-3 text-sm font-bold transition-all duration-300 ${
                               item.available
                                 ? "bg-surface-strong text-dark hover:bg-primary hover:text-white"
                                 : "cursor-not-allowed bg-gray-100 text-gray-400"

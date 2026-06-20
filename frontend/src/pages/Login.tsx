@@ -61,7 +61,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-paper px-4 py-10">
+    <div className="relative isolate flex min-h-dvh items-start justify-center overflow-x-hidden overflow-y-auto bg-paper px-3 py-6 sm:px-4 sm:py-10 lg:items-center">
       <PageMeta
         title="Login | Chicken House"
         description="Sign in to Chicken House."
@@ -79,7 +79,7 @@ const LoginPage = () => {
       <motion.section
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative z-10 grid w-full max-w-5xl overflow-hidden rounded-lg border border-black/10 bg-white shadow-[0_28px_90px_rgba(20,10,6,0.24)] lg:grid-cols-[0.92fr_1.08fr]"
+        className="relative z-10 grid w-full max-w-md overflow-hidden rounded-[1.15rem] border border-black/10 bg-white shadow-[0_22px_70px_rgba(20,10,6,0.18)] sm:max-w-lg lg:max-w-5xl lg:grid-cols-[0.92fr_1.08fr] lg:rounded-lg lg:shadow-[0_28px_90px_rgba(20,10,6,0.24)]"
       >
         <div className="relative hidden overflow-hidden bg-dark p-10 text-white lg:flex lg:min-h-[34rem] lg:flex-col lg:justify-between">
           <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(140deg,rgba(216,168,47,0.16),transparent_34%),linear-gradient(22deg,rgba(255,255,255,0.08),transparent_48%),linear-gradient(180deg,transparent,rgba(127,18,21,0.16))]" />
@@ -105,26 +105,26 @@ const LoginPage = () => {
           </div>
         </div>
 
-        <div className="p-6 sm:p-10">
+        <div className="p-5 sm:p-8 lg:p-10">
           <div className="mx-auto max-w-md">
-            <div className="mb-8 flex items-center gap-4 lg:hidden">
+            <div className="mb-6 flex items-center gap-3 sm:mb-8 sm:gap-4 lg:hidden">
               <img
                 src="/logo.jpg"
                 alt="Chicken House"
-                className="h-12 w-12 rounded-lg object-cover"
+                className="h-11 w-11 shrink-0 rounded-lg object-cover sm:h-12 sm:w-12"
               />
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary sm:text-xs">
                   Chicken House
                 </p>
-                <p className="font-display text-xl font-bold text-dark">Access Portal</p>
+                <p className="font-display text-lg font-bold leading-tight text-dark sm:text-xl">Access Portal</p>
               </div>
             </div>
 
-            <p className="text-xs font-bold uppercase tracking-[0.28em] text-primary">
+            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-primary sm:text-xs">
               Login
             </p>
-            <h2 className="mt-3 text-3xl font-display font-bold text-dark">
+            <h2 className="mt-2 text-[2.05rem] font-display font-bold leading-[1.08] text-dark sm:mt-3 sm:text-3xl">
               Enter your credentials
             </h2>
 
@@ -142,13 +142,13 @@ const LoginPage = () => {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="mt-8 space-y-5" autoComplete="off">
+            <form onSubmit={handleSubmit} className="mt-7 space-y-4 sm:mt-8 sm:space-y-5" autoComplete="off">
               <div className="pointer-events-none absolute h-0 w-0 overflow-hidden opacity-0" aria-hidden="true">
                 <input type="text" name="username" autoComplete="username" tabIndex={-1} />
                 <input type="password" name="password" autoComplete="current-password" tabIndex={-1} />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-[0.2em] text-dark">
+                <label className="text-[11px] font-bold uppercase tracking-[0.16em] text-dark sm:text-xs">
                   Email / Login ID
                 </label>
                 <div className="relative">
@@ -160,7 +160,7 @@ const LoginPage = () => {
                     placeholder="Email address"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-lg border border-transparent bg-surface px-12 py-4 outline-none transition focus:border-primary focus:bg-white"
+                    className="w-full rounded-lg border border-transparent bg-surface px-11 py-3.5 text-base outline-none transition placeholder:text-muted/75 focus:border-primary focus:bg-white sm:px-12 sm:py-4"
                     required
                   />
                 </div>
@@ -168,10 +168,10 @@ const LoginPage = () => {
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between gap-3">
-                  <label className="text-xs font-bold uppercase tracking-[0.2em] text-dark">
+                  <label className="text-[11px] font-bold uppercase tracking-[0.16em] text-dark sm:text-xs">
                     Password
                   </label>
-                  <Link to="/forgot-password" className="text-xs font-bold uppercase tracking-[0.14em] text-primary hover:underline">
+                  <Link to="/forgot-password" className="text-[11px] font-bold uppercase tracking-[0.1em] text-primary hover:underline sm:text-xs">
                     Forgot?
                   </Link>
                 </div>
@@ -184,7 +184,7 @@ const LoginPage = () => {
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-lg border border-transparent bg-surface px-12 py-4 outline-none transition focus:border-primary focus:bg-white"
+                    className="w-full rounded-lg border border-transparent bg-surface px-11 py-3.5 text-base outline-none transition placeholder:text-muted/75 focus:border-primary focus:bg-white sm:px-12 sm:py-4"
                     required
                   />
                 </div>
@@ -193,14 +193,14 @@ const LoginPage = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-4 font-bold text-white transition hover:bg-primary-strong disabled:opacity-70"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3.5 font-bold text-white transition hover:bg-primary-strong disabled:opacity-70 sm:py-4"
               >
                 {isSubmitting ? "Signing In..." : "Sign In"}
                 <ArrowRight size={18} />
               </button>
             </form>
 
-            <p className="mt-8 text-center text-sm text-muted">
+            <p className="mt-6 text-center text-sm text-muted sm:mt-8">
               New customer?{" "}
               <Link to="/signup" className="font-bold text-primary hover:underline">
                 Create account

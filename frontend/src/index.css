@@ -34,6 +34,7 @@
   html {
     overflow-x: hidden;
     scroll-padding-top: 7rem;
+    scroll-behavior: smooth;
     text-size-adjust: 100%;
   }
 
@@ -234,6 +235,25 @@
   background: linear-gradient(180deg, rgba(127, 18, 21, 0.95), rgba(216, 168, 47, 0.9));
   border-radius: 999px;
   border: 2px solid rgba(244, 229, 202, 0.9);
+}
+
+.menu-category-tabs {
+  overscroll-behavior-x: contain;
+  scroll-behavior: smooth;
+  scroll-padding-inline: 0.75rem;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.menu-category-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.menu-card-description {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .gallery-scrollbar {

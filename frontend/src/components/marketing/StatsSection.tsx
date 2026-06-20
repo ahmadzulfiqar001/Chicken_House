@@ -1,5 +1,8 @@
 import { motion } from "motion/react";
 import { Users, Utensils, Award, Clock } from "lucide-react";
+import { siteConfig } from "../../lib/site";
+
+const compactHours = siteConfig.hours.replace(/:00/g, "").replace(/\s/g, "");
 
 const stats = [
   {
@@ -22,8 +25,8 @@ const stats = [
   },
   {
     icon: <Clock size={32} />,
-    value: "24/7",
-    label: "Service Available",
+    value: compactHours,
+    label: "Open Daily",
     color: "text-orange-500"
   }
 ];
@@ -48,7 +51,7 @@ const StatsSection = () => {
               <div className={`w-20 h-20 mx-auto rounded-3xl bg-white/5 flex items-center justify-center mb-6 group-hover:bg-white/10 transition-all duration-500 ${stat.color}`}>
                 {stat.icon}
               </div>
-              <h3 className="text-4xl md:text-5xl font-anton text-white mb-2 tracking-tight">
+              <h3 className="text-3xl md:text-5xl font-anton text-white mb-2 tracking-tight">
                 {stat.value}
               </h3>
               <p className="text-white/40 font-mono text-[10px] uppercase tracking-[0.2em]">

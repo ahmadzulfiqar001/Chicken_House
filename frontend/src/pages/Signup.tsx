@@ -48,7 +48,7 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-[linear-gradient(135deg,#fff7ec_0_48%,rgba(181,101,29,0.7)_48%_100%)] px-4 py-10 lg:bg-[linear-gradient(135deg,#fffdf8_0%,#fff3dc_50%,#1d0f09_50%,#3d170c_100%)]">
+    <div className="relative isolate flex min-h-dvh items-start justify-center overflow-x-hidden overflow-y-auto bg-[linear-gradient(135deg,#fff7ec_0_48%,rgba(181,101,29,0.7)_48%_100%)] px-3 py-5 sm:px-4 sm:py-10 lg:items-center lg:bg-[linear-gradient(135deg,#fffdf8_0%,#fff3dc_50%,#1d0f09_50%,#3d170c_100%)]">
       <PageMeta
         title="Create Account | Chicken House"
         description="Create your Chicken House customer account."
@@ -57,31 +57,31 @@ const SignupPage = () => {
       <motion.section
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative z-10 grid w-full max-w-5xl overflow-hidden rounded-lg border border-black/10 bg-white shadow-[0_28px_90px_rgba(20,10,6,0.22)] lg:grid-cols-[1.08fr_0.92fr]"
+        className="relative z-10 grid w-full max-w-md overflow-hidden rounded-[1.15rem] border border-black/10 bg-white shadow-[0_22px_70px_rgba(20,10,6,0.18)] sm:max-w-lg lg:max-w-5xl lg:grid-cols-[1.08fr_0.92fr] lg:rounded-lg lg:shadow-[0_28px_90px_rgba(20,10,6,0.22)]"
       >
-        <div className="p-6 sm:p-10">
+        <div className="p-5 sm:p-8 lg:p-10">
           <div className="mx-auto max-w-md md:max-w-xl">
-            <div className="mb-8 flex items-center gap-4">
+            <div className="mb-6 flex items-center gap-3 sm:mb-8 sm:gap-4">
               <img
                 src="/logo.jpg"
                 alt="Chicken House"
-                className="h-12 w-12 rounded-lg object-cover"
+                className="h-11 w-11 shrink-0 rounded-lg object-cover sm:h-12 sm:w-12"
               />
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary sm:text-xs">
                   Chicken House
                 </p>
-                <p className="font-display text-xl font-bold text-dark">Access Portal</p>
+                <p className="font-display text-lg font-bold leading-tight text-dark sm:text-xl">Customer Signup</p>
               </div>
             </div>
 
-            <p className="text-xs font-bold uppercase tracking-[0.28em] text-primary">
+            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-primary sm:text-xs">
               Customer Signup
             </p>
-            <h1 className="mt-3 text-3xl font-display font-bold text-dark">
+            <h1 className="mt-2 text-[2.05rem] font-display font-bold leading-[1.08] text-dark sm:mt-3 sm:text-3xl">
               Create customer account
             </h1>
-            <p className="mt-3 text-sm leading-7 text-muted">
+            <p className="mt-3 text-sm leading-6 text-muted sm:leading-7">
               After signup, sign in with your email and password to continue.
             </p>
 
@@ -92,13 +92,13 @@ const SignupPage = () => {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="mt-8 space-y-5" autoComplete="off">
+            <form onSubmit={handleSubmit} className="mt-7 space-y-4 sm:mt-8 sm:space-y-5" autoComplete="off">
               <div className="pointer-events-none absolute h-0 w-0 overflow-hidden opacity-0" aria-hidden="true">
                 <input type="text" name="username" autoComplete="username" tabIndex={-1} />
                 <input type="password" name="password" autoComplete="current-password" tabIndex={-1} />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-[0.2em] text-dark">
+                <label className="text-[11px] font-bold uppercase tracking-[0.16em] text-dark sm:text-xs">
                   Full Name
                 </label>
                 <div className="relative">
@@ -110,15 +110,15 @@ const SignupPage = () => {
                     placeholder="Your full name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full rounded-lg border border-transparent bg-surface px-12 py-4 outline-none transition focus:border-primary focus:bg-white"
+                    className="w-full rounded-lg border border-transparent bg-surface px-11 py-3.5 text-base outline-none transition placeholder:text-muted/75 focus:border-primary focus:bg-white sm:px-12 sm:py-4"
                     required
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-[0.2em] text-dark">
+                  <label className="text-[11px] font-bold uppercase tracking-[0.16em] text-dark sm:text-xs">
                     Email Address
                   </label>
                   <div className="relative">
@@ -130,14 +130,14 @@ const SignupPage = () => {
                       placeholder="you@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full rounded-lg border border-transparent bg-surface px-12 py-4 outline-none transition focus:border-primary focus:bg-white"
+                      className="w-full rounded-lg border border-transparent bg-surface px-11 py-3.5 text-base outline-none transition placeholder:text-muted/75 focus:border-primary focus:bg-white sm:px-12 sm:py-4"
                       required
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-[0.2em] text-dark">
+                  <label className="text-[11px] font-bold uppercase tracking-[0.16em] text-dark sm:text-xs">
                     Phone Number
                   </label>
                   <div className="relative">
@@ -149,14 +149,14 @@ const SignupPage = () => {
                       placeholder="03XX XXXXXXX"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="w-full rounded-lg border border-transparent bg-surface px-12 py-4 outline-none transition focus:border-primary focus:bg-white"
+                      className="w-full rounded-lg border border-transparent bg-surface px-11 py-3.5 text-base outline-none transition placeholder:text-muted/75 focus:border-primary focus:bg-white sm:px-12 sm:py-4"
                     />
                   </div>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-[0.2em] text-dark">
+                <label className="text-[11px] font-bold uppercase tracking-[0.16em] text-dark sm:text-xs">
                   Password
                 </label>
                 <div className="relative">
@@ -168,7 +168,7 @@ const SignupPage = () => {
                     placeholder="Create password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-lg border border-transparent bg-surface px-12 py-4 outline-none transition focus:border-primary focus:bg-white"
+                    className="w-full rounded-lg border border-transparent bg-surface px-11 py-3.5 text-base outline-none transition placeholder:text-muted/75 focus:border-primary focus:bg-white sm:px-12 sm:py-4"
                     required
                   />
                 </div>
@@ -177,14 +177,14 @@ const SignupPage = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-4 font-bold text-white transition hover:bg-primary-strong disabled:opacity-70"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3.5 font-bold text-white transition hover:bg-primary-strong disabled:opacity-70 sm:py-4"
               >
                 {isSubmitting ? "Creating Account..." : "Create Account"}
                 <ArrowRight size={18} />
               </button>
             </form>
 
-            <p className="mt-8 text-center text-sm text-muted">
+            <p className="mt-6 text-center text-sm text-muted sm:mt-8">
               Already have an account?{" "}
               <Link to="/login" className="font-bold text-primary hover:underline">
                 Sign in
