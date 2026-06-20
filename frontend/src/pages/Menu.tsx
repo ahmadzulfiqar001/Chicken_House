@@ -727,9 +727,9 @@ const MenuPage = () => {
         <div className="pointer-events-none absolute right-[8%] top-[34rem] h-72 w-72 rounded-full bg-accent/10 blur-3xl" />
       <div className="mx-auto max-w-[106rem] px-3 pb-24 pt-48 sm:px-6 sm:pt-52 lg:px-8 xl:pt-32">
         <div className="grid gap-6 xl:grid-cols-[28rem_minmax(0,1fr)] xl:gap-8">
-          <aside className="hidden xl:sticky xl:top-28 xl:block xl:min-w-0 xl:self-start">
-            <div className="space-y-4">
-              <div className="flex h-[calc(100vh-8.5rem)] min-h-[34rem] flex-col overflow-hidden rounded-[3rem] border border-[#eadcc8] bg-gradient-to-b from-[#fff9ef] via-white to-[#f8ecdb] shadow-[0_28px_80px_rgba(17,8,5,0.12)]">
+          <aside className="hidden xl:block xl:min-w-0 xl:self-start">
+            <div className="space-y-4 xl:fixed xl:top-28 xl:w-[28rem] xl:max-w-[calc(100vw-2rem)]">
+              <div className="flex h-[calc(100dvh-8rem)] min-h-0 flex-col overflow-hidden rounded-[3rem] border border-[#eadcc8] bg-gradient-to-b from-[#fff9ef] via-white to-[#f8ecdb] shadow-[0_28px_80px_rgba(17,8,5,0.12)]">
                 <div className="px-6 py-6">
                   <div className="rounded-[2rem] bg-white/85 p-5 shadow-inner shadow-white/70">
                     <div className="flex items-center justify-between gap-3">
