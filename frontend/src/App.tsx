@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Outlet, useLocation } from "react-router-dom";
 import { motion } from "motion/react";
 import Navbar from "./components/layout/Navbar";
@@ -83,6 +84,16 @@ const RouteMetaFallback = () => {
   return null;
 };
 
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [pathname]);
+
+  return null;
+};
+
 const PublicLayout = () => (
   <>
     <RouteMetaFallback />
@@ -102,6 +113,7 @@ function App() {
       <ToastProvider>
         <CartProvider>
           <Router>
+            <ScrollToTop />
             <div className="relative min-h-screen">
               <Routes>
                 <Route path="/login" element={<LoginPage />} />
