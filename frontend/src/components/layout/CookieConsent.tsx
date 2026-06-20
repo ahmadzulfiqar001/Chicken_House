@@ -68,13 +68,13 @@ const CookieConsent = () => {
           aria-label="Cookie consent"
         >
           <div className="mx-auto flex max-w-4xl flex-col gap-4 rounded-[1.8rem] border border-gray-100 bg-white/95 p-5 shadow-2xl shadow-dark/20 backdrop-blur-md sm:flex-row sm:items-center sm:gap-6 sm:p-6">
-            <div className="flex items-start gap-4">
+            <div className="flex min-w-0 items-start gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                 <Cookie size={24} />
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="font-bold text-dark">We use cookies</p>
-                <p className="mt-1 text-sm text-muted">
+                <p className="mt-1 text-xs leading-5 text-muted sm:text-sm sm:leading-normal">
                   Cookies enable account login, cart memory, and customer sessions. Accept to use these features, or reject and keep browsing.{" "}
                   <Link to="/cookies" className="font-bold text-primary hover:underline">
                     Learn more
@@ -83,7 +83,7 @@ const CookieConsent = () => {
                 </p>
               </div>
             </div>
-            <div className="flex shrink-0 gap-3 sm:ml-auto">
+            <div className="flex min-w-0 shrink-0 gap-3 sm:ml-auto">
               <button
                 type="button"
                 onClick={() => decide("rejected")}

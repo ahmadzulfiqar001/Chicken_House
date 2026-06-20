@@ -411,8 +411,8 @@ const ProfilePage = () => {
               <AnimatePresence mode="wait">
                 {activeTab === "profile" && customer && (
                   <motion.div key="profile" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
-                    <div className="rounded-[3rem] border border-gray-100 bg-white p-10 shadow-xl shadow-dark/5">
-                      <div className="mb-10 flex items-center justify-between">
+                    <div className="rounded-[3rem] border border-gray-100 bg-white p-6 shadow-xl shadow-dark/5 sm:p-10">
+                      <div className="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                           <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary">Profile Overview</p>
                           <h2 className="mt-3 text-3xl font-bold text-dark">Personal Information</h2>
@@ -496,8 +496,8 @@ const ProfilePage = () => {
 
                 {activeTab === "orders" && (
                   <motion.div key="orders" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
-                    <div className="rounded-[3rem] border border-gray-100 bg-white p-10 shadow-xl shadow-dark/5">
-                      <div className="mb-8 flex items-center justify-between">
+                    <div className="rounded-[3rem] border border-gray-100 bg-white p-6 shadow-xl shadow-dark/5 sm:p-10">
+                      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                           <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary">My Orders</p>
                           <h2 className="mt-3 text-3xl font-bold text-dark">Order history and live tracking</h2>
@@ -511,7 +511,7 @@ const ProfilePage = () => {
                         {orders.map((order) => (
                           <div key={order.id} className="rounded-[2rem] border border-gray-100 bg-surface p-6">
                             <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-                              <div>
+                              <div className="min-w-0">
                                 <p className="text-xs font-bold uppercase tracking-[0.24em] text-muted">{order.id}</p>
                                 <h3 className="mt-2 text-2xl font-bold text-dark">{order.items}</h3>
                                 <p className="mt-2 text-sm text-muted">{new Date(order.time).toLocaleString("en-PK")}</p>
@@ -522,8 +522,8 @@ const ProfilePage = () => {
                                 <span className="rounded-full bg-dark px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-white">Rs. {order.total.toLocaleString()}</span>
                               </div>
                             </div>
-                            <div className="mt-5 flex justify-end">
-                              <Link to={`/track?orderId=${order.id}`} className="rounded-full bg-primary px-6 py-3 text-sm font-bold text-white">
+                            <div className="mt-5 flex justify-stretch sm:justify-end">
+                              <Link to={`/track?orderId=${order.id}`} className="inline-flex w-full justify-center rounded-full bg-primary px-6 py-3 text-sm font-bold text-white sm:w-auto">
                                 Track Order
                               </Link>
                             </div>
@@ -536,7 +536,7 @@ const ProfilePage = () => {
 
                 {activeTab === "wishlist" && customer && (
                   <motion.div key="wishlist" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
-                    <div className="rounded-[3rem] border border-gray-100 bg-white p-10 shadow-xl shadow-dark/5">
+                    <div className="rounded-[3rem] border border-gray-100 bg-white p-6 shadow-xl shadow-dark/5 sm:p-10">
                       <h2 className="text-3xl font-bold text-dark">Wishlist & Favorites</h2>
                       <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                         {customer.wishlist.map((item) => (
@@ -557,7 +557,7 @@ const ProfilePage = () => {
                       </div>
                     </div>
 
-                    <div className="rounded-[3rem] border border-gray-100 bg-white p-10 shadow-xl shadow-dark/5">
+                    <div className="rounded-[3rem] border border-gray-100 bg-white p-6 shadow-xl shadow-dark/5 sm:p-10">
                       <h3 className="text-2xl font-bold text-dark">Recommended Additions</h3>
                       <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
                         {suggestions.map((item) => (
@@ -581,7 +581,7 @@ const ProfilePage = () => {
                   <motion.div key="rewards" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
                     
                     {/* Points Balance Banner */}
-                    <div className="rounded-[3rem] bg-gradient-to-br from-amber-500 via-orange-500 to-red-500 p-10 text-white shadow-xl shadow-orange-500/30 relative overflow-hidden">
+                    <div className="rounded-[3rem] bg-gradient-to-br from-amber-500 via-orange-500 to-red-500 p-6 text-white shadow-xl shadow-orange-500/30 relative overflow-hidden sm:p-10">
                       <div className="absolute -top-8 -right-8 w-48 h-48 bg-white/10 rounded-full blur-3xl" />
                       <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
                       <div className="relative z-10">
@@ -611,7 +611,7 @@ const ProfilePage = () => {
                     )}
 
                     {/* Tier Progress */}
-                    <div className="rounded-[3rem] border border-gray-100 bg-white p-10 shadow-xl shadow-dark/5">
+                    <div className="rounded-[3rem] border border-gray-100 bg-white p-6 shadow-xl shadow-dark/5 sm:p-10">
                       <div className="mb-8">
                         <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary">Your Tier Progress</p>
                         <h2 className="mt-3 text-3xl font-bold text-dark">Loyalty Tiers</h2>
@@ -655,8 +655,8 @@ const ProfilePage = () => {
                     </div>
 
                     {/* Reward Catalog */}
-                    <div className="rounded-[3rem] border border-gray-100 bg-white p-10 shadow-xl shadow-dark/5">
-                      <div className="mb-8 flex items-center justify-between">
+                    <div className="rounded-[3rem] border border-gray-100 bg-white p-6 shadow-xl shadow-dark/5 sm:p-10">
+                      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                           <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary">Redeem Points</p>
                           <h2 className="mt-3 text-3xl font-bold text-dark">Reward Catalog</h2>
@@ -683,7 +683,7 @@ const ProfilePage = () => {
                                 <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-primary">{reward.category}</span>
                                 <h3 className="mt-2 text-xl font-bold text-dark">{reward.name}</h3>
                               </div>
-                              <div className="mt-6 flex items-center justify-between">
+                              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                 <div className="flex items-center gap-1">
                                   <Star size={14} className="text-amber-500" />
                                   <span className="font-bold text-dark">{reward.points} pts</span>
@@ -707,7 +707,7 @@ const ProfilePage = () => {
                     </div>
 
                     {/* How to Earn Points */}
-                    <div className="rounded-[3rem] border border-gray-100 bg-white p-10 shadow-xl shadow-dark/5">
+                    <div className="rounded-[3rem] border border-gray-100 bg-white p-6 shadow-xl shadow-dark/5 sm:p-10">
                       <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary">Earn More</p>
                       <h2 className="mt-3 text-3xl font-bold text-dark mb-8">How to Earn Points</h2>
                       <div className="grid gap-4 md:grid-cols-2">
@@ -719,10 +719,10 @@ const ProfilePage = () => {
                           { icon: "👥", title: "Refer a Friend", desc: "Invite friends — earn points when they order.", pts: "+75 pts" },
                           { icon: "📱", title: "App Check-in", desc: "Check in at the restaurant to earn bonus points.", pts: "+10 pts" },
                         ].map((item) => (
-                          <div key={item.title} className="flex items-start gap-5 rounded-[2rem] bg-surface p-6">
+                          <div key={item.title} className="flex items-start gap-4 rounded-[2rem] bg-surface p-5 sm:gap-5 sm:p-6">
                             <div className="text-3xl shrink-0">{item.icon}</div>
                             <div className="flex-1">
-                              <div className="flex items-center justify-between mb-1">
+                              <div className="mb-1 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                 <h3 className="font-bold text-dark">{item.title}</h3>
                                 <span className="text-xs font-bold text-green-600 bg-green-50 px-3 py-1 rounded-full">{item.pts}</span>
                               </div>
@@ -738,7 +738,7 @@ const ProfilePage = () => {
 
                 {activeTab === "settings" && customer && (
                   <motion.div key="settings" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
-                    <div className="rounded-[3rem] border border-gray-100 bg-white p-10 shadow-xl shadow-dark/5">
+                    <div className="rounded-[3rem] border border-gray-100 bg-white p-6 shadow-xl shadow-dark/5 sm:p-10">
                       <h2 className="text-3xl font-bold text-dark">Settings & Preferences</h2>
                       <div className="mt-8 grid gap-5 md:grid-cols-2">
                         {[
@@ -747,7 +747,7 @@ const ProfilePage = () => {
                           { key: "orderUpdates", label: "Order status updates", icon: ShoppingBag },
                           { key: "darkAlerts", label: "Priority service alerts", icon: Home },
                         ].map((item) => (
-                          <button key={item.key} onClick={() => togglePreference(item.key as keyof CustomerProfile["preferences"])} className="flex items-center justify-between rounded-[2rem] border border-gray-100 bg-surface px-5 py-5 text-left">
+                          <button key={item.key} onClick={() => togglePreference(item.key as keyof CustomerProfile["preferences"])} className="flex flex-col gap-4 rounded-[2rem] border border-gray-100 bg-surface px-5 py-5 text-left sm:flex-row sm:items-center sm:justify-between">
                             <div className="flex items-center gap-4">
                               <item.icon size={18} className="text-primary" />
                               <span className="font-bold text-dark">{item.label}</span>

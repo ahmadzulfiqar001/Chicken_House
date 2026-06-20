@@ -262,15 +262,15 @@ const BookingPage = () => {
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-6 text-5xl font-display font-bold text-white md:text-7xl"
+              className="mb-6 text-3xl font-display font-bold text-white sm:text-5xl md:text-7xl"
             >
-              Book Your <span className="text-accent italic">Special Event</span>
+              Book Your <span className="block text-accent italic sm:inline">Special Event</span>
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.08 }}
-              className="mx-auto max-w-2xl text-lg text-white/70"
+              className="mx-auto max-w-[18rem] text-sm leading-6 text-white/70 sm:max-w-2xl sm:text-lg sm:leading-normal"
             >
               Reserve a table or event setup with a polished booking workflow, clear confirmation, and direct admin visibility.
             </motion.p>
@@ -296,8 +296,8 @@ const BookingPage = () => {
       <section className="py-20">
         <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
           <div className="overflow-hidden rounded-[3rem] border border-gray-50 bg-white shadow-2xl shadow-dark/5">
-            <div className="border-b border-gray-100 px-8 py-6 md:px-12">
-              <div className="flex items-center justify-between gap-4">
+            <div className="border-b border-gray-100 px-5 py-6 sm:px-8 md:px-12">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
                     Step {Math.min(step, totalSteps)} of {totalSteps}
@@ -327,7 +327,7 @@ const BookingPage = () => {
               ) : null}
             </div>
 
-            <div className="p-8 md:p-12">
+            <div className="p-5 sm:p-8 md:p-12">
               {error ? (
                 <div className="mb-8 rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-sm font-medium text-red-600">
                   {error}
@@ -383,11 +383,11 @@ const BookingPage = () => {
                       ))}
                     </div>
 
-                    <div className="flex justify-end pt-4">
+                    <div className="flex justify-stretch pt-4 sm:justify-end">
                       <button
                         type="button"
                         onClick={handleNext}
-                        className="flex items-center gap-2 rounded-full bg-primary px-10 py-4 font-bold text-white shadow-xl shadow-primary/20 transition-colors hover:bg-primary-strong"
+                        className="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-10 py-4 font-bold text-white shadow-xl shadow-primary/20 transition-colors hover:bg-primary-strong sm:w-auto"
                       >
                         Continue
                         <ChevronRight size={20} />
@@ -516,11 +516,11 @@ const BookingPage = () => {
                       </div>
                     </div>
 
-                    <div className="flex justify-between pt-4">
+                    <div className="flex flex-col-reverse gap-3 pt-4 sm:flex-row sm:justify-between">
                       <button
                         type="button"
                         onClick={handleBack}
-                        className="flex items-center gap-2 rounded-full border border-gray-200 px-8 py-4 font-bold text-dark"
+                        className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-200 px-8 py-4 font-bold text-dark sm:w-auto"
                       >
                         <ChevronLeft size={18} />
                         Back
@@ -528,7 +528,7 @@ const BookingPage = () => {
                       <button
                         type="button"
                         onClick={handleNext}
-                        className="flex items-center gap-2 rounded-full bg-primary px-10 py-4 font-bold text-white shadow-xl shadow-primary/20 transition-colors hover:bg-primary-strong"
+                        className="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-10 py-4 font-bold text-white shadow-xl shadow-primary/20 transition-colors hover:bg-primary-strong sm:w-auto"
                       >
                         Continue
                         <ChevronRight size={20} />
@@ -586,11 +586,11 @@ const BookingPage = () => {
                       ))}
                     </div>
 
-                    <div className="flex justify-between pt-4">
+                    <div className="flex flex-col-reverse gap-3 pt-4 sm:flex-row sm:justify-between">
                       <button
                         type="button"
                         onClick={handleBack}
-                        className="flex items-center gap-2 rounded-full border border-gray-200 px-8 py-4 font-bold text-dark"
+                        className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-200 px-8 py-4 font-bold text-dark sm:w-auto"
                       >
                         <ChevronLeft size={18} />
                         Back
@@ -598,7 +598,7 @@ const BookingPage = () => {
                       <button
                         type="button"
                         onClick={handleNext}
-                        className="flex items-center gap-2 rounded-full bg-primary px-10 py-4 font-bold text-white shadow-xl shadow-primary/20 transition-colors hover:bg-primary-strong"
+                        className="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-10 py-4 font-bold text-white shadow-xl shadow-primary/20 transition-colors hover:bg-primary-strong sm:w-auto"
                       >
                         Continue
                         <ChevronRight size={20} />
@@ -722,11 +722,11 @@ const BookingPage = () => {
                         />
                       </div>
 
-                      <div className="flex justify-between pt-4">
+                      <div className="flex flex-col-reverse gap-3 pt-4 sm:flex-row sm:justify-between">
                         <button
                           type="button"
                           onClick={handleBack}
-                          className="flex items-center gap-2 rounded-full border border-gray-200 px-8 py-4 font-bold text-dark"
+                          className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-200 px-8 py-4 font-bold text-dark sm:w-auto"
                         >
                           <ChevronLeft size={18} />
                           Back
@@ -734,7 +734,7 @@ const BookingPage = () => {
                         <button
                           type="submit"
                           disabled={isSubmitting}
-                          className="flex items-center gap-2 rounded-full bg-primary px-10 py-4 font-bold text-white shadow-xl shadow-primary/20 transition-colors hover:bg-primary-strong disabled:opacity-70"
+                          className="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-10 py-4 font-bold text-white shadow-xl shadow-primary/20 transition-colors hover:bg-primary-strong disabled:opacity-70 sm:w-auto"
                         >
                           {isSubmitting ? "Submitting..." : "Confirm Booking"}
                           <CheckCircle2 size={20} />
@@ -785,10 +785,10 @@ const BookingPage = () => {
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap justify-center gap-4">
+                    <div className="flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
                       <Link
                         to="/"
-                        className="rounded-full bg-dark px-10 py-4 font-bold text-white transition-colors hover:bg-primary"
+                        className="inline-flex justify-center rounded-full bg-dark px-10 py-4 font-bold text-white transition-colors hover:bg-primary"
                       >
                         Back to Home
                       </Link>
@@ -826,7 +826,7 @@ const BookingPage = () => {
           </div>
 
           <aside className="space-y-6">
-            <div className="sticky top-28 space-y-6">
+            <div className="sticky top-24 space-y-6 lg:top-28">
               <div className="rounded-[3rem] border border-gray-50 bg-white p-8 shadow-2xl shadow-dark/5">
                 <h3 className="text-2xl font-bold text-dark">Booking Summary</h3>
                 <div className="mt-6 space-y-4">
@@ -835,10 +835,10 @@ const BookingPage = () => {
                       key={row.label}
                       type="button"
                       onClick={() => handleSummaryStepChange(row.step)}
-                      className="flex w-full items-start justify-between gap-4 rounded-2xl bg-surface p-4 text-left transition hover:bg-surface-strong focus:outline-none focus:ring-2 focus:ring-primary/25"
+                      className="flex w-full flex-col gap-2 rounded-2xl bg-surface p-4 text-left transition hover:bg-surface-strong focus:outline-none focus:ring-2 focus:ring-primary/25 sm:flex-row sm:items-start sm:justify-between sm:gap-4"
                     >
                       <span className="text-sm font-bold uppercase tracking-widest text-muted">{row.label}</span>
-                      <span className="max-w-[65%] text-right font-bold text-dark">{row.value}</span>
+                      <span className="font-bold text-dark sm:max-w-[65%] sm:text-right">{row.value}</span>
                     </button>
                   ))}
                 </div>

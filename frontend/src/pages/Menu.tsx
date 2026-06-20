@@ -629,8 +629,8 @@ const MenuPage = () => {
         <div className="pointer-events-none absolute inset-x-0 top-0 h-[24rem] bg-[radial-gradient(circle_at_top_left,rgba(127,18,21,0.18),transparent_48%),radial-gradient(circle_at_top_right,rgba(216,168,47,0.16),transparent_38%)]" />
         <div className="pointer-events-none absolute left-[18%] top-[22rem] h-64 w-64 rounded-full bg-primary/7 blur-3xl" />
         <div className="pointer-events-none absolute right-[8%] top-[34rem] h-72 w-72 rounded-full bg-accent/10 blur-3xl" />
-      <div className="mx-auto max-w-[106rem] px-4 pb-24 pt-32 sm:px-6 lg:px-8">
-        <div className="grid gap-8 xl:grid-cols-[28rem_minmax(0,1fr)]">
+      <div className="mx-auto max-w-[106rem] px-3 pb-24 pt-32 sm:px-6 lg:px-8">
+        <div className="grid gap-6 xl:grid-cols-[28rem_minmax(0,1fr)] xl:gap-8">
           <aside className="hidden xl:block xl:min-w-0 xl:h-full">
             <div className="space-y-4 xl:sticky xl:top-28">
               <div className="flex h-[calc(100vh-8.5rem)] min-h-[34rem] flex-col overflow-hidden rounded-[3rem] border border-[#eadcc8] bg-gradient-to-b from-[#fff9ef] via-white to-[#f8ecdb] shadow-[0_28px_80px_rgba(17,8,5,0.12)]">
@@ -717,7 +717,7 @@ const MenuPage = () => {
             </div>
           </aside>
 
-          <main className="min-w-0 space-y-12 xl:border-l xl:border-[#efe0c7] xl:pl-10">
+          <main className="min-w-0 space-y-10 xl:border-l xl:border-[#efe0c7] xl:pl-10">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="inline-flex items-center gap-3 rounded-full bg-white px-4 py-3 text-sm font-bold text-dark shadow-lg shadow-dark/5">
               <span className="inline-flex h-9 min-w-9 items-center justify-center rounded-full bg-surface px-3 text-primary">
@@ -767,7 +767,7 @@ const MenuPage = () => {
             <button
               type="button"
               onClick={() => setShowFilters(true)}
-              className="fixed right-5 top-28 z-40 inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-2xl shadow-primary/25 transition-all duration-300 hover:scale-105 hover:bg-primary-strong"
+              className="fixed bottom-28 right-4 z-40 inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-2xl shadow-primary/25 transition-all duration-300 hover:scale-105 hover:bg-primary-strong sm:bottom-auto sm:right-5 sm:top-28"
               aria-label="Open menu filters"
             >
               <SlidersHorizontal size={22} />
@@ -775,8 +775,8 @@ const MenuPage = () => {
           </div>
 
           {!loading && categories.length ? (
-            <div className="sticky top-28 z-20 -mt-4">
-              <div className="inline-flex items-center gap-3 rounded-full border border-[#eadcc8] bg-white/95 px-5 py-3 shadow-xl shadow-dark/5 backdrop-blur-sm">
+            <div className="sticky top-24 z-20 -mt-4 sm:top-28">
+              <div className="inline-flex max-w-full flex-wrap items-center gap-2 rounded-full border border-[#eadcc8] bg-white/95 px-4 py-3 shadow-xl shadow-dark/5 backdrop-blur-sm sm:gap-3 sm:px-5">
                 <span className="rounded-full bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-white">
                   Now Viewing
                 </span>
@@ -849,18 +849,18 @@ const MenuPage = () => {
                   className="scroll-mt-32"
                   style={{ contentVisibility: "auto", containIntrinsicSize: "1px 1400px" }}
                 >
-                  <div className="mb-10 flex items-center gap-6">
-                    <h2 className="text-4xl font-display font-bold text-dark">{category}</h2>
+                  <div className="mb-8 flex items-center gap-4 sm:mb-10 sm:gap-6">
+                    <h2 className="text-3xl font-display font-bold text-dark sm:text-4xl">{category}</h2>
                     <div className="h-px flex-1 bg-gray-100" />
                     <span className="rounded-full bg-white px-4 py-2 text-sm font-bold text-muted shadow-lg shadow-dark/5">
                       {categoryItems.length} items
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 xl:gap-8">
                     {groupedSnackItems.length ? (
                       <article className="group overflow-hidden rounded-[2.8rem] border border-gray-100 bg-white shadow-2xl shadow-dark/6 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/10">
-                        <div className="relative h-[25rem] overflow-hidden md:h-[27rem]">
+                        <div className="relative h-64 overflow-hidden sm:h-80 md:h-[24rem]">
                           <MenuImage item={groupedSnackItems[0]} className="h-full" />
                           <div className="absolute inset-0 bg-gradient-to-t from-dark/75 via-dark/10 to-transparent opacity-70" />
                           <div className="absolute left-6 top-6 rounded-full bg-accent px-4 py-2 text-[10px] font-bold uppercase tracking-[0.28em] text-dark shadow-lg">
@@ -872,7 +872,7 @@ const MenuPage = () => {
                           </div>
                         </div>
 
-                        <div className="space-y-6 p-7">
+                        <div className="space-y-5 p-5 sm:p-7">
                           <p className="text-sm leading-relaxed text-muted">
                             All the quick-bite counts are grouped in one tempting panel, with each option ready to open for selection.
                           </p>
@@ -883,7 +883,7 @@ const MenuPage = () => {
                                 key={item.id}
                                 type="button"
                                 onClick={() => setSelectedItem(item)}
-                                className="flex w-full items-center justify-between gap-4 rounded-[1.6rem] border border-[#f0e3cb] bg-surface/70 px-5 py-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/20 hover:bg-white"
+                                className="flex w-full flex-col gap-4 rounded-[1.6rem] border border-[#f0e3cb] bg-surface/70 px-5 py-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/20 hover:bg-white sm:flex-row sm:items-center sm:justify-between"
                               >
                                 <span className="min-w-0">
                                   <span className="block text-sm font-bold text-dark">{item.name}</span>
@@ -891,7 +891,7 @@ const MenuPage = () => {
                                     {item.variants[0]?.label ?? "Regular serving"}
                                   </span>
                                 </span>
-                                <span className="flex items-center gap-3">
+                                <span className="flex w-full items-center justify-between gap-3 sm:w-auto">
                                   <span className="text-lg font-display font-bold text-primary">Rs. {item.startingPrice}</span>
                                   <span className="rounded-full bg-primary px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white">
                                     Select
@@ -909,7 +909,7 @@ const MenuPage = () => {
                         key={item.id}
                         className="group flex flex-col overflow-hidden rounded-[2.8rem] border border-gray-100 bg-white shadow-xl shadow-dark/5 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/10"
                       >
-                        <div className="relative h-[24rem] overflow-hidden sm:h-[25rem] xl:h-[23rem] 2xl:h-[25rem]">
+                        <div className="relative h-64 overflow-hidden sm:h-80 md:h-[22rem] xl:h-[21rem] 2xl:h-[23rem]">
                           <MenuImage item={item} className="h-full" />
                           <div className="absolute inset-0 bg-gradient-to-t from-dark/75 via-dark/10 to-transparent opacity-55 transition-opacity duration-500 group-hover:opacity-80" />
 
@@ -932,9 +932,9 @@ const MenuPage = () => {
                           </div>
                         </div>
 
-                        <div className="flex flex-1 flex-col gap-5 p-6">
-                          <div className="flex items-start justify-between gap-4">
-                            <div>
+                        <div className="flex flex-1 flex-col gap-5 p-5 sm:p-6">
+                          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                            <div className="min-w-0">
                               <p className="mb-2 text-xs font-bold uppercase tracking-widest text-muted">
                                 {item.subcategory}
                               </p>
@@ -942,7 +942,7 @@ const MenuPage = () => {
                                 {item.name}
                               </h3>
                             </div>
-                            <span className="text-right">
+                            <span className="shrink-0 text-left sm:text-right">
                               <span className="block text-xs uppercase tracking-widest text-muted">
                                 Starting
                               </span>
@@ -1013,7 +1013,7 @@ const MenuPage = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 80 }}
               transition={{ type: "spring", stiffness: 220, damping: 24 }}
-              className="absolute right-0 top-0 h-full w-full max-w-md overflow-y-auto bg-white p-6 shadow-2xl sm:p-8"
+              className="absolute right-0 top-0 h-full w-full max-w-md overflow-y-auto bg-white p-5 shadow-2xl sm:p-8"
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -1101,7 +1101,7 @@ const MenuPage = () => {
         ) : null}
 
         {selectedItem && selectedVariant ? (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+          <div className="fixed inset-0 z-[100] flex items-end justify-center px-2 py-2 sm:items-center sm:px-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -1114,26 +1114,26 @@ const MenuPage = () => {
               initial={{ opacity: 0, scale: 0.96, y: 16 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: 16 }}
-              className="relative max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-[3rem] bg-white shadow-2xl"
+              className="relative max-h-[calc(100dvh-1rem)] w-full max-w-4xl overflow-y-auto rounded-[2rem] bg-white shadow-2xl sm:max-h-[92vh] sm:rounded-[3rem]"
             >
-              <div className="relative h-56">
+              <div className="relative h-44 sm:h-56">
                 <MenuImage item={selectedItem} className="h-full" />
                 <button
                   type="button"
                   onClick={() => setSelectedItem(null)}
-                  className="absolute right-6 top-6 rounded-full bg-white/20 p-3 text-white backdrop-blur-md transition-all hover:bg-white/40"
+                  className="absolute right-4 top-4 rounded-full bg-white/20 p-3 text-white backdrop-blur-md transition-all hover:bg-white/40 sm:right-6 sm:top-6"
                 >
                   <XCircle size={24} />
                 </button>
               </div>
 
-              <div className="p-8 md:p-10">
+              <div className="p-5 sm:p-8 md:p-10">
                 <div className="mb-8 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-                  <div>
+                  <div className="min-w-0">
                     <p className="mb-2 text-xs font-bold uppercase tracking-widest text-muted">
                       {selectedItem.category} / {selectedItem.subcategory}
                     </p>
-                    <h2 className="text-3xl font-bold text-dark">{selectedItem.name}</h2>
+                    <h2 className="text-2xl font-bold text-dark sm:text-3xl">{selectedItem.name}</h2>
                     <p className="mt-3 max-w-2xl text-muted">{selectedItem.description}</p>
                   </div>
                   <div className="inline-flex h-fit items-center gap-2 rounded-2xl bg-surface px-4 py-3 font-bold text-dark">
@@ -1267,7 +1267,7 @@ const MenuPage = () => {
                     />
                   </div>
 
-                  <div className="flex items-center justify-between rounded-3xl bg-surface p-6">
+                  <div className="flex flex-col gap-4 rounded-3xl bg-surface p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
                     <span className="font-bold text-dark">Quantity</span>
                     <div className="flex items-center gap-6">
                       <button
@@ -1304,7 +1304,7 @@ const MenuPage = () => {
                   <button
                     type="button"
                     onClick={handleAddToCart}
-                    className="flex items-center justify-center gap-3 rounded-2xl bg-primary px-10 py-4 font-bold text-white shadow-xl shadow-primary/20 transition-all hover:bg-primary-strong"
+                    className="flex w-full items-center justify-center gap-3 rounded-2xl bg-primary px-8 py-4 font-bold text-white shadow-xl shadow-primary/20 transition-all hover:bg-primary-strong md:w-auto md:px-10"
                   >
                     Add to Cart
                     <ShoppingCart size={20} />

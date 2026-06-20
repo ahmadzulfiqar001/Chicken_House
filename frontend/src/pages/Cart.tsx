@@ -136,9 +136,9 @@ const CartPage = () => {
                           />
                         </div>
 
-                        <div className="flex-1">
+                        <div className="min-w-0 flex-1">
                           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                            <div>
+                            <div className="min-w-0">
                               <h3 className="text-xl font-bold text-dark">{item.name}</h3>
                               <p className="mt-1 text-sm text-muted">{item.category}</p>
 
@@ -182,9 +182,9 @@ const CartPage = () => {
                               ) : null}
                             </div>
 
-                            <div className="text-left sm:text-right">
+                            <div className="shrink-0 text-left sm:text-right">
                               <p className="text-sm uppercase tracking-[0.18em] text-muted">Line total</p>
-                              <p className="mt-2 text-2xl font-display font-bold text-dark">
+                              <p className="mt-2 text-2xl font-display font-bold text-dark sm:text-right">
                                 Rs. {(item.price * item.quantity).toLocaleString()}
                               </p>
                               <p className="mt-1 text-sm font-bold text-primary">
@@ -227,7 +227,7 @@ const CartPage = () => {
                             <button
                               type="button"
                               onClick={() => handleRemove(item.id, item.name)}
-                              className="inline-flex items-center gap-2 rounded-2xl bg-red-500/10 px-5 py-3 font-bold text-red-500 transition hover:bg-red-500 hover:text-white"
+                              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-red-500/10 px-5 py-3 font-bold text-red-500 transition hover:bg-red-500 hover:text-white sm:w-auto"
                             >
                               <Trash2 size={18} />
                               Remove
@@ -241,7 +241,7 @@ const CartPage = () => {
               </div>
 
               <div className="space-y-8">
-                <div className="sticky top-32 rounded-[3rem] border border-gray-50 bg-white p-8 shadow-2xl shadow-dark/5">
+                <div className="sticky top-28 rounded-[3rem] border border-gray-50 bg-white p-8 shadow-2xl shadow-dark/5 lg:top-32">
                   <h2 className="text-2xl font-bold text-dark">Order Summary</h2>
 
                   <div className="mt-8 grid gap-3">
@@ -297,7 +297,7 @@ const CartPage = () => {
                           : `Rs. ${estimatedDeliveryFee.toLocaleString()}`}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between border-t border-gray-100 pt-6">
+                    <div className="flex flex-col gap-2 border-t border-gray-100 pt-6 sm:flex-row sm:items-center sm:justify-between">
                       <span className="text-xl font-bold text-dark">Estimated Total</span>
                       <span className="text-3xl font-display font-bold text-primary">
                         Rs. {estimatedTotal.toLocaleString()}

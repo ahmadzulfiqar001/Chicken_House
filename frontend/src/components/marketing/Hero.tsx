@@ -5,7 +5,7 @@ import { siteConfig } from "../../lib/site";
 
 const Hero = () => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-dark">
+    <section className="relative min-h-[92dvh] flex items-center justify-center overflow-hidden bg-dark">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 0.94 }}
@@ -31,7 +31,7 @@ const Hero = () => {
 
       <div className="absolute inset-0 atmosphere pointer-events-none" />
 
-      <div className="relative z-10 w-full max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 pt-36 pb-44 md:pt-40 md:pb-48">
+      <div className="relative z-10 w-full max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 pt-32 pb-36 md:pt-36 md:pb-40">
         <div className="relative flex flex-col items-start">
           <motion.div
             animate={{ rotate: 360 }}
@@ -59,20 +59,20 @@ const Hero = () => {
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
-            className="inline-flex items-center gap-4 mb-8"
+            className="mb-6 inline-flex max-w-full items-center gap-3 sm:mb-8 sm:gap-4"
           >
-            <div className="h-px w-24 bg-accent" />
-            <span className="text-accent font-mono text-sm tracking-[0.3em] uppercase">
+            <div className="h-px w-12 flex-shrink-0 bg-accent sm:w-24" />
+            <span className="text-accent font-mono text-xs tracking-normal uppercase sm:text-sm">
               Live Kitchen - Renala Khurd
             </span>
           </motion.div>
 
-          <div className="mb-8 max-w-[980px]">
+          <div className="mb-7 max-w-[980px] sm:mb-8">
             <motion.h1
               initial={{ opacity: 0, y: 100 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
-              className="text-[clamp(4.6rem,12vw,9rem)] md:text-[clamp(5.6rem,10vw,9.5rem)] font-anton leading-[0.88] text-white uppercase tracking-[-0.05em]"
+              className="text-[clamp(2.25rem,10.5vw,3.25rem)] sm:text-[clamp(4.8rem,13vw,8.5rem)] md:text-[clamp(5.6rem,10vw,9.5rem)] font-anton leading-none text-white uppercase tracking-normal sm:leading-[0.88]"
             >
               Chicken <br />
               <span className="text-accent drop-shadow-[0_10px_30px_rgba(255,171,73,0.22)]">
@@ -86,7 +86,7 @@ const Hero = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.35 }}
-              className="max-w-3xl text-2xl font-display font-semibold leading-snug text-white drop-shadow-[0_8px_24px_rgba(0,0,0,0.45)] sm:text-3xl md:text-4xl"
+              className="max-w-[18rem] text-base font-display font-semibold leading-snug text-white drop-shadow-[0_8px_24px_rgba(0,0,0,0.45)] sm:max-w-3xl sm:text-3xl md:text-4xl"
             >
               Traditional Taste, Homelike Comfort, and a Warm Atmosphere.
             </motion.h2>
@@ -95,13 +95,13 @@ const Hero = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6 }}
-              className="mt-8 flex flex-wrap gap-4"
+              className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4"
             >
-              <Link to="/menu">
+              <Link to="/menu" className="w-full sm:w-auto">
                 <motion.button
                   whileHover={{ scale: 1.05, rotate: -2 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-8 md:px-10 py-4 md:py-5 rounded-full bg-accent text-dark font-bold text-base md:text-lg flex items-center gap-3 shadow-2xl shadow-accent/40 group"
+                  className="flex w-full items-center justify-center gap-3 rounded-full bg-accent px-8 py-4 text-base font-bold text-dark shadow-2xl shadow-accent/40 group md:px-10 md:py-5 md:text-lg"
                 >
                   Explore Menu
                   <ChevronRight
@@ -110,11 +110,11 @@ const Hero = () => {
                   />
                 </motion.button>
               </Link>
-              <Link to="/booking">
+              <Link to="/booking" className="w-full sm:w-auto">
                 <motion.button
                   whileHover={{ scale: 1.05, rotate: 2 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-8 md:px-10 py-4 md:py-5 rounded-full bg-white/5 backdrop-blur-xl text-white font-bold text-base md:text-lg flex items-center gap-3 border border-white/10 hover:bg-white/10 transition-all"
+                  className="flex w-full items-center justify-center gap-3 rounded-full border border-white/10 bg-white/5 px-8 py-4 text-base font-bold text-white backdrop-blur-xl transition-all hover:bg-white/10 md:px-10 md:py-5 md:text-lg"
                 >
                   <Play size={22} fill="currentColor" />
                   Book A Table

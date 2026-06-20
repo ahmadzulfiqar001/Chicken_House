@@ -55,7 +55,7 @@ const Footer = () => {
         transition={{ duration: 26, repeat: Infinity, ease: "linear" }}
         className="absolute left-0 right-0 top-0 border-y border-white/10 bg-white/[0.03] py-3"
       >
-        <div className="flex w-[200%] gap-10 whitespace-nowrap font-anton text-2xl uppercase tracking-[0.24em] text-white/20">
+        <div className="flex w-[200%] gap-10 whitespace-nowrap font-anton text-xl uppercase tracking-normal text-white/20 sm:text-2xl">
           <span>Chicken House</span>
           <span>Live Kitchen</span>
           <span>Signature Platters</span>
@@ -76,7 +76,7 @@ const Footer = () => {
               <span className="mb-3 inline-flex items-center gap-3 rounded-full border border-white/12 bg-white/6 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.32em] text-accent">
                 Renala Khurd
               </span>
-              <h2 className="max-w-5xl font-anton text-3xl uppercase leading-[0.95] tracking-tight sm:text-4xl lg:text-5xl">
+              <h2 className="max-w-5xl font-anton text-2xl uppercase leading-tight tracking-normal sm:text-4xl lg:text-5xl">
                 A premium local restaurant experience, built for meals, families, and events.
               </h2>
             </div>
@@ -91,7 +91,7 @@ const Footer = () => {
                     {item.icon}
                   </div>
                   <div className="min-w-0">
-                    <p className="font-anton text-xl uppercase tracking-tight">
+                    <p className="font-anton text-xl uppercase tracking-normal">
                       {item.title}
                     </p>
                     <p className="mt-1 text-xs leading-5 text-white/60">
@@ -106,34 +106,34 @@ const Footer = () => {
 
         <div className="mb-24 grid grid-cols-1 gap-16 lg:grid-cols-12">
           <div className="lg:col-span-6">
-            <Link to="/" className="group mb-12 flex items-center gap-5">
+            <Link to="/" className="group mb-10 flex min-w-0 items-center gap-4 sm:mb-12 sm:gap-5">
               <img
                 src="/logo.jpg"
                 alt="Chicken House"
-                className="h-20 w-20 rounded-full border-2 border-white/15 object-cover shadow-[0_18px_50px_rgba(255,170,73,0.35)] transition-transform duration-500 group-hover:rotate-6"
+                className="h-16 w-16 shrink-0 rounded-full border-2 border-white/15 object-cover shadow-[0_18px_50px_rgba(255,170,73,0.35)] transition-transform duration-500 group-hover:rotate-6 sm:h-20 sm:w-20"
               />
-              <div>
-                <p className="font-anton text-4xl uppercase tracking-tight text-white">
+              <div className="min-w-0">
+                <p className="font-anton text-3xl uppercase tracking-normal text-white sm:text-4xl">
                   {siteConfig.brandName}
                 </p>
-                <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-white/45">
+                <p className="font-mono text-[11px] uppercase tracking-normal text-white/45">
                   {siteConfig.tagline}
                 </p>
               </div>
             </Link>
 
-            <h2 className="mb-10 select-none font-anton text-7xl uppercase leading-[0.8] tracking-tighter opacity-10 pointer-events-none md:text-9xl">
+            <h2 className="mb-10 hidden select-none font-anton text-7xl uppercase leading-[0.8] tracking-normal opacity-10 pointer-events-none sm:block md:text-9xl">
               Fire <br /> Flavor
             </h2>
 
-            <p className="max-w-xl text-xl font-light leading-relaxed text-white/50">
+            <p className="max-w-xl text-base font-light leading-relaxed text-white/50 sm:text-xl">
               Chicken House serves dine-in, takeaway, delivery, and special event bookings near Mitchell&apos;s Main Gate and Railways Phatak, Renala Khurd.
             </p>
           </div>
 
           <div className="grid grid-cols-1 gap-16 md:grid-cols-2 lg:col-span-6">
             <div>
-              <span className="mb-8 block font-mono text-[10px] uppercase tracking-[0.5em] text-accent">
+              <span className="mb-8 block font-mono text-[10px] uppercase tracking-normal text-accent">
                 Navigation
               </span>
               <ul className="space-y-6">
@@ -141,7 +141,7 @@ const Footer = () => {
                   <li key={link.name}>
                     <Link
                       to={link.href}
-                      className="group flex items-center gap-4 font-anton text-lg sm:text-2xl md:text-3xl uppercase transition-colors hover:text-accent"
+                    className="group flex items-center gap-4 font-anton text-xl uppercase tracking-normal transition-colors hover:text-accent sm:text-2xl md:text-3xl"
                     >
                       {link.name}
                       <ArrowUpRight
@@ -155,40 +155,40 @@ const Footer = () => {
             </div>
 
             <div>
-              <span className="mb-8 block font-mono text-[10px] uppercase tracking-[0.5em] text-accent">
+              <span className="mb-8 block font-mono text-[10px] uppercase tracking-normal text-accent">
                 Contact Us
               </span>
               <ul className="space-y-8">
                 <li className="flex items-start gap-6">
                   <MapPin size={24} className="shrink-0 text-accent" />
-                  <a href={siteConfig.googleMapsUrl} target="_blank" rel="noreferrer" className="text-lg font-light leading-relaxed text-white/60 hover:text-white">
+                  <a href={siteConfig.googleMapsUrl} target="_blank" rel="noreferrer" className="text-base font-light leading-relaxed text-white/60 hover:text-white sm:text-lg">
                     {siteConfig.addressLine1}, {siteConfig.addressLine2}
                   </a>
                 </li>
                 <li className="flex items-center gap-6">
                   <Phone size={24} className="shrink-0 text-accent" />
-                  <a href={`tel:${siteConfig.phone.replace(/\s+/g, "")}`} className="text-lg font-light text-white/60 hover:text-white">
+                  <a href={`tel:${siteConfig.phone.replace(/\s+/g, "")}`} className="text-base font-light text-white/60 hover:text-white sm:text-lg">
                     {siteConfig.phone}
                   </a>
                 </li>
                 {secondaryPhone ? (
                   <li className="flex items-center gap-6">
                     <Phone size={24} className="shrink-0 text-accent" />
-                    <a href={`tel:${secondaryPhone.replace(/\s+/g, "")}`} className="text-lg font-light text-white/60 hover:text-white">
+                    <a href={`tel:${secondaryPhone.replace(/\s+/g, "")}`} className="text-base font-light text-white/60 hover:text-white sm:text-lg">
                       {secondaryPhone}
                     </a>
                   </li>
                 ) : null}
                 <li className="flex items-center gap-6">
                   <Mail size={24} className="shrink-0 text-accent" />
-                  <a href={`mailto:${siteConfig.email}`} className="text-lg font-light text-white/60 hover:text-white">
+                  <a href={`mailto:${siteConfig.email}`} className="text-base font-light text-white/60 hover:text-white sm:text-lg">
                     {siteConfig.email}
                   </a>
                 </li>
               </ul>
 
               <div className="mt-12">
-                <span className="mb-5 block font-mono text-[10px] uppercase tracking-[0.5em] text-accent">
+                <span className="mb-5 block font-mono text-[10px] uppercase tracking-normal text-accent">
                   Opening Hours
                 </span>
                 <div className="space-y-3 text-lg font-light text-white/60">
@@ -198,7 +198,7 @@ const Footer = () => {
               </div>
 
               <div className="mt-12">
-                <span className="mb-6 block font-mono text-[10px] uppercase tracking-[0.5em] text-accent">
+                <span className="mb-6 block font-mono text-[10px] uppercase tracking-normal text-accent">
                   Connect
                 </span>
                 <div className="flex flex-wrap gap-8">
@@ -209,7 +209,7 @@ const Footer = () => {
                       target={social.href.startsWith("http") ? "_blank" : undefined}
                       rel={social.href.startsWith("http") ? "noreferrer" : undefined}
                       whileHover={{ y: -5, color: "var(--color-accent)" }}
-                      className="font-anton text-2xl uppercase text-white/40 transition-colors"
+                      className="font-anton text-xl uppercase tracking-normal text-white/40 transition-colors sm:text-2xl"
                     >
                       {social.label}
                     </motion.a>

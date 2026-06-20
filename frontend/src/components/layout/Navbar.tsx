@@ -57,8 +57,8 @@ const Navbar = () => {
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${
         isScrolled 
-          ? "py-4 px-4" 
-          : "py-8 px-8"
+          ? "px-3 py-3 sm:px-4 sm:py-4" 
+          : "px-3 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8"
       }`}
     >
       <div 
@@ -79,21 +79,21 @@ const Navbar = () => {
                   className="h-12 w-12 object-cover"
                 />
               </div>
-              <span className="hidden font-anton text-[1.7rem] uppercase tracking-tighter text-white drop-shadow-[0_0_7px_rgba(255,214,132,0.24)] sm:block lg:text-3xl">
+              <span className="hidden font-anton text-2xl uppercase tracking-normal text-white drop-shadow-[0_0_7px_rgba(255,214,132,0.24)] md:block lg:text-3xl">
                 Chicken House
               </span>
             </motion.div>
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden lg:flex items-center gap-9 xl:gap-11">
+          <div className="hidden xl:flex items-center gap-4 2xl:gap-6">
             {navLinks.map((link) => {
               const isActive = location.pathname === link.href;
               return (
                 <Link
                   key={link.name}
                   to={link.href}
-                  className={`font-mono text-[11px] font-bold uppercase tracking-[0.24em] transition-all duration-500 relative group px-4 py-2 rounded-full ${
+                  className={`font-mono text-[11px] font-bold uppercase tracking-normal transition-all duration-500 relative group px-3 py-2 rounded-full 2xl:px-4 ${
                     isActive 
                       ? "text-dark bg-accent shadow-[0_12px_30px_rgba(255,171,73,0.35)]" 
                       : "text-white/88 hover:text-white hover:bg-white/12"
@@ -109,7 +109,7 @@ const Navbar = () => {
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
             <Link to="/cart">
               <motion.button
                 whileHover={{ scale: 1.1, y: -2 }}
@@ -156,7 +156,7 @@ const Navbar = () => {
               </Link>
             )}
             <button
-              className="lg:hidden p-3 rounded-full border border-white/15 bg-white/8 text-white"
+              className="xl:hidden p-3 rounded-full border border-white/15 bg-white/8 text-white"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
               aria-expanded={isMobileMenuOpen}
@@ -174,14 +174,14 @@ const Navbar = () => {
             initial={{ opacity: 0, y: -20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            className="lg:hidden fixed inset-x-4 top-24 z-[70] overflow-hidden rounded-[3rem] border border-white/15 bg-[linear-gradient(180deg,rgba(18,12,8,0.96),rgba(73,28,14,0.93),rgba(145,62,20,0.88))] shadow-2xl backdrop-blur-2xl"
+            className="xl:hidden fixed inset-x-3 top-20 z-[70] overflow-hidden rounded-[2rem] border border-white/15 bg-[linear-gradient(180deg,rgba(18,12,8,0.96),rgba(73,28,14,0.93),rgba(145,62,20,0.88))] shadow-2xl backdrop-blur-2xl sm:inset-x-4 sm:top-24 sm:rounded-[3rem]"
           >
-            <div className="max-h-[calc(100vh-7rem)] overflow-y-auto p-10 space-y-8 sm:p-12">
+            <div className="max-h-[calc(100dvh-6rem)] overflow-y-auto p-6 space-y-5 sm:max-h-[calc(100dvh-7rem)] sm:p-10 sm:space-y-8">
               {navLinks.map((link) => (
                 <Link
                   key={link.name}
                   to={link.href}
-                  className="flex items-center gap-6 text-white/78 hover:text-accent font-anton text-4xl uppercase tracking-tighter transition-all"
+                  className="flex items-center gap-4 text-white/78 hover:text-accent font-anton text-3xl uppercase tracking-normal transition-all sm:gap-6 sm:text-4xl"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <span className="text-accent font-mono text-xs">{link.icon}</span>

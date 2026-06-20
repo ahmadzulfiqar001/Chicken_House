@@ -24,13 +24,89 @@
 }
 
 @layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    min-width: 0;
+  }
+
+  html {
+    overflow-x: hidden;
+    scroll-padding-top: 7rem;
+    text-size-adjust: 100%;
+  }
+
   body {
     @apply bg-paper text-ink-blue font-sans overflow-x-hidden;
+  }
+
+  #root {
+    min-height: 100dvh;
+    overflow-x: clip;
+  }
+
+  img,
+  video,
+  canvas {
+    max-width: 100%;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
   }
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-display;
+    overflow-wrap: anywhere;
   }
+
+  p,
+  a,
+  span,
+  label,
+  button,
+  input,
+  textarea,
+  select,
+  td,
+  th {
+    overflow-wrap: anywhere;
+  }
+}
+
+@layer components {
+  .responsive-table-shell {
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .overflow-x-auto {
+    max-width: 100%;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .overflow-x-auto > table {
+    min-width: max-content;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+[class*="tracking-"],
+.tracking-tight,
+.tracking-tighter {
+  letter-spacing: 0 !important;
 }
 
 /* Premium Animations */
@@ -336,6 +412,110 @@
 }
 
 @media (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  .rounded-\[3rem\],
+  .rounded-\[2\.8rem\],
+  .rounded-\[2\.5rem\],
+  .rounded-\[2\.2rem\],
+  .rounded-\[2rem\],
+  .rounded-3xl {
+    border-radius: 1.35rem !important;
+  }
+
+  .rounded-\[4rem_1\.2rem_4rem_1\.2rem\],
+  .rounded-\[5rem_1\.2rem_5rem_1\.2rem\],
+  .rounded-\[1\.2rem_4rem_1\.2rem_4rem\],
+  .rounded-\[3rem_1rem_1rem_1rem\],
+  .rounded-\[1rem_1rem_3rem_1rem\] {
+    border-radius: 1.35rem !important;
+  }
+
+  .p-16,
+  .p-14,
+  .p-12,
+  .p-10,
+  .p-8 {
+    padding: 1.25rem !important;
+  }
+
+  .px-12,
+  .px-10,
+  .px-8 {
+    padding-left: 1.25rem !important;
+    padding-right: 1.25rem !important;
+  }
+
+  .py-32,
+  .py-24,
+  .py-20 {
+    padding-top: 4rem !important;
+    padding-bottom: 4rem !important;
+  }
+
+  .pt-40,
+  .pt-36,
+  .pt-32,
+  .pt-28 {
+    padding-top: 7.5rem !important;
+  }
+
+  .pb-48,
+  .pb-44,
+  .pb-40,
+  .pb-32,
+  .pb-24 {
+    padding-bottom: 4rem !important;
+  }
+
+  .gap-16,
+  .gap-14,
+  .gap-12,
+  .gap-10,
+  .gap-8 {
+    gap: 1.25rem !important;
+  }
+
+  .h-\[35rem\],
+  .h-\[34rem\],
+  .h-\[32rem\],
+  .h-\[31rem\],
+  .h-\[28rem\],
+  .h-\[27rem\],
+  .h-\[26rem\],
+  .h-\[25rem\],
+  .h-\[24rem\] {
+    height: 18rem !important;
+  }
+
+  .min-h-\[28rem\],
+  .min-h-\[26rem\],
+  .min-h-\[24rem\],
+  .min-h-\[22rem\],
+  .min-h-\[20rem\] {
+    min-height: 18rem !important;
+  }
+
+  .space-y-10 > :not([hidden]) ~ :not([hidden]),
+  .space-y-8 > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-y-reverse: 0;
+    margin-top: calc(1.25rem * calc(1 - var(--tw-space-y-reverse))) !important;
+    margin-bottom: calc(1.25rem * var(--tw-space-y-reverse)) !important;
+  }
+
+  a,
+  button {
+    touch-action: manipulation;
+  }
+
+  .curve-stage-wrap {
+    overflow-x: hidden;
+  }
+
   .premium-curve-gallery {
     --curve-path: path("M38 245 C110 124 276 103 430 145 C586 188 640 262 580 330 C514 406 326 408 194 374 C96 349 76 438 196 486 C336 542 520 506 630 410");
   }
@@ -360,5 +540,35 @@
   .curve-guide {
     transform: scale(0.72);
     transform-origin: left center;
+  }
+}
+
+@media (max-width: 420px) {
+  .text-8xl,
+  .text-7xl {
+    font-size: 3.35rem !important;
+    line-height: 0.98 !important;
+  }
+
+  .text-6xl,
+  .text-5xl {
+    font-size: 2.65rem !important;
+    line-height: 1.05 !important;
+  }
+
+  .text-4xl {
+    font-size: 2.05rem !important;
+    line-height: 1.12 !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
   }
 }

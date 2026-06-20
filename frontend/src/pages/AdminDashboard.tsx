@@ -292,7 +292,7 @@ const AdminDashboard = () => {
 
       {/* Sidebar (off-canvas drawer on mobile, fixed rail on desktop) */}
       <aside
-        className={`fixed h-full w-[280px] z-50 bg-dark text-white flex flex-col transition-transform duration-300 ${
+        className={`fixed h-full w-[min(280px,86vw)] z-50 bg-dark text-white flex flex-col transition-transform duration-300 md:w-[280px] ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0`}
       >
@@ -345,7 +345,7 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <main className="min-w-0 flex-1 transition-all duration-300 md:ml-[280px]">
         {/* Top Header */}
-        <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 px-4 sm:px-8 py-4 flex justify-between items-center">
+        <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 flex items-center justify-between gap-3 px-4 py-4 sm:px-8">
           <div className="min-w-0 flex items-center gap-4">
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -357,7 +357,7 @@ const AdminDashboard = () => {
             <h1 className="truncate text-2xl font-bold text-dark capitalize">{activeTab}</h1>
           </div>
 
-          <div className="shrink-0 flex items-center gap-3 sm:gap-6">
+          <div className="shrink-0 flex items-center gap-2 sm:gap-4 lg:gap-6">
             <div className="relative hidden md:block">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
               <input
@@ -376,7 +376,7 @@ const AdminDashboard = () => {
               <Bell size={20} />
               <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full border-2 border-white" />
             </button>
-            <div className="flex items-center gap-3 pl-6 border-l border-gray-100">
+            <div className="flex items-center gap-3 border-l border-gray-100 pl-3 sm:pl-6">
               <div className="text-right hidden sm:block">
                 <span className="text-sm font-bold text-dark block leading-none mb-1">{user?.name ?? "Owner Admin"}</span>
                 <span className="text-xs text-muted">{panelMeta.authority}</span>
@@ -397,10 +397,10 @@ const AdminDashboard = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="space-y-8"
+                className="min-w-0 space-y-8"
               >
                 {/* Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
                   {stats.map((stat, index) => (
                     <motion.div
                       key={index}
@@ -431,13 +431,13 @@ const AdminDashboard = () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   {/* Recent Orders */}
-                  <div className="lg:col-span-2 bg-white rounded-[3rem] p-8 shadow-xl shadow-dark/5 border border-gray-50">
-                    <div className="flex justify-between items-center mb-8">
+                  <div className="lg:col-span-2 bg-white rounded-[3rem] p-5 shadow-xl shadow-dark/5 border border-gray-50 sm:p-8">
+                    <div className="mb-8 flex items-center justify-between gap-4">
                       <h2 className="text-xl font-bold text-dark">Recent Orders</h2>
                       <button onClick={() => setActiveTab("orders")} className="text-primary font-bold text-sm hover:underline">View All</button>
                     </div>
                     <div className="overflow-x-auto">
-                      <table className="w-full">
+                      <table className="w-full min-w-[720px]">
                         <thead>
                           <tr className="text-left border-b border-gray-100">
                             <th className="pb-4 text-muted text-xs font-bold uppercase tracking-widest">Order ID</th>
@@ -487,7 +487,7 @@ const AdminDashboard = () => {
 
                   {/* Quick Actions */}
                   <div className="space-y-8">
-                    <div className="bg-white rounded-[3rem] p-8 shadow-xl shadow-dark/5 border border-gray-50">
+                    <div className="bg-white rounded-[3rem] p-5 shadow-xl shadow-dark/5 border border-gray-50 sm:p-8">
                       <h2 className="text-xl font-bold text-dark mb-8">Quick Actions</h2>
                       <div className="grid grid-cols-2 gap-4">
                         {quickActions.map((action) => (
@@ -504,7 +504,7 @@ const AdminDashboard = () => {
                     </div>
 
                     {/* Inventory Alert */}
-                    <div className="bg-primary rounded-[3rem] p-8 shadow-xl shadow-primary/20 text-white relative overflow-hidden">
+                    <div className="bg-primary rounded-[3rem] p-5 shadow-xl shadow-primary/20 text-white relative overflow-hidden sm:p-8">
                       <div className="relative z-10">
                         {spotlightCard.icon}
                         <h3 className="text-xl font-bold mb-2">{spotlightCard.title}</h3>
@@ -536,6 +536,7 @@ const AdminDashboard = () => {
                 key="inventory"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
+                className="min-w-0"
               >
                 <InventoryManagement
                   focusItemId={notificationTarget?.tab === "inventory" ? notificationTarget.id : undefined}
@@ -548,6 +549,7 @@ const AdminDashboard = () => {
                 key="hr"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
+                className="min-w-0"
               >
                 <HRManagement />
               </motion.div>
@@ -558,6 +560,7 @@ const AdminDashboard = () => {
                 key="users"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
+                className="min-w-0"
               >
                 <UserManagement />
               </motion.div>
@@ -568,6 +571,7 @@ const AdminDashboard = () => {
                 key="orders"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
+                className="min-w-0"
               >
                 <OrderManagement
                   focusOrderId={notificationTarget?.tab === "orders" ? notificationTarget.id : undefined}
@@ -580,6 +584,7 @@ const AdminDashboard = () => {
                 key="bookings"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
+                className="min-w-0"
               >
                 <BookingManagement
                   focusBookingId={notificationTarget?.tab === "bookings" ? notificationTarget.id : undefined}
@@ -592,6 +597,7 @@ const AdminDashboard = () => {
                 key="ecommerce"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
+                className="min-w-0"
               >
                 <EcommerceModule />
               </motion.div>
@@ -602,6 +608,7 @@ const AdminDashboard = () => {
                 key="branches"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
+                className="min-w-0"
               >
                 <BranchesModule />
               </motion.div>
@@ -612,6 +619,7 @@ const AdminDashboard = () => {
                 key="promotions"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
+                className="min-w-0"
               >
                 <PromotionManagement />
               </motion.div>
@@ -622,6 +630,7 @@ const AdminDashboard = () => {
                 key="analytics"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
+                className="min-w-0"
               >
                 <AnalyticsOverview />
               </motion.div>
@@ -632,6 +641,7 @@ const AdminDashboard = () => {
                 key="chatbot"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
+                className="min-w-0"
               >
                 <ChatbotInboxModule />
               </motion.div>
@@ -642,6 +652,7 @@ const AdminDashboard = () => {
                 key="settings"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
+                className="min-w-0"
               >
                 <SettingsModule />
               </motion.div>
@@ -652,6 +663,7 @@ const AdminDashboard = () => {
                 key="menu"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
+                className="min-w-0"
               >
                 <MenuManagement />
               </motion.div>
@@ -662,6 +674,7 @@ const AdminDashboard = () => {
                 key="ai"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
+                className="min-w-0"
               >
                 <DemandForecasting />
               </motion.div>
@@ -672,6 +685,7 @@ const AdminDashboard = () => {
                 key="riders"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
+                className="min-w-0"
               >
                 <RiderModule />
               </motion.div>
@@ -682,6 +696,7 @@ const AdminDashboard = () => {
                 key="support"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
+                className="min-w-0"
               >
                 <SupportModule
                   focusTicketId={notificationTarget?.tab === "support" ? notificationTarget.id : undefined}
@@ -694,6 +709,7 @@ const AdminDashboard = () => {
                 key="security"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
+                className="min-w-0"
               >
                 <SecurityModule />
               </motion.div>
@@ -704,6 +720,7 @@ const AdminDashboard = () => {
                 key="notifications"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
+                className="min-w-0"
               >
                 <NotificationModule onOpenRelated={openNotificationTarget} />
               </motion.div>
@@ -714,6 +731,7 @@ const AdminDashboard = () => {
                 key="careers"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
+                className="min-w-0"
               >
                 <CareersModule
                   focusApplicationId={notificationTarget?.tab === "careers" ? notificationTarget.id : undefined}

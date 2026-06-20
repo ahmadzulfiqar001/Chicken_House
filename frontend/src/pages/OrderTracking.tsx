@@ -126,9 +126,9 @@ const OrderTrackingPage = () => {
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6 text-5xl font-display font-bold text-white md:text-7xl"
+            className="mb-6 text-3xl font-display font-bold text-white sm:text-5xl md:text-7xl"
           >
-            Track Your <span className="text-accent italic">Order</span>
+            Track Your <span className="block text-accent italic sm:inline">Order</span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -210,22 +210,22 @@ const OrderTrackingPage = () => {
                 )}
 
                 <div className="space-y-8 lg:col-span-2">
-                  <div className="rounded-[3rem] border border-gray-50 bg-white p-10 shadow-xl shadow-dark/5">
+                  <div className="rounded-[3rem] border border-gray-50 bg-white p-6 shadow-xl shadow-dark/5 sm:p-10">
                     <h2 className="mb-10 flex items-center gap-3 text-2xl font-bold text-dark">
                       <Clock className="text-primary" />
                       Order Status
                     </h2>
 
-                    <div className="relative space-y-12">
+                    <div className="relative space-y-8 sm:space-y-12">
                       <div className="absolute bottom-2 left-6 top-2 w-1 bg-surface-strong" />
 
                       {orderData.timeline.map((step) => (
-                        <div key={step.status} className="relative z-10 flex items-start gap-8">
+                        <div key={step.status} className="relative z-10 flex items-start gap-4 sm:gap-8">
                           <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl transition-all duration-500 ${step.active ? "scale-110 bg-primary text-white shadow-xl shadow-primary/30" : step.completed ? "bg-primary/20 text-primary" : "bg-surface-strong text-muted"}`}>
                             {getStatusIcon(step.status)}
                           </div>
                           <div className="flex-1 pt-2">
-                            <div className="mb-1 flex items-center justify-between">
+                            <div className="mb-1 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                               <h3 className={`text-xl font-bold ${step.active ? "text-primary" : "text-dark"}`}>
                                 {step.status}
                               </h3>
@@ -242,12 +242,12 @@ const OrderTrackingPage = () => {
                     </div>
                   </div>
 
-                  <div className="rounded-[3rem] border border-gray-50 bg-white p-10 shadow-xl shadow-dark/5">
+                  <div className="rounded-[3rem] border border-gray-50 bg-white p-6 shadow-xl shadow-dark/5 sm:p-10">
                     <h2 className="mb-8 flex items-center gap-3 text-2xl font-bold text-dark">
                       <Truck className="text-primary" />
                       Delivery Details
                     </h2>
-                    <div className="flex items-start gap-6">
+                    <div className="flex items-start gap-4 sm:gap-6">
                       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-accent/10 text-accent">
                         <MapPin size={24} />
                       </div>
@@ -256,7 +256,7 @@ const OrderTrackingPage = () => {
                         <p className="text-lg text-muted">{orderData.deliveryAddress || siteConfig.city}</p>
                       </div>
                     </div>
-                    <div className="mt-10 flex items-center justify-between rounded-3xl bg-surface-strong p-6">
+                    <div className="mt-10 flex flex-col gap-5 rounded-3xl bg-surface-strong p-5 sm:p-6 md:flex-row md:items-center md:justify-between">
                       <div className="flex items-center gap-4">
                         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-primary">
                           <Clock size={24} />
@@ -266,7 +266,7 @@ const OrderTrackingPage = () => {
                           <span className="text-2xl font-display font-bold text-dark">{orderData.estimatedArrival}</span>
                         </div>
                       </div>
-                      <a href={`tel:${siteConfig.phone.replace(/\s+/g, "")}`} className="rounded-xl bg-primary px-8 py-3 font-bold text-white transition-colors hover:bg-primary-strong">
+                      <a href={`tel:${siteConfig.phone.replace(/\s+/g, "")}`} className="inline-flex justify-center rounded-xl bg-primary px-8 py-3 font-bold text-white transition-colors hover:bg-primary-strong">
                         Call Restaurant
                       </a>
                     </div>
@@ -274,34 +274,34 @@ const OrderTrackingPage = () => {
                 </div>
 
                 <div className="space-y-8">
-                  <div className="sticky top-32 rounded-[3rem] border border-gray-50 bg-white p-10 shadow-xl shadow-dark/5">
+                  <div className="sticky top-28 rounded-[3rem] border border-gray-50 bg-white p-6 shadow-xl shadow-dark/5 sm:p-10 lg:top-32">
                     <h2 className="mb-4 text-2xl font-bold text-dark">Order Summary</h2>
                     <p className="mb-8 text-sm font-bold uppercase tracking-[0.24em] text-primary">{orderData.id}</p>
                     <div className="mb-8 space-y-4">
                       {(orderData.details?.length ? orderData.details : orderData.items.split(",").map((item) => ({ name: item.trim(), quantity: 1, price: 0 }))).map((item) => (
-                        <div key={`${item.name}-${item.quantity}`} className="flex items-center justify-between gap-3">
-                          <div className="flex items-center gap-3">
+                        <div key={`${item.name}-${item.quantity}`} className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                          <div className="flex min-w-0 items-center gap-3">
                             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface-strong text-sm font-bold text-dark">
                               {item.quantity}x
                             </span>
                             <span className="font-medium text-muted">{item.name}</span>
                           </div>
-                          <span className="font-bold text-dark">{item.price ? `Rs. ${item.price}` : ""}</span>
+                          <span className="shrink-0 font-bold text-dark sm:text-right">{item.price ? `Rs. ${item.price}` : ""}</span>
                         </div>
                       ))}
                     </div>
                     <div className="space-y-4 border-t border-gray-100 pt-8">
-                      <div className="flex justify-between text-muted">
+                      <div className="flex flex-wrap justify-between gap-2 text-muted">
                         <span>Subtotal</span>
                         <span>
                           Rs. {Math.max(orderData.total - orderData.deliveryFee, 0).toLocaleString()}
                         </span>
                       </div>
-                      <div className="flex justify-between text-muted">
+                      <div className="flex flex-wrap justify-between gap-2 text-muted">
                         <span>Delivery Fee</span>
                         <span>Rs. {orderData.deliveryFee.toLocaleString()}</span>
                       </div>
-                      <div className="flex items-center justify-between pt-4">
+                      <div className="flex flex-wrap items-center justify-between gap-2 pt-4">
                         <span className="text-xl font-bold text-dark">Total</span>
                         <span className="text-3xl font-display font-bold text-primary">
                           Rs. {orderData.total.toLocaleString()}
@@ -315,7 +315,7 @@ const OrderTrackingPage = () => {
                 </div>
 
                 {orderData.status === "Delivered" && (
-                  <div className="rounded-[3rem] border border-gray-50 bg-white p-10 shadow-xl shadow-dark/5 lg:col-span-3">
+                  <div className="rounded-[3rem] border border-gray-50 bg-white p-6 shadow-xl shadow-dark/5 sm:p-10 lg:col-span-3">
                     <h2 className="mb-2 flex items-center gap-3 text-2xl font-bold text-dark">
                       <Star className="text-accent" /> Rate your order
                     </h2>
