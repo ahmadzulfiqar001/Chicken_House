@@ -193,18 +193,8 @@ const SignupPage = () => {
         <div className="relative hidden overflow-hidden bg-dark p-10 text-white lg:flex lg:flex-col lg:justify-between">
           <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(140deg,rgba(216,168,47,0.14),transparent_36%),linear-gradient(180deg,transparent,rgba(127,18,21,0.16))]" />
 
-          <Link to="/" className="relative z-10 flex items-center gap-4">
-            <img
-              src="/logo.jpg"
-              alt="Chicken House"
-              className="h-14 w-14 rounded-lg object-cover"
-            />
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.24em] text-orange-300">
-                Chicken House
-              </p>
-              <p className="mt-1 font-display text-2xl font-bold">Customer Access</p>
-            </div>
+          <Link to="/" className="relative z-10 w-fit font-display text-2xl font-bold">
+            Access Portal
           </Link>
 
           <div className="relative z-10 flex flex-1 items-center justify-center py-10">
@@ -218,15 +208,9 @@ const SignupPage = () => {
           </div>
 
           <div className="relative z-10">
-            <p className="text-xs font-bold uppercase tracking-[0.28em] text-white/45">
-              Chicken House
-            </p>
             <h2 className="mt-4 text-4xl font-display font-bold leading-tight">
-              Create your customer profile.
+              Secure account login.
             </h2>
-            <p className="mt-4 text-sm leading-7 text-white/62">
-              Save your delivery details, track orders, manage favorites, and keep your Chicken House rewards in one place.
-            </p>
           </div>
         </div>
       </motion.section>

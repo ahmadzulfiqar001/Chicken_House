@@ -81,63 +81,27 @@ const LoginPage = () => {
         animate={{ opacity: 1, y: 0 }}
         className="relative z-10 grid w-full max-w-5xl overflow-hidden rounded-lg border border-black/10 bg-white shadow-[0_28px_90px_rgba(20,10,6,0.24)] lg:grid-cols-[0.92fr_1.08fr]"
       >
-        <div className="relative hidden overflow-hidden bg-dark p-10 text-white lg:flex lg:min-h-[34rem] lg:flex-col">
+        <div className="relative hidden overflow-hidden bg-dark p-10 text-white lg:flex lg:min-h-[34rem] lg:flex-col lg:justify-between">
           <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(140deg,rgba(216,168,47,0.16),transparent_34%),linear-gradient(22deg,rgba(255,255,255,0.08),transparent_48%),linear-gradient(180deg,transparent,rgba(127,18,21,0.16))]" />
           <div aria-hidden="true" className="absolute right-0 top-0 h-full w-20 bg-gradient-to-b from-accent/10 via-white/5 to-transparent" />
-          <Link to="/" className="relative z-10 flex items-center gap-4">
-            <img
-              src="/logo.jpg"
-              alt="Chicken House"
-              className="h-14 w-14 rounded-lg object-cover"
-            />
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.24em] text-orange-300">
-                Chicken House
-              </p>
-              <p className="mt-1 font-display text-2xl font-bold">Access Portal</p>
-            </div>
+          <Link to="/" className="relative z-10 w-fit font-display text-2xl font-bold">
+            Access Portal
           </Link>
 
-          <div className="relative z-10 flex flex-1 flex-col justify-center py-10">
-            <div className="max-w-sm">
-              <div className="flex items-center gap-5 border-y border-white/10 py-6">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.28em] text-orange-300">
-                    A Symbol Of
-                  </p>
-                  <p className="mt-2 font-display text-3xl font-bold leading-tight">
-                    Quality & Freshness
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-8 grid grid-cols-2 gap-4">
-                <div className="border-l border-accent/60 pl-4">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-white/42">
-                    Location
-                  </p>
-                  <p className="mt-2 text-sm font-bold text-white/85">Renala Khurd</p>
-                </div>
-                <div className="border-l border-accent/60 pl-4">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-white/42">
-                    Brand
-                  </p>
-                  <p className="mt-2 text-sm font-bold text-white/85">Chicken House</p>
-                </div>
-              </div>
+          <div className="relative z-10 flex flex-1 items-center justify-center py-10">
+            <div className="w-full max-w-xs rounded-2xl border border-accent/35 bg-white/[0.07] p-3 shadow-[0_26px_70px_rgba(0,0,0,0.34)]">
+              <img
+                src="/logo.jpg"
+                alt="Chicken House logo"
+                className="aspect-[4/3] w-full rounded-xl object-cover"
+              />
             </div>
           </div>
 
           <div className="relative z-10">
-            <p className="text-xs font-bold uppercase tracking-[0.28em] text-white/45">
-              Authorized access
-            </p>
             <h1 className="mt-4 max-w-sm text-4xl font-display font-bold leading-tight">
               Secure account login.
             </h1>
-            <p className="mt-4 max-w-sm text-sm leading-7 text-white/62">
-              Sign in with the login details assigned to your account.
-            </p>
           </div>
         </div>
 
