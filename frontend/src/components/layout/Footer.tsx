@@ -45,29 +45,37 @@ const Footer = () => {
       detail: "Open daily with dine-in, takeaway, delivery, and WhatsApp support.",
     },
   ];
+  const tickerItems = [
+    "Chicken House",
+    "Live Kitchen",
+    "Signature Platters",
+    "Premium Dining",
+    "Family Nights",
+    "Fresh Karahi",
+    "Fast Delivery",
+  ];
 
   return (
     <footer className="relative overflow-hidden border-t border-white/10 bg-[#120a07] pb-10 pt-20 text-white">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,170,73,0.22),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(210,74,21,0.18),transparent_28%)]" />
 
-      <motion.div
-        animate={{ x: ["0%", "-50%"] }}
-        transition={{ duration: 26, repeat: Infinity, ease: "linear" }}
-        className="absolute left-0 right-0 top-0 border-y border-white/10 bg-white/[0.03] py-3"
-      >
-        <div className="flex w-[200%] gap-10 whitespace-nowrap font-anton text-xl uppercase tracking-normal text-white/20 sm:text-2xl">
-          <span>Chicken House</span>
-          <span>Live Kitchen</span>
-          <span>Signature Platters</span>
-          <span>Premium Dining</span>
-          <span>Family Nights</span>
-          <span>Chicken House</span>
-          <span>Live Kitchen</span>
-          <span>Signature Platters</span>
-          <span>Premium Dining</span>
-          <span>Family Nights</span>
+      <div className="absolute left-0 right-0 top-0 overflow-hidden border-y border-white/10 bg-white/[0.03] py-3">
+        <div className="marquee-track font-anton text-xl uppercase tracking-normal text-white/20 sm:text-2xl">
+          {[0, 1].map((groupIndex) => (
+            <div
+              key={groupIndex}
+              className="marquee-group"
+              aria-hidden={groupIndex === 1}
+            >
+              {tickerItems.map((item) => (
+                <span className="marquee-item" key={`${groupIndex}-${item}`}>
+                  {item}
+                </span>
+              ))}
+            </div>
+          ))}
         </div>
-      </motion.div>
+      </div>
 
       <div className="relative z-10 mx-auto max-w-[1800px] px-4 sm:px-6 lg:px-12">
         <div className="mb-10 mt-6 rounded-3xl border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,170,73,0.08),rgba(255,255,255,0.02))] p-4 shadow-[0_22px_60px_rgba(0,0,0,0.28)] backdrop-blur-xl sm:p-5 lg:p-6">

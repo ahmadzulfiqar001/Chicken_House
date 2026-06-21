@@ -43,6 +43,21 @@ const stats = [
   { label: "Brand Energy", value: "Premium", icon: Star },
 ];
 
+const servicesTickerItems = [
+  "Live Cooking",
+  "Fast Takeaway",
+  "Delivery Support",
+  "Family Seating",
+  "Event Hosting",
+  "Booking Help",
+  "Order Tracking",
+  "Fresh Packing",
+  "Local Dining",
+  "WhatsApp Support",
+  "Table Booking",
+  "Family Events",
+];
+
 const coreServices = [
   { title: "Online Food Ordering", text: "Direct browsing, food discovery, and order intent in one smooth flow.", icon: ShoppingBag },
   { title: "Table Reservation", text: "Pre-booked tables for family dinners, occasions, and planned visits.", icon: CalendarDays },
@@ -154,11 +169,21 @@ const ServicesPage = () => {
       </section>
 
       <section className="overflow-hidden border-y border-white/6 py-5">
-        <motion.div animate={{ x: ["0%", "-50%"] }} transition={{ duration: 26, repeat: Infinity, ease: "linear" }} className="flex min-w-max gap-12 whitespace-nowrap text-xs font-bold uppercase tracking-[0.48em] text-white/25">
-          {Array.from({ length: 12 }).map((_, index) => (
-            <span key={index}>Live Cooking • Fast Takeaway • Delivery Support • Family Seating • Event Hosting</span>
+        <div className="marquee-track text-xs font-bold uppercase tracking-normal text-white/25">
+          {[0, 1].map((groupIndex) => (
+            <div
+              key={groupIndex}
+              className="marquee-group"
+              aria-hidden={groupIndex === 1}
+            >
+              {servicesTickerItems.map((item) => (
+                <span className="marquee-item" key={`${groupIndex}-${item}`}>
+                  {item}
+                </span>
+              ))}
+            </div>
           ))}
-        </motion.div>
+        </div>
       </section>
 
       <section className="py-24">

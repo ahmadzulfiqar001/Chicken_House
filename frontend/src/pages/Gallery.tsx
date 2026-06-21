@@ -62,6 +62,21 @@ const pinterestChickenCornSoup = new URL("../../assets/source-images/Soups/Chick
 const pinterestSpecialSoup = new URL("../../assets/source-images/Soups/Chicken Special Soup.jpg", import.meta.url).href;
 const pinterestHotSourSoup = new URL("../../assets/source-images/Soups/Hot & Sour Soup.jpg", import.meta.url).href;
 
+const galleryTickerItems = [
+  "Live Kitchen",
+  "Food Aesthetics",
+  "Family Moments",
+  "Event Nights",
+  "Signature Dishes",
+  "Dining Spaces",
+  "Outdoor Seating",
+  "Kitchen Craft",
+  "Fresh Counter",
+  "Celebration Moments",
+  "BBQ Section",
+  "Play Area",
+];
+
 const heroOrbitImages = [
   {
     title: "Front House",
@@ -390,16 +405,22 @@ const GalleryPage = () => {
     <div className="min-h-screen overflow-hidden bg-[#0b0403] text-white">
       <CurveMotionGallerySection />
 
-      <section className="border-y border-[#d8a82f]/10 bg-[#060302] py-4">
-        <motion.div
-          animate={{ x: ["0%", "-50%"] }}
-          transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
-          className="flex min-w-max gap-12 whitespace-nowrap text-xs font-bold uppercase tracking-[0.42em] text-[#d8a82f]/36"
-        >
-          {Array.from({ length: 12 }).map((_, index) => (
-            <span key={index}>Live Kitchen / Food Aesthetics / Family Moments / Event Nights / Signature Dishes</span>
+      <section className="overflow-hidden border-y border-[#d8a82f]/10 bg-[#060302] py-4">
+        <div className="marquee-track text-xs font-bold uppercase tracking-normal text-[#d8a82f]/36">
+          {[0, 1].map((groupIndex) => (
+            <div
+              key={groupIndex}
+              className="marquee-group"
+              aria-hidden={groupIndex === 1}
+            >
+              {galleryTickerItems.map((item) => (
+                <span className="marquee-item" key={`${groupIndex}-${item}`}>
+                  {item}
+                </span>
+              ))}
+            </div>
           ))}
-        </motion.div>
+        </div>
       </section>
 
       <RealCafeShowcase />

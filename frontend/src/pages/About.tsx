@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import {
   ArrowUpRight,
@@ -196,6 +196,10 @@ const marqueeWords = [
   "Since 2003",
   "Clean Preparation",
   "Word of Mouth",
+  "Fresh Karahi",
+  "Family Seating",
+  "Delivery",
+  "Event Meals",
 ];
 
 const spiceDoodles = [
@@ -272,8 +276,6 @@ const AboutPage = () => {
       window.clearInterval(badgeTimer);
     };
   }, []);
-
-  const rollingWords = useMemo(() => [...marqueeWords, ...marqueeWords], []);
 
   return (
     <div className="min-h-screen max-w-[100vw] overflow-x-hidden bg-paper pt-28">
@@ -1093,20 +1095,21 @@ const AboutPage = () => {
         </div>
       </section>
 
-      <section className="border-y border-accent/20 bg-dark py-4">
-        <div className="overflow-hidden">
-          <motion.div
-            animate={{ x: ["0%", "-50%"] }}
-            transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
-            className="flex w-max gap-8 whitespace-nowrap px-4 text-sm font-bold uppercase tracking-[0.24em] text-white/68"
-          >
-            {rollingWords.map((word, index) => (
-              <span key={`${word}-${index}`} className="inline-flex items-center gap-8">
-                {word}
-                <span className="text-accent">/</span>
-              </span>
-            ))}
-          </motion.div>
+      <section className="overflow-hidden border-y border-accent/20 bg-dark py-4">
+        <div className="marquee-track text-sm font-bold uppercase tracking-normal text-white/68">
+          {[0, 1].map((groupIndex) => (
+            <div
+              key={groupIndex}
+              className="marquee-group"
+              aria-hidden={groupIndex === 1}
+            >
+              {marqueeWords.map((word) => (
+                <span className="marquee-item" key={`${groupIndex}-${word}`}>
+                  {word}
+                </span>
+              ))}
+            </div>
+          ))}
         </div>
       </section>
 
