@@ -5,6 +5,7 @@ import {
   ArrowRight,
   CheckCircle2,
   CreditCard,
+  Mail,
   MapPin,
   Phone,
   ReceiptText,
@@ -254,7 +255,7 @@ const CheckoutPage = () => {
 
   if (!cartItems.length && !confirmation) {
     return (
-      <div className="min-h-screen bg-paper pt-32">
+      <div className="min-h-screen bg-paper pt-36 sm:pt-32">
         <PageMeta
           title="Checkout | Chicken House"
           description="Secure checkout for Chicken House delivery and takeaway orders."
@@ -278,7 +279,7 @@ const CheckoutPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-paper pt-32">
+    <div className="min-h-screen bg-paper pt-36 sm:pt-32">
       <PageMeta
         title="Checkout | Chicken House"
         description="Secure checkout for Chicken House delivery and takeaway orders."
@@ -482,11 +483,11 @@ const CheckoutPage = () => {
                     <div className="space-y-2">
                       <label className="text-xs font-bold uppercase tracking-[0.24em] text-muted">Full Name</label>
                       <div className="relative">
-                        <User className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={18} />
+                        <User className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={18} />
                         <input
                           value={formData.name}
                           onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-                          className="w-full rounded-2xl bg-surface px-12 py-4 outline-none"
+                          className="w-full rounded-2xl bg-surface py-4 pl-12 pr-5 outline-none"
                           placeholder="Your full name"
                           autoComplete="name"
                         />
@@ -499,12 +500,12 @@ const CheckoutPage = () => {
                     <div className="space-y-2">
                       <label className="text-xs font-bold uppercase tracking-[0.24em] text-muted">Email Address</label>
                       <div className="relative">
-                        <User className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={18} />
+                        <Mail className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={18} />
                         <input
                           type="email"
                           value={formData.email}
                           onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
-                          className="w-full rounded-2xl bg-surface px-12 py-4 outline-none"
+                          className="w-full rounded-2xl bg-surface py-4 pl-12 pr-5 outline-none"
                           placeholder={siteConfig.email}
                           autoComplete="email"
                         />
@@ -517,13 +518,13 @@ const CheckoutPage = () => {
                     <div className="space-y-2 md:col-span-2">
                       <label className="text-xs font-bold uppercase tracking-[0.24em] text-muted">Phone Number</label>
                       <div className="relative">
-                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={18} />
+                        <Phone className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={18} />
                         <input
                           value={formData.phone}
                           onChange={(e) =>
                             setFormData((prev) => ({ ...prev, phone: normalizePhone(e.target.value) }))
                           }
-                          className="w-full rounded-2xl bg-surface px-12 py-4 outline-none"
+                          className="w-full rounded-2xl bg-surface py-4 pl-12 pr-5 outline-none"
                           placeholder={siteConfig.phone}
                           autoComplete="tel"
                           inputMode="tel"
@@ -641,13 +642,13 @@ const CheckoutPage = () => {
                     <div className="space-y-2 md:col-span-2">
                       <label className="text-xs font-bold uppercase tracking-[0.24em] text-muted">Address</label>
                       <div className="relative">
-                        <MapPin className="absolute left-4 top-6 text-muted" size={18} />
+                        <MapPin className="pointer-events-none absolute left-4 top-6 text-muted" size={18} />
                         <textarea
                           value={formData.address}
                           onChange={(e) => setFormData((prev) => ({ ...prev, address: e.target.value }))}
                           rows={3}
                           disabled={formData.type === "Takeaway"}
-                          className="w-full resize-none rounded-2xl bg-surface px-12 py-4 outline-none disabled:opacity-60"
+                          className="w-full resize-none rounded-2xl bg-surface py-4 pl-12 pr-5 outline-none disabled:opacity-60"
                           placeholder={
                             formData.type === "Takeaway"
                               ? "Pickup orders do not require a delivery address"
