@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "motion/react";
-import { Send, Mail } from "lucide-react";
+import { Send, Mail, UserMinus } from "lucide-react";
 
 const NewsletterSection = () => {
   const [email, setEmail] = useState("");
@@ -41,6 +41,38 @@ const NewsletterSection = () => {
     }
   };
 
+  const handleUnsubscribe = async () => {
+    setSuccess("");
+    setError("");
+
+    if (!email.trim()) {
+      setError("Enter your email address first, then tap Remove my email.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch("/api/newsletter/unsubscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message ?? "Unsubscribe failed. Please try again.");
+      }
+
+      setSuccess(data.message ?? "You've been unsubscribed.");
+      setEmail("");
+    } catch (unsubscribeError) {
+      setError(unsubscribeError instanceof Error ? unsubscribeError.message : "Unsubscribe failed. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <section className="py-24 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -56,7 +88,7 @@ const NewsletterSection = () => {
           <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/20 rounded-full blur-[120px]" />
           <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-accent/20 rounded-full blur-[120px]" />
 
-          <div className="relative z-10 max-w-3xl mx-auto">
+          <div className="relative z-10 mx-auto max-w-5xl">
             <div className="w-20 h-20 bg-white/10 backdrop-blur-md rounded-3xl flex items-center justify-center mx-auto mb-12 text-accent">
               <Mail size={40} />
             </div>
@@ -65,7 +97,7 @@ const NewsletterSection = () => {
             <h2 className="text-5xl md:text-7xl font-display font-bold text-white mb-8 tracking-tighter">
               Join Our <span className="text-primary italic">Flavor</span> Circle.
             </h2>
-            <p className="text-white/60 text-xl font-light mb-12 leading-relaxed">
+            <p className="mx-auto mb-10 max-w-[62rem] whitespace-normal text-[clamp(0.95rem,1.55vw,1.25rem)] font-light leading-relaxed text-white/65 lg:mb-12 lg:whitespace-nowrap">
               Be the first to know about our new dishes, special events, and exclusive offers in Renala Khurd.
             </p>
 
@@ -93,15 +125,26 @@ const NewsletterSection = () => {
             </form>
 
             {success && (
-              <p className="mt-6 text-accent text-base font-medium">{success}</p>
+              <p className="mt-6 text-base font-semibold text-accent" aria-live="polite">{success}</p>
             )}
             {error && (
-              <p className="mt-6 text-primary text-base font-medium">{error}</p>
+              <p className="mt-6 text-base font-semibold text-red-300" aria-live="polite">{error}</p>
             )}
 
-            <p className="mt-8 text-white/30 text-sm font-light">
-              We respect your privacy. Unsubscribe at any time.
-            </p>
+            <div className="mx-auto mt-8 flex max-w-2xl flex-col items-center justify-center gap-3 text-white/65 sm:flex-row sm:flex-wrap">
+              <p className="text-base font-medium sm:text-lg">
+                We respect your privacy. Use the same email to unsubscribe anytime.
+              </p>
+              <button
+                type="button"
+                onClick={handleUnsubscribe}
+                disabled={isSubmitting}
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 px-5 py-2.5 text-sm font-bold text-accent transition hover:border-accent/60 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Remove my email
+                <UserMinus size={16} />
+              </button>
+            </div>
           </div>
         </motion.div>
       </div>

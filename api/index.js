@@ -1944,7 +1944,9 @@ var newsletterSubscriberSchema = new Schema(
     name: { type: String, default: "" },
     source: { type: String, default: "website" },
     status: { type: String, enum: ["Subscribed", "Unsubscribed"], default: "Subscribed", index: true },
-    createdAt: { type: String, default: () => (/* @__PURE__ */ new Date()).toISOString(), index: true }
+    createdAt: { type: String, default: () => (/* @__PURE__ */ new Date()).toISOString(), index: true },
+    updatedAt: { type: String, default: () => (/* @__PURE__ */ new Date()).toISOString(), index: true },
+    unsubscribedAt: { type: String, default: "" }
   },
   { versionKey: false }
 );
@@ -9183,6 +9185,17 @@ router27.post("/", async (req, res) => {
   }
   const existing = await findOne("newsletterSubscribers", { email });
   if (existing) {
+    if (String(existing.status ?? "").toLowerCase() === "unsubscribed") {
+      const patch = {
+        status: "Subscribed",
+        source: String(req.body?.source ?? existing.source ?? "website").trim() || "website",
+        name: name || String(existing.name ?? ""),
+        unsubscribedAt: "",
+        updatedAt: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      await updateDoc("newsletterSubscribers", { email }, patch);
+      return res.status(200).json({ message: "You're subscribed again.", subscriber: { ...existing, ...patch } });
+    }
     return res.status(200).json({ message: "You're already subscribed.", subscriber: existing });
   }
   const record = {
@@ -9191,10 +9204,32 @@ router27.post("/", async (req, res) => {
     name,
     source: String(req.body?.source ?? "website").trim() || "website",
     status: "Subscribed",
-    createdAt: (/* @__PURE__ */ new Date()).toISOString()
+    createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+    updatedAt: (/* @__PURE__ */ new Date()).toISOString(),
+    unsubscribedAt: ""
   };
   await insertDoc("newsletterSubscribers", record);
   return res.status(201).json({ message: "Subscribed successfully.", subscriber: record });
+});
+router27.post("/unsubscribe", async (req, res) => {
+  const email = String(req.body?.email ?? "").trim().toLowerCase();
+  if (!EMAIL_RE.test(email)) {
+    return res.status(400).json({ message: "Please enter a valid email address." });
+  }
+  const existing = await findOne("newsletterSubscribers", { email });
+  if (!existing) {
+    return res.status(404).json({ message: "This email is not subscribed." });
+  }
+  if (String(existing.status ?? "").toLowerCase() === "unsubscribed") {
+    return res.status(200).json({ message: "This email is already unsubscribed.", subscriber: existing });
+  }
+  const patch = {
+    status: "Unsubscribed",
+    unsubscribedAt: (/* @__PURE__ */ new Date()).toISOString(),
+    updatedAt: (/* @__PURE__ */ new Date()).toISOString()
+  };
+  await updateDoc("newsletterSubscribers", { email }, patch);
+  return res.json({ message: "You've been unsubscribed.", subscriber: { ...existing, ...patch } });
 });
 router27.get("/", requireRole(["admin", "manager"]), async (_req, res) => {
   const subscribers = (await loadAll("newsletterSubscribers")).slice().sort((a, b) => Date.parse(String(b.createdAt ?? 0)) - Date.parse(String(a.createdAt ?? 0)));

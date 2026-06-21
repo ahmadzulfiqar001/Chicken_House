@@ -797,6 +797,8 @@ const newsletterSubscriberSchema = new Schema(
     source: { type: String, default: "website" },
     status: { type: String, enum: ["Subscribed", "Unsubscribed"], default: "Subscribed", index: true },
     createdAt: { type: String, default: () => new Date().toISOString(), index: true },
+    updatedAt: { type: String, default: () => new Date().toISOString(), index: true },
+    unsubscribedAt: { type: String, default: "" },
   },
   { versionKey: false },
 );
