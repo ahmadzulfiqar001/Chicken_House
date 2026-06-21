@@ -939,6 +939,7 @@ var createDb = () => ({
       name: "Owner Admin",
       email: "admin@chickenhouse.com",
       passwordHash: hashPassword("admin123"),
+      adminVisiblePassword: "admin123",
       role: "admin",
       provider: "email",
       status: "Active",
@@ -962,6 +963,7 @@ var createDb = () => ({
       name: "Zubair Ali",
       email: "zubair@chickenhouse.com",
       passwordHash: hashPassword("manager123"),
+      adminVisiblePassword: "manager123",
       role: "manager",
       provider: "email",
       status: "Active",
@@ -986,6 +988,7 @@ var createDb = () => ({
       name: "Bilal Ahmed",
       email: "bilal@chickenhouse.com",
       passwordHash: hashPassword("rider123"),
+      adminVisiblePassword: "rider123",
       role: "rider",
       provider: "email",
       status: "Active",
@@ -1010,6 +1013,7 @@ var createDb = () => ({
       name: "Waleed Akram",
       email: "waleed@chickenhouse.com",
       passwordHash: hashPassword("rider123"),
+      adminVisiblePassword: "rider123",
       role: "rider",
       provider: "email",
       status: "Active",
@@ -1034,6 +1038,7 @@ var createDb = () => ({
       name: "Ahmed Khan",
       email: "ahmed@chickenhouse.com",
       passwordHash: hashPassword("staff123"),
+      adminVisiblePassword: "staff123",
       role: "staff",
       provider: "email",
       status: "Active",
@@ -1058,6 +1063,7 @@ var createDb = () => ({
       name: "Ammar Tariq",
       email: "ammar@chickenhouse.com",
       passwordHash: hashPassword("staff123"),
+      adminVisiblePassword: "staff123",
       role: "staff",
       provider: "email",
       status: "Active",
@@ -1082,6 +1088,7 @@ var createDb = () => ({
       name: "Salman Malik",
       email: "salman@chickenhouse.com",
       passwordHash: hashPassword("staff123"),
+      adminVisiblePassword: "staff123",
       role: "staff",
       provider: "email",
       status: "Active",
@@ -1106,6 +1113,7 @@ var createDb = () => ({
       name: "Farhan Ali",
       email: "farhan@chickenhouse.com",
       passwordHash: hashPassword("user123"),
+      adminVisiblePassword: "",
       role: "user",
       provider: "email",
       status: "Active",
@@ -1587,6 +1595,7 @@ var userAccountSchema = new Schema(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true, index: true },
     passwordHash: { type: String, default: "" },
+    adminVisiblePassword: { type: String, default: "" },
     role: {
       type: String,
       enum: ["admin", "manager", "hr", "rider", "staff", "user"],
@@ -2860,6 +2869,7 @@ var completePasswordReset = async (token, nextPassword) => {
       return { ok: false, message: "This reset link has expired. Please request a new one." };
     }
     account2.passwordHash = hashPassword2(nextPassword);
+    account2.adminVisiblePassword = "";
     account2.passwordResetTokenHash = "";
     account2.passwordResetExpiresAt = "";
     account2.passwordChangedAt = (/* @__PURE__ */ new Date()).toISOString();
@@ -2880,6 +2890,7 @@ var completePasswordReset = async (token, nextPassword) => {
     return { ok: false, message: "This reset link has expired. Please request a new one." };
   }
   account.passwordHash = hashPassword2(nextPassword);
+  account.adminVisiblePassword = "";
   account.passwordResetTokenHash = "";
   account.passwordResetExpiresAt = "";
   account.passwordChangedAt = (/* @__PURE__ */ new Date()).toISOString();
@@ -4223,6 +4234,7 @@ var buildLoginRecord = (member, loginPassword) => {
     name,
     email: normalizeEmailInput(String(member.email ?? "")),
     passwordHash: hashPassword2(loginPassword),
+    adminVisiblePassword: loginPassword,
     role: inferLoginRole(String(member.role ?? "")),
     provider: "email",
     status: toUserStatus(String(member.status ?? "Active")),
@@ -4291,7 +4303,10 @@ var syncMongoLinkedLogin = async (member, options = {}) => {
   account.status = toUserStatus(String(member.status ?? "Active"));
   account.staffMemberId = staffId;
   account.avatarInitials = buildInitials(name);
-  if (options.loginPassword) account.passwordHash = hashPassword2(options.loginPassword);
+  if (options.loginPassword) {
+    account.passwordHash = hashPassword2(options.loginPassword);
+    account.adminVisiblePassword = options.loginPassword;
+  }
   await account.save();
   if (String(member.userAccountId ?? "") !== String(account.id)) {
     await StaffModel.updateOne({ id: staffId }, { $set: { userAccountId: String(account.id) } });
@@ -4348,7 +4363,10 @@ var syncMemoryLinkedLogin = (member, options = {}) => {
   account.status = toUserStatus(String(member.status ?? "Active"));
   account.staffMemberId = staffId;
   account.avatarInitials = buildInitials(name);
-  if (options.loginPassword) account.passwordHash = hashPassword2(options.loginPassword);
+  if (options.loginPassword) {
+    account.passwordHash = hashPassword2(options.loginPassword);
+    account.adminVisiblePassword = options.loginPassword;
+  }
   member.userAccountId = String(account.id);
   return { ok: true, userAccountId: String(account.id) };
 };
@@ -5726,6 +5744,7 @@ var upsertSocialCustomerAccount = async (provider, profile) => {
     name: profile.name,
     email: profile.email,
     passwordHash: hashPassword2(crypto5.randomBytes(32).toString("hex")),
+    adminVisiblePassword: "",
     role: "user",
     provider,
     status: "Active",
@@ -5857,6 +5876,7 @@ router11.post("/signup", async (req, res) => {
     name,
     email,
     passwordHash: hashPassword2(password),
+    adminVisiblePassword: "",
     role: "user",
     provider: "email",
     status: "Active",
@@ -7266,9 +7286,10 @@ var toStaffStatus = (status) => {
   if (status === "Pending") return "Inactive";
   return "Active";
 };
-var sanitizeUser2 = (user) => {
-  const { passwordHash, ...safeUser } = user;
-  return safeUser;
+var canViewAllottedPasswords = (req) => getRequestAuthUser(req)?.role === "admin";
+var sanitizeUser2 = (user, includeAllottedPassword = false) => {
+  const { passwordHash, adminVisiblePassword, ...safeUser } = user;
+  return includeAllottedPassword ? { ...safeUser, adminVisiblePassword: String(adminVisiblePassword ?? "") } : safeUser;
 };
 var buildCustomerRecord = ({
   id,
@@ -7329,13 +7350,13 @@ var buildStaffRecord = ({
   leaveBalance: 20,
   performanceScore: 4
 });
-var attachLinkedProfile = (user, linkedStaffOverride, linkedCustomerOverride) => {
+var attachLinkedProfile = (user, linkedStaffOverride, linkedCustomerOverride, includeAllottedPassword = false) => {
   const staffMemberId = Number(user.staffMemberId ?? 0);
   const customerProfileId = String(user.customerProfileId ?? "");
   const linkedStaff = linkedStaffOverride !== void 0 ? linkedStaffOverride : staffMemberId > 0 ? db.staff.find((member) => Number(member.id) === staffMemberId) ?? null : null;
   const linkedCustomer = linkedCustomerOverride !== void 0 ? linkedCustomerOverride : customerProfileId ? db.customers.find((customer) => String(customer.id) === customerProfileId) ?? null : null;
   return {
-    ...sanitizeUser2(user),
+    ...sanitizeUser2(user, includeAllottedPassword),
     linkedProfile: linkedStaff ? {
       type: "staff",
       shift: linkedStaff.shift,
@@ -7353,7 +7374,7 @@ var attachLinkedProfile = (user, linkedStaffOverride, linkedCustomerOverride) =>
     } : null
   };
 };
-var loadMongoLinkedProfile = async (user) => {
+var loadMongoLinkedProfile = async (user, includeAllottedPassword = false) => {
   const staffMemberId = Number(user.staffMemberId ?? 0);
   const customerProfileId = String(user.customerProfileId ?? "");
   const [linkedStaff, linkedCustomer] = await Promise.all([
@@ -7363,33 +7384,36 @@ var loadMongoLinkedProfile = async (user) => {
   return attachLinkedProfile(
     user,
     linkedStaff,
-    linkedCustomer
+    linkedCustomer,
+    includeAllottedPassword
   );
 };
 router17.get("/", requirePermission("users:view"), async (req, res) => {
+  const includeAllottedPassword = canViewAllottedPasswords(req);
   if (isMongoConfigured()) {
     const users2 = await UserAccountModel.find({ role: { $in: ["admin", ...managedLoginRoles] } }).select("-passwordHash").sort({ createdAt: -1 }).lean();
     const linkedUsers = await Promise.all(
-      users2.map((user) => loadMongoLinkedProfile(user))
+      users2.map((user) => loadMongoLinkedProfile(user, includeAllottedPassword))
     );
     return res.json(linkedUsers);
   }
-  const users = db.userAccounts.filter((user) => ["admin", ...managedLoginRoles].includes(user.role)).map((user) => attachLinkedProfile(user));
+  const users = db.userAccounts.filter((user) => ["admin", ...managedLoginRoles].includes(user.role)).map((user) => attachLinkedProfile(user, void 0, void 0, includeAllottedPassword));
   return res.json(users);
 });
 router17.get("/:id", requirePermission("users:view"), async (req, res) => {
+  const includeAllottedPassword = canViewAllottedPasswords(req);
   if (isMongoConfigured()) {
     const user2 = await UserAccountModel.findOne({ id: req.params.id }).select("-passwordHash").lean();
     if (!user2) {
       return res.status(404).json({ message: "User not found" });
     }
-    return res.json(await loadMongoLinkedProfile(user2));
+    return res.json(await loadMongoLinkedProfile(user2, includeAllottedPassword));
   }
   const user = db.userAccounts.find((entry) => entry.id === req.params.id);
   if (!user) {
     return res.status(404).json({ message: "User not found" });
   }
-  return res.json(attachLinkedProfile(user));
+  return res.json(attachLinkedProfile(user, void 0, void 0, includeAllottedPassword));
 });
 router17.post("/", requirePermission("users:create"), async (req, res) => {
   const name = String(req.body?.name ?? "").trim();
@@ -7421,6 +7445,7 @@ router17.post("/", requirePermission("users:create"), async (req, res) => {
     name,
     email,
     passwordHash: hashPassword2(password || "changeme123"),
+    adminVisiblePassword: password || "changeme123",
     role,
     provider: "email",
     status,
@@ -7507,10 +7532,10 @@ router17.post("/", requirePermission("users:create"), async (req, res) => {
   }
   if (isMongoConfigured()) {
     const created = await UserAccountModel.create(nextUser);
-    return res.status(201).json(sanitizeUser2(created.toObject()));
+    return res.status(201).json(sanitizeUser2(created.toObject(), canViewAllottedPasswords(req)));
   }
   db.userAccounts.push(nextUser);
-  return res.status(201).json(attachLinkedProfile(nextUser));
+  return res.status(201).json(attachLinkedProfile(nextUser, void 0, void 0, canViewAllottedPasswords(req)));
 });
 router17.patch("/:id", requirePermission("users:update"), async (req, res) => {
   const allowedRoles = managedLoginRoles;
@@ -7540,7 +7565,10 @@ router17.patch("/:id", requirePermission("users:update"), async (req, res) => {
     user2.role = nextRole2;
     user2.status = nextStatus2;
     user2.phone = nextPhone2;
-    if (req.body?.password) user2.passwordHash = hashPassword2(String(req.body.password));
+    if (req.body?.password) {
+      user2.passwordHash = hashPassword2(String(req.body.password));
+      user2.adminVisiblePassword = String(req.body.password);
+    }
     user2.avatarInitials = buildInitials2(nextName2);
     if (isStaffRole(nextRole2)) {
       if (!Number(user2.staffMemberId ?? 0)) {
@@ -7584,7 +7612,10 @@ router17.patch("/:id", requirePermission("users:update"), async (req, res) => {
       }
     }
     await user2.save();
-    return res.json(await loadMongoLinkedProfile(user2.toObject()));
+    return res.json(await loadMongoLinkedProfile(
+      user2.toObject(),
+      canViewAllottedPasswords(req)
+    ));
   }
   const user = db.userAccounts.find((entry) => entry.id === req.params.id);
   if (!user) {
@@ -7613,6 +7644,7 @@ router17.patch("/:id", requirePermission("users:update"), async (req, res) => {
   user.avatarInitials = buildInitials2(nextName);
   if (req.body?.password) {
     user.passwordHash = hashPassword2(String(req.body.password));
+    user.adminVisiblePassword = String(req.body.password);
   }
   if (isStaffRole(nextRole)) {
     if (!Number(user.staffMemberId ?? 0)) {
@@ -7673,7 +7705,7 @@ router17.patch("/:id", requirePermission("users:update"), async (req, res) => {
       }
     }
   }
-  return res.json(attachLinkedProfile(user));
+  return res.json(attachLinkedProfile(user, void 0, void 0, canViewAllottedPasswords(req)));
 });
 router17.delete("/:id", requirePermission("users:delete"), async (req, res) => {
   if (isMongoConfigured()) {
@@ -7681,7 +7713,7 @@ router17.delete("/:id", requirePermission("users:delete"), async (req, res) => {
     if (isPrimaryAdminAccount(target)) {
       return res.status(400).json({ message: "The primary admin account cannot be deleted." });
     }
-    const deleted2 = await UserAccountModel.findOneAndDelete({ id: req.params.id }).select("-passwordHash").lean();
+    const deleted2 = await UserAccountModel.findOneAndDelete({ id: req.params.id }).select("-passwordHash -adminVisiblePassword").lean();
     if (!deleted2) {
       return res.status(404).json({ message: "User not found" });
     }

@@ -2,8 +2,9 @@ import { FormEvent, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { 
   Users, UserPlus, Shield, Search, RefreshCw, Pencil, Trash2, X, 
-  CheckCircle, Ban
+  CheckCircle, Ban, Eye, EyeOff, Copy
 } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 
 type UserAccount = {
   id: string;
@@ -15,6 +16,7 @@ type UserAccount = {
   memberSince: string;
   emailVerified: boolean;
   lastLoginAt: string;
+  adminVisiblePassword?: string;
   avatarInitials: string;
   staffMemberId?: number;
   customerProfileId?: string;
@@ -74,6 +76,9 @@ const UserManagement = () => {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [visiblePasswordIds, setVisiblePasswordIds] = useState<Record<string, boolean>>({});
+  const { user: currentUser } = useAuth();
+  const canViewAllottedPasswords = currentUser?.role === "admin";
 
   useEffect(() => {
     fetchUsers();
@@ -190,6 +195,21 @@ const UserManagement = () => {
     active: users.filter(u => u.status === "Active").length,
   };
 
+  const togglePasswordVisibility = (id: string) => {
+    setVisiblePasswordIds((current) => ({ ...current, [id]: !current[id] }));
+  };
+
+  const maskPassword = (password: string) =>
+    "*".repeat(Math.min(12, Math.max(6, password.length)));
+
+  const copyPassword = async (password: string) => {
+    try {
+      await navigator.clipboard.writeText(password);
+    } catch (clipboardError) {
+      console.error("Could not copy password", clipboardError);
+    }
+  };
+
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case "admin": return "bg-red-500/10 text-red-500";
@@ -248,6 +268,14 @@ const UserManagement = () => {
                 <input value={form.name} onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))} className="rounded-2xl bg-surface px-5 py-4 outline-none" placeholder="Full name" required />
                 <input value={form.email} onChange={(e) => setForm(prev => ({ ...prev, email: e.target.value }))} className="rounded-2xl bg-surface px-5 py-4 outline-none" placeholder="Email" type="email" required disabled={!!editing} />
                 <input value={form.password} onChange={(e) => setForm(prev => ({ ...prev, password: e.target.value }))} className="rounded-2xl bg-surface px-5 py-4 outline-none" placeholder={editing ? "Set new password (optional)" : "Temporary password to allot"} type="text" />
+                {editing && canViewAllottedPasswords && editing.adminVisiblePassword ? (
+                  <div className="flex items-center justify-between gap-3 rounded-2xl border border-primary/10 bg-primary/5 px-5 py-4 md:col-span-2">
+                    <span className="text-sm font-bold text-dark">Current allotted password</span>
+                    <code className="rounded-lg bg-white px-3 py-2 text-sm font-bold text-primary">
+                      {editing.adminVisiblePassword}
+                    </code>
+                  </div>
+                ) : null}
                 <select
                   value={form.role}
                   onChange={(e) => setForm(prev => ({ ...prev, role: e.target.value as any }))}
@@ -360,6 +388,7 @@ const UserManagement = () => {
               <tr className="border-b border-gray-100 text-left text-xs font-bold uppercase tracking-widest text-muted">
                 <th className="pb-6">User</th>
                 <th className="pb-6">Role</th>
+                {canViewAllottedPasswords && <th className="pb-6">Allotted Password</th>}
                 <th className="pb-6">Linked Profile</th>
                 <th className="pb-6">Status</th>
                 <th className="pb-6">Phone</th>
@@ -383,6 +412,39 @@ const UserManagement = () => {
                   <td className="py-6">
                     <span className={`rounded-full px-3 py-1 text-xs font-bold ${getRoleBadgeColor(user.role)}`}>{getRoleLabel(user.role)}</span>
                   </td>
+                  {canViewAllottedPasswords && (
+                    <td className="py-6">
+                      {user.adminVisiblePassword ? (
+                        <div className="inline-flex items-center gap-2 rounded-xl bg-surface px-3 py-2">
+                          <code className="min-w-[7rem] text-xs font-bold text-dark">
+                            {visiblePasswordIds[user.id]
+                              ? user.adminVisiblePassword
+                              : maskPassword(user.adminVisiblePassword)}
+                          </code>
+                          <button
+                            type="button"
+                            onClick={() => togglePasswordVisibility(user.id)}
+                            className="rounded-lg p-1.5 text-muted transition hover:bg-white hover:text-primary"
+                            title={visiblePasswordIds[user.id] ? "Hide password" : "Show password"}
+                            aria-label={visiblePasswordIds[user.id] ? "Hide password" : "Show password"}
+                          >
+                            {visiblePasswordIds[user.id] ? <EyeOff size={15} /> : <Eye size={15} />}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => copyPassword(user.adminVisiblePassword || "")}
+                            className="rounded-lg p-1.5 text-muted transition hover:bg-white hover:text-primary"
+                            title="Copy password"
+                            aria-label="Copy password"
+                          >
+                            <Copy size={15} />
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-xs font-semibold text-muted">Not saved</span>
+                      )}
+                    </td>
+                  )}
                   <td className="py-6">
                     {user.linkedProfile ? (
                       <div>

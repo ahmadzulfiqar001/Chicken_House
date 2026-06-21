@@ -319,6 +319,7 @@ export const completePasswordReset = async (token: string, nextPassword: string)
     }
 
     account.passwordHash = hashPassword(nextPassword);
+    account.adminVisiblePassword = "";
     account.passwordResetTokenHash = "";
     account.passwordResetExpiresAt = "";
     account.passwordChangedAt = new Date().toISOString();
@@ -348,6 +349,7 @@ export const completePasswordReset = async (token: string, nextPassword: string)
   }
 
   account.passwordHash = hashPassword(nextPassword);
+  account.adminVisiblePassword = "";
   account.passwordResetTokenHash = "";
   account.passwordResetExpiresAt = "";
   account.passwordChangedAt = new Date().toISOString();

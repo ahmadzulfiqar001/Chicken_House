@@ -54,6 +54,7 @@ const buildLoginRecord = (member: Record<string, unknown>, loginPassword: string
     name,
     email: normalizeEmailInput(String(member.email ?? "")),
     passwordHash: hashPassword(loginPassword),
+    adminVisiblePassword: loginPassword,
     role: inferLoginRole(String(member.role ?? "")),
     provider: "email",
     status: toUserStatus(String(member.status ?? "Active")),
@@ -140,7 +141,10 @@ const syncMongoLinkedLogin = async (
   account.status = toUserStatus(String(member.status ?? "Active"));
   account.staffMemberId = staffId;
   account.avatarInitials = buildInitials(name);
-  if (options.loginPassword) account.passwordHash = hashPassword(options.loginPassword);
+  if (options.loginPassword) {
+    account.passwordHash = hashPassword(options.loginPassword);
+    account.adminVisiblePassword = options.loginPassword;
+  }
   await account.save();
 
   if (String(member.userAccountId ?? "") !== String(account.id)) {
@@ -216,7 +220,10 @@ const syncMemoryLinkedLogin = (
   account.status = toUserStatus(String(member.status ?? "Active"));
   account.staffMemberId = staffId;
   account.avatarInitials = buildInitials(name);
-  if (options.loginPassword) account.passwordHash = hashPassword(options.loginPassword);
+  if (options.loginPassword) {
+    account.passwordHash = hashPassword(options.loginPassword);
+    account.adminVisiblePassword = options.loginPassword;
+  }
   member.userAccountId = String(account.id);
   return { ok: true, userAccountId: String(account.id) };
 };
