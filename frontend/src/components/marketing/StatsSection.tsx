@@ -51,10 +51,10 @@ const StatsSection = () => {
               <div className={`w-20 h-20 mx-auto rounded-3xl bg-white/5 flex items-center justify-center mb-6 group-hover:bg-white/10 transition-all duration-500 ${stat.color}`}>
                 {stat.icon}
               </div>
-              <h3 className="text-3xl md:text-5xl font-anton text-white mb-2 tracking-tight">
+              <h3 className="mb-2 font-anton text-[1.9rem] leading-none text-white sm:text-[2.2rem] md:text-[2.55rem] lg:text-[2.75rem]">
                 {stat.value}
               </h3>
-              <p className="text-white/40 font-mono text-[10px] uppercase tracking-[0.2em]">
+              <p className="font-mono text-[11px] font-bold uppercase leading-snug text-white/65 sm:text-xs md:text-[13px]">
                 {stat.label}
               </p>
             </motion.div>

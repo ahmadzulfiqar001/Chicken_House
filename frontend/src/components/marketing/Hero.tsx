@@ -3,6 +3,14 @@ import { motion } from "motion/react";
 import { ChevronRight, Play, Star, ArrowDown } from "lucide-react";
 import { siteConfig } from "../../lib/site";
 
+const tickerItems = [
+  "Authentic BBQ",
+  "Desi Karahi",
+  "Smart Booking",
+  "Premium Dining",
+  "Fast Delivery",
+];
+
 const Hero = () => {
   return (
     <section className="relative min-h-[92dvh] flex items-center justify-center overflow-hidden bg-dark">
@@ -125,27 +133,21 @@ const Hero = () => {
         </div>
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 py-6 bg-accent/5 backdrop-blur-sm border-t border-white/5 overflow-hidden">
-        <div className="marquee-track flex whitespace-nowrap gap-10 text-white/20 font-anton text-2xl md:text-3xl uppercase tracking-[0.18em]">
-          <span>Authentic BBQ</span>
-          <span>/</span>
-          <span>Desi Karahi</span>
-          <span>/</span>
-          <span>Smart Booking</span>
-          <span>/</span>
-          <span>Premium Dining</span>
-          <span>/</span>
-          <span>Fast Delivery</span>
-          <span>/</span>
-          <span>Authentic BBQ</span>
-          <span>/</span>
-          <span>Desi Karahi</span>
-          <span>/</span>
-          <span>Smart Booking</span>
-          <span>/</span>
-          <span>Premium Dining</span>
-          <span>/</span>
-          <span>Fast Delivery</span>
+      <div className="absolute bottom-0 left-0 right-0 overflow-hidden border-t border-white/5 bg-accent/5 py-4 backdrop-blur-sm sm:py-5 md:py-6">
+        <div className="marquee-track font-anton text-xl uppercase text-white/45 sm:text-2xl md:text-3xl">
+          {[0, 1].map((groupIndex) => (
+            <div
+              key={groupIndex}
+              className="marquee-group"
+              aria-hidden={groupIndex === 1}
+            >
+              {tickerItems.map((item) => (
+                <span className="marquee-item" key={`${groupIndex}-${item}`}>
+                  {item}
+                </span>
+              ))}
+            </div>
+          ))}
         </div>
       </div>
 

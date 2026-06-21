@@ -187,9 +187,9 @@ const TestimonialsSection = () => {
           </div>
         </div>
         
-        <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
-          <div className="relative h-[460px] flex items-center justify-center perspective-1000">
-            <AnimatePresence initial={false} custom={direction}>
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
+          <div className="relative flex flex-col items-center justify-center gap-6 perspective-1000 md:min-h-[540px] md:gap-0">
+            <AnimatePresence initial={false} custom={direction} mode="wait">
               <motion.div
                 key={currentIndex}
                 custom={direction}
@@ -203,46 +203,46 @@ const TestimonialsSection = () => {
                   scale: { duration: 0.5 },
                   rotateY: { duration: 0.5 }
                 }}
-                className="absolute w-full max-w-3xl glass-morphism p-8 md:p-12 rounded-[2rem] border-white/10 relative group hover:bg-white/10 transition-all duration-500 shadow-2xl"
+                className="relative w-full max-w-3xl glass-morphism rounded-[2rem] border-white/10 p-6 shadow-2xl transition-all duration-500 hover:bg-white/10 sm:p-8 md:absolute md:p-12"
               >
-                <div className="absolute -top-6 -left-6 w-16 h-16 bg-accent rounded-full flex items-center justify-center shadow-2xl z-20">
-                  <Quote size={28} className="text-dark" fill="currentColor" />
+                <div className="absolute -left-3 -top-5 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-accent shadow-2xl sm:-left-6 sm:-top-6 sm:h-16 sm:w-16">
+                  <Quote size={26} className="text-dark sm:size-7" fill="currentColor" />
                 </div>
 
-                <div className="flex items-center gap-2 text-accent mb-8">
+                <div className="mb-7 flex items-center gap-2 text-accent sm:mb-8">
                   {[...Array(testimonials[currentIndex].rating)].map((_, i) => (
                     <Star key={i} size={18} fill="currentColor" />
                   ))}
                 </div>
 
-                <p className="text-white text-2xl md:text-4xl font-light italic leading-tight mb-10 font-serif tracking-tight">
+                <p className="mb-8 font-serif text-[1.55rem] font-light italic leading-snug text-white sm:text-2xl md:mb-10 md:text-[2.35rem] md:leading-tight lg:text-4xl">
                   "{testimonials[currentIndex].text}"
                 </p>
 
-                <div className="flex items-center gap-5 pt-8 border-t border-white/10">
-                  <div className="flex h-[4.5rem] w-[4.5rem] shrink-0 items-center justify-center rounded-[1.4rem] bg-accent text-xl font-bold text-dark shadow-xl">
+                <div className="flex items-center gap-4 border-t border-white/10 pt-6 sm:gap-5 md:pt-8">
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.25rem] bg-accent text-lg font-bold text-dark shadow-xl sm:h-[4.5rem] sm:w-[4.5rem] sm:rounded-[1.4rem] sm:text-xl">
                     {getInitials(testimonials[currentIndex].name)}
                   </div>
-                  <div>
-                    <h4 className="text-white font-bold text-2xl mb-1">{testimonials[currentIndex].name}</h4>
-                    <p className="text-accent font-mono text-[10px] uppercase tracking-[0.3em]">{testimonials[currentIndex].role}</p>
+                  <div className="min-w-0">
+                    <h4 className="mb-1 text-xl font-bold leading-tight text-white sm:text-2xl">{testimonials[currentIndex].name}</h4>
+                    <p className="font-mono text-[10px] uppercase leading-relaxed text-accent sm:text-xs">{testimonials[currentIndex].role}</p>
                   </div>
                 </div>
               </motion.div>
             </AnimatePresence>
 
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex items-center gap-6 z-30">
+            <div className="relative z-30 flex items-center gap-4 sm:gap-6 md:absolute md:bottom-0 md:left-1/2 md:-translate-x-1/2">
               <motion.button
                 whileHover={{ scale: 1.1, backgroundColor: "rgba(255,255,255,0.2)" }}
                 whileTap={{ scale: 0.9 }}
                 onClick={prevTestimonial}
-                className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center text-white transition-colors"
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/20 text-white transition-colors"
                 aria-label="Previous review"
               >
                 <ChevronLeft size={20} />
               </motion.button>
 
-              <div className="flex gap-2">
+              <div className="flex max-w-[48vw] flex-wrap justify-center gap-2 sm:max-w-none">
                 {testimonials.map((_, i) => (
                   <button
                     key={i}
@@ -260,7 +260,7 @@ const TestimonialsSection = () => {
                 whileHover={{ scale: 1.1, backgroundColor: "rgba(255,255,255,0.2)" }}
                 whileTap={{ scale: 0.9 }}
                 onClick={nextTestimonial}
-                className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center text-white transition-colors"
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/20 text-white transition-colors"
                 aria-label="Next review"
               >
                 <ChevronRight size={20} />
