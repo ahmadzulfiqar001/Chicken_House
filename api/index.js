@@ -1,6 +1,6 @@
 // backend/src/app.ts
 import "express-async-errors";
-import express29 from "express";
+import express30 from "express";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 
@@ -1134,6 +1134,7 @@ var createDb = () => ({
     }
   ],
   authSessions: [],
+  cookieConsents: [],
   bookings: [],
   contactMessages: [],
   assistantConversations: [
@@ -1637,6 +1638,24 @@ var authSessionSchema = new Schema(
   },
   { versionKey: false, timestamps: true }
 );
+var cookieConsentSchema = new Schema(
+  {
+    id: { type: String, required: true, unique: true, index: true },
+    visitorId: { type: String, required: true, unique: true, index: true },
+    choice: { type: String, enum: ["accepted", "rejected"], required: true, index: true },
+    consentVersion: { type: String, default: "", index: true },
+    source: { type: String, default: "cookie-banner", index: true },
+    page: { type: String, default: "" },
+    timezone: { type: String, default: "" },
+    userAgent: { type: String, default: "" },
+    ipAddress: { type: String, default: "" },
+    acceptedAt: { type: String, default: "", index: true },
+    rejectedAt: { type: String, default: "", index: true },
+    createdAt: { type: String, default: () => (/* @__PURE__ */ new Date()).toISOString(), index: true },
+    updatedAt: { type: String, default: () => (/* @__PURE__ */ new Date()).toISOString(), index: true }
+  },
+  { versionKey: false }
+);
 var bookingRequestSchema = new Schema(
   {
     id: { type: String, required: true, unique: true, index: true },
@@ -2010,6 +2029,7 @@ var CustomerModel = mongoose.models.CustomerProfile || mongoose.model("CustomerP
 var AssistantConversationModel = mongoose.models.AssistantConversation || mongoose.model("AssistantConversation", assistantConversationSchema, "assistantConversations");
 var UserAccountModel = mongoose.models.UserAccount || mongoose.model("UserAccount", userAccountSchema, "userAccounts");
 var AuthSessionModel = mongoose.models.AuthSession || mongoose.model("AuthSession", authSessionSchema, "authSessions");
+var CookieConsentModel = mongoose.models.CookieConsent || mongoose.model("CookieConsent", cookieConsentSchema, "cookieConsents");
 var BookingRequestModel = mongoose.models.BookingRequest || mongoose.model("BookingRequest", bookingRequestSchema, "bookings");
 var ContactMessageModel = mongoose.models.ContactMessage || mongoose.model("ContactMessage", contactMessageSchema, "contactMessages");
 var ReviewModel = mongoose.models.Review || mongoose.model("Review", reviewSchema, "reviews");
@@ -7779,6 +7799,7 @@ var MODELS = {
   notifications: NotificationModel,
   riders: RiderModel,
   authSessions: AuthSessionModel,
+  cookieConsents: CookieConsentModel,
   newsletterSubscribers: NewsletterSubscriberModel,
   siteSettings: SiteSettingModel,
   jobOpenings: JobOpeningModel,
@@ -9505,14 +9526,57 @@ router28.delete("/applications/:id", requireRole(["admin"]), async (req, res) =>
 });
 var careers_routes_default = router28;
 
+// backend/src/modules/cookie-consent/cookie-consent.routes.ts
+import express29 from "express";
+var router29 = express29.Router();
+var trimTo = (value, maxLength) => String(value ?? "").trim().slice(0, maxLength);
+var getClientIp = (req) => {
+  const forwardedFor = String(req.headers["x-forwarded-for"] ?? "").split(",")[0]?.trim();
+  return forwardedFor || req.ip || "";
+};
+router29.post("/", async (req, res) => {
+  const choice = trimTo(req.body?.choice, 20);
+  if (choice !== "accepted" && choice !== "rejected") {
+    return res.status(400).json({ message: "Cookie consent choice is required." });
+  }
+  const now = (/* @__PURE__ */ new Date()).toISOString();
+  const visitorId = trimTo(req.body?.visitorId, 120) || `visitor-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  const existing = await findOne("cookieConsents", { visitorId });
+  const choicePatch = choice === "accepted" ? { acceptedAt: now, rejectedAt: "" } : { acceptedAt: "", rejectedAt: now };
+  const patch = {
+    visitorId,
+    choice,
+    consentVersion: trimTo(req.body?.consentVersion, 80),
+    source: trimTo(req.body?.source, 80) || "cookie-banner",
+    page: trimTo(req.body?.page, 300),
+    timezone: trimTo(req.body?.timezone, 80),
+    userAgent: trimTo(req.get("user-agent"), 500),
+    ipAddress: trimTo(getClientIp(req), 80),
+    updatedAt: now,
+    ...choicePatch
+  };
+  if (existing) {
+    await updateDoc("cookieConsents", { visitorId }, patch);
+    return res.json({ message: "Cookie consent updated.", consent: { ...existing, ...patch } });
+  }
+  const record = {
+    id: `CONS-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    createdAt: trimTo(req.body?.decidedAt, 40) || now,
+    ...patch
+  };
+  await insertDoc("cookieConsents", record);
+  return res.status(201).json({ message: "Cookie consent saved.", consent: record });
+});
+var cookie_consent_routes_default = router29;
+
 // backend/src/app.ts
 function createApp() {
-  const app2 = express29();
+  const app2 = express30();
   const isProd = process.env.NODE_ENV === "production";
   app2.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
   if (isProd) app2.set("trust proxy", 1);
   app2.use(
-    express29.json({
+    express30.json({
       limit: "1mb",
       verify: (req, _res, buf) => {
         req.rawBody = buf;
@@ -9571,6 +9635,7 @@ function createApp() {
   app2.use("/api/security", security_routes_default);
   app2.use("/api/newsletter", newsletter_routes_default);
   app2.use("/api/careers", careers_routes_default);
+  app2.use("/api/cookie-consent", cookie_consent_routes_default);
   app2.use("/api", (_req, res) => {
     res.status(404).json({ message: "Not found." });
   });

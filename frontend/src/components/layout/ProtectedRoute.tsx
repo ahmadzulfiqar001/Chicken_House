@@ -56,8 +56,8 @@ const ProtectedRoute = ({
           </p>
           <button
             type="button"
-            onClick={() => {
-              acceptCookieConsent();
+            onClick={async () => {
+              await acceptCookieConsent();
               setCookiesAccepted(true);
             }}
             className="mt-6 w-full rounded-lg bg-primary px-5 py-4 font-bold text-white transition hover:bg-primary-strong"

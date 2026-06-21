@@ -462,6 +462,25 @@ const authSessionSchema = new Schema(
   { versionKey: false, timestamps: true },
 );
 
+const cookieConsentSchema = new Schema(
+  {
+    id: { type: String, required: true, unique: true, index: true },
+    visitorId: { type: String, required: true, unique: true, index: true },
+    choice: { type: String, enum: ["accepted", "rejected"], required: true, index: true },
+    consentVersion: { type: String, default: "", index: true },
+    source: { type: String, default: "cookie-banner", index: true },
+    page: { type: String, default: "" },
+    timezone: { type: String, default: "" },
+    userAgent: { type: String, default: "" },
+    ipAddress: { type: String, default: "" },
+    acceptedAt: { type: String, default: "", index: true },
+    rejectedAt: { type: String, default: "", index: true },
+    createdAt: { type: String, default: () => new Date().toISOString(), index: true },
+    updatedAt: { type: String, default: () => new Date().toISOString(), index: true },
+  },
+  { versionKey: false },
+);
+
 const bookingRequestSchema = new Schema(
   {
     id: { type: String, required: true, unique: true, index: true },
@@ -874,6 +893,8 @@ export const UserAccountModel =
   mongoose.models.UserAccount || mongoose.model("UserAccount", userAccountSchema, "userAccounts");
 export const AuthSessionModel =
   mongoose.models.AuthSession || mongoose.model("AuthSession", authSessionSchema, "authSessions");
+export const CookieConsentModel =
+  mongoose.models.CookieConsent || mongoose.model("CookieConsent", cookieConsentSchema, "cookieConsents");
 export const BookingRequestModel =
   mongoose.models.BookingRequest || mongoose.model("BookingRequest", bookingRequestSchema, "bookings");
 export const ContactMessageModel =

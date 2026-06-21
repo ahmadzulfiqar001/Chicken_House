@@ -535,6 +535,7 @@ export const createDb = () => ({
     },
   ],
   authSessions: [],
+  cookieConsents: [],
   bookings: [],
   contactMessages: [],
   assistantConversations: [

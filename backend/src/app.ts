@@ -30,6 +30,7 @@ import settingsRoutes from "./modules/settings/settings.routes";
 import securityRoutes from "./modules/security/security.routes";
 import newsletterRoutes from "./modules/newsletter/newsletter.routes";
 import careerRoutes from "./modules/careers/careers.routes";
+import cookieConsentRoutes from "./modules/cookie-consent/cookie-consent.routes";
 import { getMongoHealth, isMongoConnected } from "./core/mongo";
 
 /**
@@ -118,6 +119,7 @@ export function createApp() {
   app.use("/api/security", securityRoutes);
   app.use("/api/newsletter", newsletterRoutes);
   app.use("/api/careers", careerRoutes);
+  app.use("/api/cookie-consent", cookieConsentRoutes);
 
   // Unknown API route -> JSON 404 (don't fall through to the SPA HTML).
   app.use("/api", (_req, res) => {

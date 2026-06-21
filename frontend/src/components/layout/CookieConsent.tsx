@@ -7,6 +7,7 @@ import {
   rejectCookieConsent,
   COOKIE_CONSENT_CHANGED_EVENT,
   hasDecidedCookieConsent,
+  syncPendingCookieConsent,
 } from "../../lib/cookieConsent";
 
 const OPEN_EVENT = "chicken-house:open-cookie-settings";
@@ -20,9 +21,11 @@ export const openCookieSettings = () => {
 
 const CookieConsent = () => {
   const [visible, setVisible] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     setVisible(!hasDecidedCookieConsent());
+    void syncPendingCookieConsent();
   }, []);
 
   useEffect(() => {
@@ -45,13 +48,19 @@ const CookieConsent = () => {
     return () => window.removeEventListener(COOKIE_CONSENT_CHANGED_EVENT, handler);
   }, []);
 
-  const decide = (choice: "accepted" | "rejected") => {
+  const decide = async (choice: "accepted" | "rejected") => {
+    if (isSaving) return;
+
+    setIsSaving(true);
+
     if (choice === "accepted") {
-      acceptCookieConsent();
+      await acceptCookieConsent();
     } else {
       rejectCookieConsent();
     }
+
     setVisible(false);
+    setIsSaving(false);
   };
 
   return (
@@ -62,19 +71,20 @@ const CookieConsent = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 40 }}
           transition={{ duration: 0.3 }}
-          className="fixed inset-x-0 bottom-0 z-[80] px-4 pb-4 sm:px-6"
+          className="fixed inset-x-0 bottom-0 z-[80] px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:px-6 sm:pb-6"
           role="dialog"
           aria-live="polite"
           aria-label="Cookie consent"
+          aria-modal="false"
         >
-          <div className="mx-auto flex max-w-4xl flex-col gap-4 rounded-[1.8rem] border border-gray-100 bg-white/95 p-5 shadow-2xl shadow-dark/20 backdrop-blur-md sm:flex-row sm:items-center sm:gap-6 sm:p-6">
+          <div className="mx-auto flex max-h-[calc(100vh-1.5rem)] w-full max-w-[calc(100vw-1.5rem)] flex-col gap-4 overflow-y-auto rounded-2xl border border-gray-100 bg-white/95 p-4 shadow-2xl shadow-dark/20 backdrop-blur-md sm:max-w-4xl sm:flex-row sm:items-center sm:gap-6 sm:rounded-[1.8rem] sm:p-6">
             <div className="flex min-w-0 items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                <Cookie size={24} />
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary sm:h-12 sm:w-12">
+                <Cookie size={22} />
               </div>
               <div className="min-w-0">
                 <p className="font-bold text-dark">We use cookies</p>
-                <p className="mt-1 text-xs leading-5 text-muted sm:text-sm sm:leading-normal">
+                <p className="mt-1 break-words text-xs leading-5 text-muted sm:text-sm sm:leading-normal">
                   Cookies enable account login, cart memory, and customer sessions. Accept to use these features, or reject and keep browsing.{" "}
                   <Link to="/cookies" className="font-bold text-primary hover:underline">
                     Learn more
@@ -83,20 +93,22 @@ const CookieConsent = () => {
                 </p>
               </div>
             </div>
-            <div className="flex min-w-0 shrink-0 gap-3 sm:ml-auto">
+            <div className="grid w-full min-w-0 grid-cols-1 gap-2 sm:ml-auto sm:flex sm:w-auto sm:shrink-0 sm:gap-3">
               <button
                 type="button"
                 onClick={() => decide("rejected")}
-                className="flex-1 rounded-full border border-gray-200 px-6 py-3 text-sm font-bold text-dark transition hover:bg-surface sm:flex-none"
+                disabled={isSaving}
+                className="w-full rounded-full border border-gray-200 px-6 py-3 text-sm font-bold text-dark transition hover:bg-surface disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
               >
                 Reject
               </button>
               <button
                 type="button"
                 onClick={() => decide("accepted")}
-                className="flex-1 rounded-full bg-primary px-6 py-3 text-sm font-bold text-white transition hover:bg-primary-strong sm:flex-none"
+                disabled={isSaving}
+                className="w-full rounded-full bg-primary px-6 py-3 text-sm font-bold text-white transition hover:bg-primary-strong disabled:cursor-not-allowed disabled:opacity-75 sm:w-auto"
               >
-                Accept
+                {isSaving ? "Saving..." : "Accept"}
               </button>
             </div>
           </div>
