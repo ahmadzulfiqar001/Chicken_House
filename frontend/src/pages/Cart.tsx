@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   ChevronRight,
@@ -7,11 +7,12 @@ import {
   Minus,
   Plus,
   ShoppingCart,
+  Search,
   Store,
   Trash2,
   Truck,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import PageMeta from "../components/layout/PageMeta";
 import { useToast } from "../components/layout/ToastProvider";
 import { useCart } from "../context/CartContext";
@@ -25,9 +26,11 @@ import {
 const CartPage = () => {
   const { cartItems, setQuantity, updateQuantity, removeFromCart, clearCart, subtotal } = useCart();
   const { showToast } = useToast();
+  const navigate = useNavigate();
   const [orderType, setOrderType] = useState<DeliveryMode>("Delivery");
   const [city, setCity] = useState("Renala Khurd");
   const [addressHint, setAddressHint] = useState("");
+  const [trackingOrderId, setTrackingOrderId] = useState("");
 
   const totalItems = useMemo(
     () => cartItems.reduce((sum, item) => sum + item.quantity, 0),
@@ -61,6 +64,13 @@ const CartPage = () => {
       title: "Cart cleared",
       description: "Your order basket has been reset.",
     });
+  };
+
+  const handleTrackOrder = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const trimmedOrderId = trackingOrderId.trim();
+    if (!trimmedOrderId) return;
+    navigate(`/track?orderId=${encodeURIComponent(trimmedOrderId)}`);
   };
 
   return (
@@ -375,6 +385,40 @@ const CartPage = () => {
                 Go to Menu
                 <ChevronRight size={20} />
               </Link>
+              <div className="mx-auto mt-10 max-w-xl px-4">
+                <div className="mb-4 flex items-center justify-center gap-3 text-xs font-bold uppercase tracking-[0.18em] text-muted">
+                  <span className="h-px w-14 bg-gray-200" />
+                  Track existing order
+                  <span className="h-px w-14 bg-gray-200" />
+                </div>
+                <form onSubmit={handleTrackOrder} className="flex flex-col gap-3 sm:flex-row">
+                  <label className="relative min-w-0 flex-1">
+                    <span className="sr-only">Track order by ID</span>
+                    <Search
+                      size={18}
+                      className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-muted"
+                    />
+                    <input
+                      type="text"
+                      value={trackingOrderId}
+                      onChange={(event) => setTrackingOrderId(event.target.value)}
+                      placeholder="Track order by ID"
+                      className="h-14 w-full rounded-full border border-gray-100 bg-surface py-4 pl-12 pr-5 text-sm font-bold text-dark outline-none transition focus:border-primary focus:bg-white"
+                    />
+                  </label>
+                  <button
+                    type="submit"
+                    disabled={!trackingOrderId.trim()}
+                    className="inline-flex h-14 items-center justify-center gap-2 rounded-full border border-primary/10 bg-dark px-7 text-sm font-bold text-white transition hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Track
+                    <ChevronRight size={18} />
+                  </button>
+                </form>
+                <p className="mt-3 text-xs leading-5 text-muted">
+                  No login needed. Use the order ID from your checkout confirmation.
+                </p>
+              </div>
             </motion.div>
           )}
         </div>
